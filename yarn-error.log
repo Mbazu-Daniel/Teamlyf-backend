@@ -1,0 +1,36 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\mbazu\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add express express-joi-validation joi bcrypt jsonwebtoken cors body-parser mongoose dotenv
+
+PATH: 
+  C:\Users\mbazu\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\mbazu\bin;C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\Program Files\nodejs;C:\ProgramData\chocolatey\bin;C:\Program Files\Microsoft SQL Server\150\Tools\Binn;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\170\Tools\Binn;C:\Program Files\dotnet;C:\Program Files\Git\cmd;C:\Program Files\PuTTY;C:\Program Files\MongoDB\Server\6.0\bin;C:\mongosh-1.8.2\bin;C:\Program Files\Docker\Docker\resources\bin;C:\Users\mbazu\.local\share\solana\install\active_release\bin;C:\Users\mbazu\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\HashiCorp\Vagrant\bin;C:\Users\mbazu\.cargo\bin;C:\Users\mbazu\AppData\Local\Programs\Python\Python311\Scripts;C:\Users\mbazu\AppData\Local\Programs\Python\Python311;C:\Users\mbazu\AppData\Local\Microsoft\WindowsApps;C:\Users\mbazu\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\mbazu\AppData\Roaming\npm;C:\Users\mbazu\.dotnet\tools;C:\Users\mbazu\AppData\Local\Programs\mongosh;C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.1\bin;C:\Users\mbazu\AppData\Roaming\Flow;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl;C:\Users\mbazu\.foundry\bin;C:\Users\mbazu\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl;C:\Users\mbazu\.foundry\bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.14.2
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: Client network socket disconnected before secure TLS connection was established
+      at connResetException (node:internal/errors:717:14)
+      at TLSSocket.onConnectEnd (node:_tls_wrap:1595:19)
+      at TLSSocket.emit (node:events:525:35)
+      at endReadableNT (node:internal/streams/readable:1359:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+
+npm manifest: 
+  {
+    "name": "TeamLyf",
+    "version": "1.0.0",
+    "main": "server.js",
+    "license": "MIT"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
