@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import connectDB from "./config/connectDB.js";
 import bodyParser from "body-parser";
 dotenv.config();
 
@@ -13,5 +14,6 @@ const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);
 
 app.listen(PORT, () => {
+  connectDB();
   console.log(`Server is running on PORT ${PORT}`);
 });
