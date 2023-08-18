@@ -42,4 +42,11 @@ const loginUser = asyncHandler(async (req, res) => {
     console.error(error);
   }
 });
-export { registerUser, loginUser };
+
+const logoutUser = asyncHandler((req, res) => {
+  res
+    .clearCookie("access_token")
+    .status(200)
+    .json({ message: "Logged out successfully" });
+});
+export { registerUser, loginUser,logoutUser };
