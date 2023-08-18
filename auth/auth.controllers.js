@@ -24,4 +24,22 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  try {
+    const email = req.body.email.toLowerCase();
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "Incorrect email or password!" });
+    }
+    const isPasswordCorrect = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
+    if (!isPasswordCorrect) {
+      return res.status(401).json("Wrong password or email!");
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+export { registerUser, loginUser };
