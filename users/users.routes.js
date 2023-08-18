@@ -1,10 +1,16 @@
 import express from "express";
-import { getAllUsers, getSingleUser } from "./users.controllers.js";
+import {
+  getAllUsers,
+  getSingleUser,
+  updateUser,
+  deleteUser,
+} from "./users.controllers.js";
 
 const userRouter = express.Router();
 
-userRouter.get("/", verifyAdmin, getAllUsers);
-userRouter.get("/:id", verifyLogin, getSingleUser);
-
+userRouter.get("/", getAllUsers);
+userRouter.get("/:id", getSingleUser);
+userRouter.patch("/:id", updateUser);
+userRouter.delete("/:id", deleteUser);
 
 export default userRouter;

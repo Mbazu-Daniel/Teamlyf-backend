@@ -20,4 +20,25 @@ const getAllUsers = asyncHandler(async (req, res) => {
   }
 });
 
-export { getSingleUser, getAllUsers };
+const deleteUser = asyncHandler(async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(204).json("User has been deleted.");
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+
+const updateUser = asyncHandler(async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.status(202).json(updatedUser);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+export { getSingleUser, getAllUsers, updateUser, deleteUser};
