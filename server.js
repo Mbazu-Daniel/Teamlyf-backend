@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/connectDB.js";
 import authRouter from "./auth/auth.routes.js";
 import userRouter from "./users/users.routes.js";
+import organizationRouter from "./organization/organization.routes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 const basePath = "/api/v1";
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/user`, userRouter);
+app.use(`${basePath}/organization`, organizationRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);

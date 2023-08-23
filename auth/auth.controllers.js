@@ -38,6 +38,15 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(401).json("Wrong password or email!");
     }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const { password, ...otherDetails } = user._doc;
+    res
+      .cookie("access_token", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .json({ user: { ...otherDetails } });
   } catch (error) {
     console.error(error);
   }
@@ -49,4 +58,4 @@ const logoutUser = asyncHandler((req, res) => {
     .status(200)
     .json({ message: "Logged out successfully" });
 });
-export { registerUser, loginUser,logoutUser };
+export { registerUser, loginUser, logoutUser };
