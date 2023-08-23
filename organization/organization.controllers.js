@@ -61,4 +61,28 @@ const getOrganizationById = asyncHandler(async (req, res) => {
   }
 });
 
-export { createOrganization, getAllOrganizations, getOrganizationById };
+// Update an organization by ID
+const updateOrganization = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const organization = await Organization.findById(id);
+    if (!organization) {
+      res.status(404).json(`Organization ${id} not found`);
+    }
+    const updatedOrganization = await Organization.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    );
+    res.status(202).json(updatedOrganization);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+export {
+  createOrganization,
+  getAllOrganizations,
+  getOrganizationById,
+  updateOrganization,
+};
