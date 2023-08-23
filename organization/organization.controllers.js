@@ -12,7 +12,7 @@ const createOrganization = asyncHandler(async (req, res) => {
       city,
       address1,
       address2,
-      image,
+      logo,
       size,
       created_by,
     } = req.body;
@@ -25,7 +25,7 @@ const createOrganization = asyncHandler(async (req, res) => {
       city,
       address1,
       address2,
-      image,
+      logo,
       size,
       created_by,
     });
@@ -80,9 +80,26 @@ const updateOrganization = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
+
+// Delete an organization by ID
+const deleteOrganization = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const organization = await Organization.findById(id);
+    if (!organization) {
+      res.status(404).json(`Organization ${id} not found`);
+    }
+    await Organization.findByIdAndDelete(id);
+    res.status(204).json(`Organization ${id} deleted`);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
 export {
   createOrganization,
   getAllOrganizations,
   getOrganizationById,
   updateOrganization,
+  deleteOrganization,
 };

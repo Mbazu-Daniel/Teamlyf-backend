@@ -9,7 +9,7 @@ const OrganizationSchema = new mongoose.Schema(
     city: { type: String, required: true },
     address1: { type: String, required: true },
     address2: { type: String },
-    image: { type: String },
+    logo: { type: String },
     size: { type: String },
     created_by: {
       type: mongoose.Schema.Types.ObjectId,
