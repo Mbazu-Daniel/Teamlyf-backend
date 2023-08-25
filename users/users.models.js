@@ -41,4 +41,5 @@ UserSchema.methods.createPasswordResetToken = async function () {
   this.passwordResetExpires = Date.now() + 30 * 60 * 500; // 10 minutes
   return token;
 };
-export default mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+export default User 

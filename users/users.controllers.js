@@ -21,24 +21,40 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
   try {
-    await User.findByIdAndDelete(req.params.id);
-    res.status(204).json("User has been deleted.");
+    const deletedUser = await User.findByIdAndDelete(id);
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ message: `User with the specified ID ${id} was not found` });
+    }
+
+    return res.status(204).json("User has been deleted.");
   } catch (err) {
     throw new Error(err);
   }
 });
 
 const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, phone } = req.body;
   try {
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
+      id,
+      { $set: { name, phone } },
       { new: true }
     );
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ message: `User with the specified ID ${id} was not found` });
+    }
     res.status(202).json(updatedUser);
   } catch (err) {
     throw new Error(err);
   }
 });
-export { getSingleUser, getAllUsers, updateUser, deleteUser};
+export { getSingleUser, getAllUsers, updateUser, deleteUser };
