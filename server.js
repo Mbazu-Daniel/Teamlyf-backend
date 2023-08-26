@@ -3,11 +3,13 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 
-// local imports
-import connectDB from "./config/connectDB.js";
-import authRouter from "./auth/auth.routes.js";
-import userRouter from "./users/users.routes.js";
-import organizationRouter from "./organization/organization.routes.js";
+import {
+  connectDB,
+  authRouter,
+  userRouter,
+  organizationsRouter,
+  employeeRouter,
+} from "./localImport.js";
 
 dotenv.config();
 
@@ -25,8 +27,9 @@ app.get("/", (req, res) => {
 
 const basePath = "/api/v1";
 app.use(`${basePath}/auth`, authRouter);
-app.use(`${basePath}/user`, userRouter);
-app.use(`${basePath}/organization`, organizationRouter);
+app.use(`${basePath}/users`, userRouter);
+app.use(`${basePath}/organizations`, organizationsRouter);
+app.use(`${basePath}/employees`, employeeRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);
