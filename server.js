@@ -9,6 +9,7 @@ import {
   userRouter,
   organizationsRouter,
   employeeRouter,
+  teamsRouter,
 } from "./localImport.js";
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
 app.use(`${basePath}/organizations`, organizationsRouter);
 app.use(`${basePath}/employees`, employeeRouter);
+app.use(`${basePath}/organization/teams`, teamsRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);
