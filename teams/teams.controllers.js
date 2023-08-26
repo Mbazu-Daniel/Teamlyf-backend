@@ -8,17 +8,17 @@ const createTeam = asyncHandler(async (req, res) => {
 
     res.status(201).json(newTeam);
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Get all teams
 const getAllTeams = asyncHandler(async (req, res) => {
   try {
-    const teams = await Team.find({});
-    res.status(200).json(teams);
+    // const teams = await Team.find();
+    res.status(200).json(await Team.find());
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -27,13 +27,13 @@ const getTeamById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   try {
-    const team = await Team.findById(id).populate("organizations");
+    const team = await Team.findById(id);
     if (!team) {
       res.status(404).json(`Team ${id} not found`);
     }
     res.status(200).json(team);
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -49,7 +49,7 @@ const deleteTeam = asyncHandler(async (req, res) => {
     await Team.findByIdAndDelete(id);
     res.status(204).json(`Team ${id} deleted`);
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -67,7 +67,7 @@ const updateTeam = asyncHandler(async (req, res) => {
     });
     res.status(202).json(updatedTeam);
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

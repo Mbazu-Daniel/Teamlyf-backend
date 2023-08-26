@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: "Organization" }],
   },
   { timestamps: true }
 );
@@ -42,4 +43,4 @@ UserSchema.methods.createPasswordResetToken = async function () {
   return token;
 };
 const User = mongoose.model("User", UserSchema);
-export default User 
+export default User;

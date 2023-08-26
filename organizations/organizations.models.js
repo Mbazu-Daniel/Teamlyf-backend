@@ -15,14 +15,12 @@ const organizationSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Employee",
-        required: true,
       },
     ],
     teams: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Team",
-        required: true,
       },
     ],
     createdBy: {
