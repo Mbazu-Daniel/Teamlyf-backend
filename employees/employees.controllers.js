@@ -37,8 +37,9 @@ const getEmployeeById = asyncHandler(async (req, res) => {
 
 // Update employee by ID
 const updateEmployee = asyncHandler(async (req, res) => {
+  const {id} = req.params
   try {
-    const employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
+    const employee = await Employee.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     if (!employee) {

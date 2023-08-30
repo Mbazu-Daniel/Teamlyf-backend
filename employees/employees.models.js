@@ -6,7 +6,7 @@ const employeeSchema = new mongoose.Schema(
     email: { type: String },
     password: { type: String },
     birthDate: { type: Date },
-    gender: { type: String, enum: ["Male", "Female", "Others"] },
+    gender: { type: String, enum: ["Male", "Female", "Others"], index: true },
     contactNumber: { type: String },
     address: { type: String },
     image: { type: String },
