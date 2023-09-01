@@ -20,8 +20,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: "Organization" }],
+    organizations: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
+    ],
   },
+  { versionKey: false },
   { timestamps: true }
 );
 

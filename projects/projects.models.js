@@ -36,7 +36,7 @@ const projectSchema = mongoose.Schema(
       index: true,
     },
   },
-
+  { versionKey: false },
   { timestamps: true }
 );
 

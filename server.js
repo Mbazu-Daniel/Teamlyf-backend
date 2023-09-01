@@ -10,6 +10,10 @@ import {
   organizationsRouter,
   employeeRouter,
   teamsRouter,
+  spaceRouter,
+  projectRouter,
+  taskRouter,
+  subTaskRouter,
 } from "./localImport.js";
 
 dotenv.config();
@@ -32,6 +36,10 @@ app.use(`${basePath}/users`, userRouter);
 app.use(`${basePath}/organizations`, organizationsRouter);
 app.use(`${basePath}/employees`, employeeRouter);
 app.use(`${basePath}/organization/teams`, teamsRouter);
+app.use(`${basePath}/spaces`, spaceRouter);
+app.use(`${basePath}/projects`, projectRouter);
+app.use(`${basePath}/tasks`, taskRouter);
+app.use(`${basePath}/subtasks`, subTaskRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);

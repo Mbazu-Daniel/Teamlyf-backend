@@ -14,6 +14,7 @@ const employeeSchema = new mongoose.Schema(
     organization: { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
     teams: [{ type: mongoose.Schema.Types.ObjectId, ref: "Team" }],
   },
+  { versionKey: false },
   { timestamps: true }
 );
 const Employee = mongoose.model("Employee", employeeSchema);

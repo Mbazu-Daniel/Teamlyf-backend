@@ -15,6 +15,7 @@ const TeamsSchema = new mongoose.Schema(
       ref: "Organization",
     },
   },
+  { versionKey: false },
   { timestamps: true }
 );
 const Team = mongoose.model("Team", TeamsSchema);

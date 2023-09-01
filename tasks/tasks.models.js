@@ -50,6 +50,7 @@ const taskSchema = mongoose.Schema(
       index: true,
     },
   },
+  { versionKey: false },
   { timestamps: true }
 );
 

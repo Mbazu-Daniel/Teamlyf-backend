@@ -29,6 +29,7 @@ const organizationSchema = new mongoose.Schema(
       required: true,
     },
   },
+  { versionKey: false },
   { timestamps: true }
 );
 export default mongoose.model("Organization", organizationSchema);
