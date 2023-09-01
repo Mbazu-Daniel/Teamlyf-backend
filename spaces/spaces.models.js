@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const spaceSchema = mongoose.schema(
+const spaceSchema = mongoose.Schema(
   {
     title: {
       type: String,

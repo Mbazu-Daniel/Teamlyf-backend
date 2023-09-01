@@ -16,4 +16,3 @@ spaceRouter.patch("/:id", updateSpace);
 spaceRouter.delete("/:id", deleteSpace);
 
 export default spaceRouter;
-b;

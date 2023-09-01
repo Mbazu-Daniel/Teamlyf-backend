@@ -1,12 +1,7 @@
 import mongoose from "mongoose";
 
-const taskSchema = mongoose.schema(
+const taskSchema = mongoose.Schema(
   {
-    employee: {
-      type: mongoose.Schema.Types.ObjectId,
-      require: true,
-      ref: "Employee",
-    },
     title: {
       type: String,
       required: true,
@@ -14,9 +9,16 @@ const taskSchema = mongoose.schema(
     description: {
       type: String,
     },
+    employee: {
+      type: mongoose.Schema.Types.ObjectId,
+      require: true,
+      ref: "Employee",
+    },
+
     priority: {
       type: String,
       enum: ["critical", "minor", "normal", "major"],
+      default: "normal",
       //   enum: ["urgent", "low", "medium", "high"],
       index: true,
     },
@@ -30,11 +32,7 @@ const taskSchema = mongoose.schema(
       type: [String],
       index: true,
     },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
-      index: true,
-    },
+
     assignees: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -45,6 +43,12 @@ const taskSchema = mongoose.schema(
     isCompleted: { type: Boolean, default: false, index: true },
     dueDate: { type: Date, index: true },
     reminderDate: { type: Date, index: true },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+      index: true,
+    },
   },
   { timestamps: true }
 );
