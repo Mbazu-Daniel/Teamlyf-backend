@@ -6,10 +6,15 @@ import {
   updateOrganization,
   deleteOrganization,
 } from "./organizations.controllers.js";
+import {
+  verifyAdmin,
+  verifyUser,
+  verifyToken,
+} from "../middleware/authenticate.js";
 
 const organizationsRouter = express.Router();
 
-organizationsRouter.post("/", createOrganization);
+organizationsRouter.post("/", verifyToken, createOrganization);
 organizationsRouter.get("/", getAllOrganizations);
 organizationsRouter.get("/:id", getOrganizationById);
 organizationsRouter.patch("/:id", updateOrganization);
