@@ -37,7 +37,7 @@ const getEmployeeById = asyncHandler(async (req, res) => {
 
 // Update employee by ID
 const updateEmployee = asyncHandler(async (req, res) => {
-  const {id} = req.params
+  const { id } = req.params;
   try {
     const employee = await Employee.findByIdAndUpdate(id, req.body, {
       new: true,
@@ -55,11 +55,11 @@ const updateEmployee = asyncHandler(async (req, res) => {
 const deleteEmployee = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const employee = await Employee.findByIdAndRemove(id);
+    const employee = await Employee.findOneAndDelete(id);
     if (!employee) {
       return res.status(404).json({ message: `Employee  ${id} not found` });
     }
-    res.status(204).json();
+    res.status(204).json({ message: `Employee ${id} deleted successfully.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
