@@ -4,7 +4,7 @@ import Space from "./spaces.models.js";
 // Create a new space
 const createSpace = asyncHandler(async (req, res) => {
   try {
-    const space = await Space.create(req.body);
+    const space = await Space.create({ ...req.body, createdBy: req.user.id });
     res.status(201).json(space);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -37,7 +37,7 @@ const getSpaceById = asyncHandler(async (req, res) => {
 
 // Update space by ID
 const updateSpace = asyncHandler(async (req, res) => {
-  const {id} = req.params
+  const { id } = req.params;
   try {
     const space = await Space.findByIdAndUpdate(id, req.body, {
       new: true,
@@ -55,7 +55,7 @@ const updateSpace = asyncHandler(async (req, res) => {
 const deleteSpace = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const space = await Space.findByIdAndRemove(id);
+    const space = await Space.findOneAndDelete(id);
     if (!space) {
       return res.status(404).json({ message: `Space  ${id} not found` });
     }
@@ -65,10 +65,4 @@ const deleteSpace = asyncHandler(async (req, res) => {
   }
 });
 
-export {
-  createSpace,
-  getAllSpaces,
-  getSpaceById,
-  deleteSpace,
-  updateSpace,
-};
+export { createSpace, getAllSpaces, getSpaceById, deleteSpace, updateSpace };

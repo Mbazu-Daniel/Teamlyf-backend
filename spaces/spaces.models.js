@@ -6,6 +6,7 @@ const spaceSchema = mongoose.Schema(
       type: String,
       required: true,
       index: true,
+      lowercase: true,
     },
 
     projects: [
@@ -25,5 +26,5 @@ const spaceSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-const Project = mongoose.model("Space", spaceSchema);
-export default Project;
+const Space = mongoose.model("Space", spaceSchema);
+export default Space;
