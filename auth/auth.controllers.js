@@ -39,14 +39,24 @@ const loginUser = asyncHandler(async (req, res) => {
       return res.status(401).json("Wrong password or email!");
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    // include user information
+    const tokenPayload = {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      password: user.password,
+    };
+
+    console.log(tokenPayload);
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
     const { password, ...otherDetails } = user._doc;
     res
       .cookie("access_token", token, {
         httpOnly: true,
       })
       .status(200)
-      .json({ user: { ...otherDetails } });
+      .json({ message: `${email} logged in successful` });
   } catch (error) {
     console.error(error);
   }
