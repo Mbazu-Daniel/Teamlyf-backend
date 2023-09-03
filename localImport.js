@@ -9,6 +9,7 @@ import spaceRouter from "./spaces/spaces.routes.js";
 import projectRouter from "./projects/projects.routes.js";
 import taskRouter from "./tasks/tasks.routes.js";
 import subTaskRouter from "./subTasks/subTasks.routes.js";
+import inviteRouter from "./invites/invites.routes.js";
 
 
 export {
@@ -22,4 +23,5 @@ export {
   projectRouter,
   taskRouter,
   subTaskRouter,
+  inviteRouter
 };

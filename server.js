@@ -14,6 +14,7 @@ import {
   projectRouter,
   taskRouter,
   subTaskRouter,
+  inviteRouter,
 } from "./localImport.js";
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.use(`${basePath}/spaces`, spaceRouter);
 app.use(`${basePath}/projects`, projectRouter);
 app.use(`${basePath}/tasks`, taskRouter);
 app.use(`${basePath}/subtasks`, subTaskRouter);
+app.use(`${basePath}/invites`, inviteRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);

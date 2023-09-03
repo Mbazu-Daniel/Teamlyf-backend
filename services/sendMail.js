@@ -6,8 +6,8 @@ const MAIL_CONFIG = {
   secure: false,
   requireTLS: true,
   auth: {
-    user: process.env.USER || "31d9906e33ea9a",
-    pass: process.env.PASSWORD || "6a6ea8618f94c6",
+    user: process.env.USER || "2ea71ebdd71092",
+    pass: process.env.PASSWORD || "a6d4be3320df41",
   },
 };
 
