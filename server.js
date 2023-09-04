@@ -32,16 +32,21 @@ app.get("/", (req, res) => {
 });
 
 const basePath = "/api/v1";
+// Authentication
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
+
+// Administration (Organization)
 app.use(`${basePath}/organizations`, organizationsRouter);
-app.use(`${basePath}/employees`, employeeRouter);
-app.use(`${basePath}/organization/teams`, teamsRouter);
+app.use(`${basePath}/organizations`, employeeRouter);
+app.use(`${basePath}/organizations`, inviteRouter);
+app.use(`${basePath}/organizations`, teamsRouter);
+
+// Task Management
 app.use(`${basePath}/spaces`, spaceRouter);
 app.use(`${basePath}/projects`, projectRouter);
 app.use(`${basePath}/tasks`, taskRouter);
 app.use(`${basePath}/subtasks`, subTaskRouter);
-app.use(`${basePath}/invites`, inviteRouter);
 
 const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);
