@@ -6,8 +6,9 @@ import asyncHandler from "express-async-handler";
 const createOrganization = asyncHandler(async (req, res) => {
   const { createdBy } = req.user.id;
   const { name } = req.body;
+  try {
 
-  // Check if an organization with the same name already exists
+      // Check if an organization with the same name already exists
   const existingOrganization = await Organization.findOne({ name });
 
   if (existingOrganization) {
@@ -15,8 +16,7 @@ const createOrganization = asyncHandler(async (req, res) => {
       .status(400)
       .json({ error: `Organization name ${name} already exists.` });
   }
-
-  try {
+  
     // Create a new organization with the provided data
     const newOrganization = await Organization.create({
       ...req.body,
@@ -24,24 +24,7 @@ const createOrganization = asyncHandler(async (req, res) => {
     });
 
     // Create a new employee associated with the user who created the organization
-    const user = req.user.id;
-    console.log(
-      "🚀 ~ file: organizations.controllers.js:18 ~ createOrganization ~ user:",
-      user
-    );
-    const fullName = req.user.fullName;
-    console.log(
-      "🚀 ~ file: organizations.controllers.js:20 ~ createOrganization ~ fullName:",
-      fullName
-    );
-    const email = req.user.email;
-    console.log(
-      "🚀 ~ file: organizations.controllers.js:22 ~ createOrganization ~ email:",
-      email
-    );
-
     const newEmployee = await Employee.create({
-      user: req.user.id,
       organization: newOrganization._id,
       fullName: req.user.fullName,
       email: req.user.email,
