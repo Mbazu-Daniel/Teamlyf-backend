@@ -1,18 +1,26 @@
 import express from "express";
 import {
-  createEmployee,
-  getAllEmployees,
-  getEmployeeById,
-  deleteEmployee,
-  updateEmployee,
+  getAllEmployeesByOrganization,
+  getEmployeeByIdByOrganization,
+  updateEmployeeByOrganization,
+  deleteEmployeeByOrganization,
 } from "./employees.controllers.js";
 
 const employeeRouter = express.Router();
 
-employeeRouter.post("/", createEmployee);
-employeeRouter.get("/", getAllEmployees);
-employeeRouter.get("/:id", getEmployeeById);
-employeeRouter.patch("/:id", updateEmployee);
-employeeRouter.delete("/:id", deleteEmployee);
+// Routes for managing employees within an organization
+employeeRouter.get("/:organizationId/employees", getAllEmployeesByOrganization);
+employeeRouter.get(
+  "/:organizationId/employees/:employeeId",
+  getEmployeeByIdByOrganization
+);
+employeeRouter.put(
+  "/:organizationId/employees/:employeeId",
+  updateEmployeeByOrganization
+);
+employeeRouter.delete(
+  "/:organizationId/employees/:employeeId",
+  deleteEmployeeByOrganization
+);
 
 export default employeeRouter;

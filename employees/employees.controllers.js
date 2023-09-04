@@ -1,49 +1,29 @@
 import asyncHandler from "express-async-handler";
 import Employee from "./employees.models.js";
 
-// Create a new employee
-const createEmployee = asyncHandler(async (req, res) => {
+// Get all employees by organization
+const getAllEmployeesByOrganization = asyncHandler(async (req, res) => {
+  const { organizationId } = req.params;
   try {
-    const employee = await Employee.create(req.body);
-    res.status(201).json(employee);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-// Get all employees
-const getAllEmployees = asyncHandler(async (req, res) => {
-  try {
-    const employees = await Employee.find();
+    const employees = await Employee.find({ organization: organizationId });
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get employee by ID
-const getEmployeeById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+// Get employee by ID by organization
+const getEmployeeByIdByOrganization = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
   try {
-    const employee = await Employee.findById(id);
-    if (!employee) {
-      return res.status(404).json({ message: `Employee  ${id} not found` });
-    }
-    res.status(200).json(employee);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Update employee by ID
-const updateEmployee = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  try {
-    const employee = await Employee.findByIdAndUpdate(id, req.body, {
-      new: true,
+    const employee = await Employee.findOne({
+      _id: employeeId,
+      organization: organizationId,
     });
     if (!employee) {
-      return res.status(404).json({ message: `Employee  ${id} not found` });
+      return res.status(404).json({
+        message: `Employee ${employeeId} not found in the organization`,
+      });
     }
     res.status(200).json(employee);
   } catch (error) {
@@ -51,24 +31,62 @@ const updateEmployee = asyncHandler(async (req, res) => {
   }
 });
 
-// Delete employee by ID
-const deleteEmployee = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+// Update employee by ID by organization
+const updateEmployeeByOrganization = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
   try {
-    const employee = await Employee.findOneAndDelete(id);
+    const employee = await Employee.findOneAndUpdate(
+      { _id: employeeId, organization: organizationId },
+      req.body,
+      { new: true }
+    );
     if (!employee) {
-      return res.status(404).json({ message: `Employee  ${id} not found` });
+      return res.status(404).json({
+        message: `Employee ${employeeId} not found in the organization`,
+      });
     }
-    res.status(204).json({ message: `Employee ${id} deleted successfully.` });
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete employee by ID by organization
+const deleteEmployeeByOrganization = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
+  try {
+    const employee = await Employee.findOneAndDelete({
+      _id: employeeId,
+      organization: organizationId,
+    });
+    if (!employee) {
+      return res.status(404).json({
+        message: `Employee ${employeeId} not found in the organization`,
+      });
+    }
+    res
+      .status(204)
+      .json({ message: `Employee ${employeeId} deleted successfully.` });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 export {
-  createEmployee,
-  getAllEmployees,
-  getEmployeeById,
-  deleteEmployee,
-  updateEmployee,
+  getAllEmployeesByOrganization,
+  getEmployeeByIdByOrganization,
+  updateEmployeeByOrganization,
+  deleteEmployeeByOrganization,
 };
+
+// Create a new employee
+//TODO
+// delete this
+// const createEmployee = asyncHandler(async (req, res) => {
+//   try {
+//     const employee = await Employee.create(req.body);
+//     res.status(201).json(employee);
+//   } catch (error) {
+//     res.status(400).json({ error: error.message });
+//   }
+// });
