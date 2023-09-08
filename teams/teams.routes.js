@@ -9,10 +9,10 @@ import {
 
 const teamsRouter = express.Router();
 
-teamsRouter.post("/", createTeam);
-teamsRouter.get("/", getAllTeams);
-teamsRouter.get("/:id", getTeamById);
-teamsRouter.patch("/:id", updateTeam);
-teamsRouter.delete("/:id", deleteTeam);
+teamsRouter.post("/:organizationId/teams", createTeam);
+teamsRouter.get("/:organizationId/teams", getAllTeams);
+teamsRouter.get("/:organizationId/teams/:teamId", getTeamById);
+teamsRouter.patch("/:organizationId/teams/:teamId", updateTeam);
+teamsRouter.delete("/:organizationId/teams/:teamId", deleteTeam);
 
 export default teamsRouter;
