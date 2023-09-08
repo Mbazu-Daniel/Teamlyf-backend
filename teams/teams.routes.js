@@ -2,7 +2,7 @@ import express from "express";
 import {
   createTeam,
   getAllTeams,
-  getTeamById,
+  getTeamMembers,
   deleteTeam,
   updateTeam,
 } from "./teams.controllers.js";
@@ -17,7 +17,7 @@ const teamsRouter = express.Router();
 
 teamsRouter.post("/:organizationId/teams", verifyToken, createTeam);
 teamsRouter.get("/:organizationId/teams", getAllTeams);
-teamsRouter.get("/:organizationId/teams/:teamId", getTeamById);
+teamsRouter.get("/:organizationId/teams/:teamId/members", getTeamMembers);
 teamsRouter.patch("/:organizationId/teams/:teamId", updateTeam);
 teamsRouter.delete("/:organizationId/teams/:teamId", deleteTeam);
 

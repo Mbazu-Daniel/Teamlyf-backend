@@ -39,7 +39,7 @@ app.use(`${basePath}/users`, userRouter);
 // Administration (Organization)
 app.use(`${basePath}/organizations`, organizationsRouter);
 app.use(`${basePath}/organizations`, employeeRouter);
-app.use(`${basePath}/organizations`, inviteRouter);
+app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/organizations`, teamsRouter);
 
 // Task Management

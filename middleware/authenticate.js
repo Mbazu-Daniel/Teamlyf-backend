@@ -9,19 +9,6 @@ const verifyToken = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
     if (err) return next(createError(403, "Token is not valid!"));
-
-    // Ensure that the decoded token contains the necessary user information
-    if (
-      !decodedToken.id ||
-      !decodedToken.fullName ||
-      !decodedToken.email ||
-      !decodedToken.password
-    ) {
-      return next(
-        createError(403, "Token does not contain required user information!")
-      );
-    }
-
     req.user = decodedToken;
     next();
   });

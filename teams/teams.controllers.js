@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Team from "./teams.models.js";
 import Organization from "../organizations/organizations.models.js";
+import Employee from "../employees/employees.models.js";
 
 // Create a new team within an organization
 const createTeam = asyncHandler(async (req, res) => {
@@ -63,10 +64,9 @@ const getAllTeams = asyncHandler(async (req, res) => {
 });
 
 // Get a team by ID within an organization
-const getTeamById = asyncHandler(async (req, res) => {
+const getTeamMembers = asyncHandler(async (req, res) => {
   const { organizationId, teamId } = req.params;
-  // 64fb7072808508d831aa87fb team
-  // organization 64fab43a0ada13a88355b089
+
   try {
     const organization = await Organization.findById(organizationId);
 
@@ -82,7 +82,11 @@ const getTeamById = asyncHandler(async (req, res) => {
     if (!team) {
       res.status(404).json(`Team ${teamId} not found`);
     }
-    res.status(200).json(team);
+
+    // Fetch the members of the team
+    const employees = await Employee.find({ _id: { $in: team.employees } });
+
+    res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -137,4 +141,6 @@ const updateTeam = asyncHandler(async (req, res) => {
   }
 });
 
-export { createTeam, getAllTeams, getTeamById, deleteTeam, updateTeam };
+
+
+export { createTeam, getAllTeams, getTeamMembers, deleteTeam, updateTeam };
