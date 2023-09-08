@@ -1,4 +1,5 @@
 import User from "../users/users.models.js";
+import Employee from "../employees/employees.models.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -12,6 +13,7 @@ const registerUser = asyncHandler(async (req, res) => {
       ...req.body,
       email: email,
     });
+
     try {
       return res.status(201).json(newUser);
     } catch (error) {
