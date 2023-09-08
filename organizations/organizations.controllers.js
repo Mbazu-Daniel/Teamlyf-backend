@@ -4,19 +4,18 @@ import asyncHandler from "express-async-handler";
 
 // Create a new organizations
 const createOrganization = asyncHandler(async (req, res) => {
-  const { createdBy } = req.user.id;
+  const { id: createdBy } = req.user;
   const { name } = req.body;
   try {
+    // Check if an organization with the same name already exists
+    const existingOrganization = await Organization.findOne({ name });
 
-      // Check if an organization with the same name already exists
-  const existingOrganization = await Organization.findOne({ name });
+    if (existingOrganization) {
+      return res
+        .status(400)
+        .json({ error: `Organization name ${name} already exists.` });
+    }
 
-  if (existingOrganization) {
-    return res
-      .status(400)
-      .json({ error: `Organization name ${name} already exists.` });
-  }
-  
     // Create a new organization with the provided data
     const newOrganization = await Organization.create({
       ...req.body,
