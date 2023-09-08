@@ -14,7 +14,7 @@ employeeRouter.get(
   "/:organizationId/employees/:employeeId",
   getEmployeeByIdByOrganization
 );
-employeeRouter.put(
+employeeRouter.patch(
   "/:organizationId/employees/:employeeId",
   updateEmployeeByOrganization
 );
