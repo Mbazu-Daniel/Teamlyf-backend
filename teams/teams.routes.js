@@ -7,9 +7,15 @@ import {
   updateTeam,
 } from "./teams.controllers.js";
 
+import {
+  verifyAdmin,
+  verifyUser,
+  verifyToken,
+} from "../middleware/authenticate.js";
+
 const teamsRouter = express.Router();
 
-teamsRouter.post("/:organizationId/teams", createTeam);
+teamsRouter.post("/:organizationId/teams", verifyToken, createTeam);
 teamsRouter.get("/:organizationId/teams", getAllTeams);
 teamsRouter.get("/:organizationId/teams/:teamId", getTeamById);
 teamsRouter.patch("/:organizationId/teams/:teamId", updateTeam);

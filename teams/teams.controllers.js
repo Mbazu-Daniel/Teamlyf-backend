@@ -6,11 +6,25 @@ import Organization from "../organizations/organizations.models.js";
 const createTeam = asyncHandler(async (req, res) => {
   try {
     const { organizationId } = req.params;
-    const { createdBy } = req.user.id;
+    const { id: createdBy } = req.user;
+    const { name } = req.body;
+
     const organization = await Organization.findById(organizationId);
 
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // check if team exist already
+    const existingTeam = await Team.findOne({
+      name,
+      organization: organizationId,
+    });
+
+    if (existingTeam) {
+      return res
+        .status(400)
+        .json({ error: `Team name "${name}" already exists.` });
     }
 
     const newTeam = await Team.create({
@@ -33,6 +47,13 @@ const createTeam = asyncHandler(async (req, res) => {
 const getAllTeams = asyncHandler(async (req, res) => {
   try {
     const { organizationId } = req.params;
+
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
     const teams = await Team.find({ organization: organizationId });
 
     res.status(200).json(teams);
@@ -44,8 +65,16 @@ const getAllTeams = asyncHandler(async (req, res) => {
 // Get a team by ID within an organization
 const getTeamById = asyncHandler(async (req, res) => {
   const { organizationId, teamId } = req.params;
-
+  // 64fb7072808508d831aa87fb team
+  // organization 64fab43a0ada13a88355b089
   try {
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res
+        .status(404)
+        .json({ error: `Organization ${organizationId} not found` });
+    }
     const team = await Team.findOne({
       _id: teamId,
       organization: organizationId,
