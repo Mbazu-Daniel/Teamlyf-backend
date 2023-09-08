@@ -1,5 +1,4 @@
 import User from "../users/users.models.js";
-import Employee from "../employees/employees.models.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -44,12 +43,9 @@ const loginUser = asyncHandler(async (req, res) => {
     // include user information
     const tokenPayload = {
       id: user._id,
-      fullName: user.fullName,
       email: user.email,
       password: user.password,
     };
-
-    console.log(tokenPayload);
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
     const { password, ...otherDetails } = user._doc;

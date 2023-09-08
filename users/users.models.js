@@ -3,13 +3,6 @@ import bcrypt from "bcrypt";
 
 const UserSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-    },
-
-    phone: {
-      type: String,
-    },
     email: {
       type: String,
       required: true,
@@ -24,6 +17,7 @@ const UserSchema = new mongoose.Schema(
       { type: mongoose.Schema.Types.ObjectId, ref: "Organization" },
     ],
   },
+
   { versionKey: false },
   { timestamps: true }
 );
