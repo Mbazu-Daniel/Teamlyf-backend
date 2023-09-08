@@ -4,7 +4,7 @@ import Organization from "../organizations/organizations.models.js";
 import Team from "../teams/teams.models.js";
 
 // Get all employees by organization
-const getAllEmployeesByOrganization = asyncHandler(async (req, res) => {
+const getAllEmployees = asyncHandler(async (req, res) => {
   const { organizationId } = req.params;
   try {
     const employees = await Employee.find({
@@ -25,7 +25,7 @@ const getAllEmployeesByOrganization = asyncHandler(async (req, res) => {
 });
 
 // Get employee by ID by organization
-const getEmployeeByIdByOrganization = asyncHandler(async (req, res) => {
+const getEmployeeById = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
     const organization = await Organization.findById(organizationId);
@@ -56,7 +56,7 @@ const getEmployeeByIdByOrganization = asyncHandler(async (req, res) => {
 });
 
 // Update employee by ID by organization
-const updateEmployeeByOrganization = asyncHandler(async (req, res) => {
+const updateEmployee = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
     const organization = await Organization.findById(organizationId);
@@ -83,7 +83,7 @@ const updateEmployeeByOrganization = asyncHandler(async (req, res) => {
 });
 
 // Delete employee by ID by organization
-const deleteEmployeeByOrganization = asyncHandler(async (req, res) => {
+const deleteEmployee = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
     const organization = await Organization.findById(organizationId);
@@ -217,10 +217,10 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
 });
 
 export {
-  getAllEmployeesByOrganization,
-  getEmployeeByIdByOrganization,
-  updateEmployeeByOrganization,
-  deleteEmployeeByOrganization,
+  getAllEmployees,
+  getEmployeeById,
+  updateEmployee,
+  deleteEmployee,
   addEmployeeToTeam,
   removeEmployeeFromTeam,
 };
