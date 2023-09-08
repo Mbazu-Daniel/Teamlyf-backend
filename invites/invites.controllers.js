@@ -139,7 +139,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
     // Delete the invite link as it has been used
     await invite.deleteOne();
 
-    res.status(200).json({ user: newEmployee, data: data });
+    res.status(200).json({ user: newEmployee });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
