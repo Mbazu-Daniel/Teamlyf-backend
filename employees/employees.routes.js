@@ -7,6 +7,7 @@ import {
   addEmployeeToTeam,
   removeEmployeeFromTeam,
   getTeamsByEmployee,
+  changeEmployeeRole,
 } from "./employees.controllers.js";
 
 const employeeRouter = express.Router();
@@ -28,6 +29,10 @@ employeeRouter.post(
 employeeRouter.get(
   "/:organizationId/employees/:employeeId/teams",
   getTeamsByEmployee
+);
+employeeRouter.patch(
+  "/:organizationId/employees/:employeeId/change-role",
+  changeEmployeeRole
 );
 
 export default employeeRouter;

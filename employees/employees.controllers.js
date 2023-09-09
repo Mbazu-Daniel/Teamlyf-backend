@@ -244,6 +244,46 @@ const getTeamsByEmployee = asyncHandler(async (req, res) => {
   }
 });
 
+const changeEmployeeRole = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
+  const { role } = req.body;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Check if the employee exists within the organization
+    const employee = await Employee.findOne({
+      _id: employeeId,
+      organization: organizationId,
+    });
+
+    if (!employee) {
+      return res
+        .status(404)
+        .json({ error: "Employee not found in the organization" });
+    }
+
+    // Validate the new role to be either "Admin" or "Member"
+    if (role !== "Admin" && role !== "Member") {
+      return res
+        .status(400)
+        .json({ error: "Invalid role. Role must be 'Admin' or 'Member'" });
+    }
+
+    // Update the employee's role
+    employee.role = role;
+    await employee.save();
+
+    res.status(200).json({ message: "Employee role updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -252,4 +292,5 @@ export {
   addEmployeeToTeam,
   removeEmployeeFromTeam,
   getTeamsByEmployee,
+  changeEmployeeRole,
 };
