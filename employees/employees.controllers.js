@@ -216,6 +216,34 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
   }
 });
 
+// Get a list of teams that an employee is a member of in the organization
+const getTeamsByEmployee = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
+
+  try {
+    // Find the organization and verify it exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+    // Find the employee and verify it exists
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    // Find teams where the employee is a member
+    const teams = await Team.find({
+      _id: { $in: organization.teams },
+      employees: employeeId,
+    });
+
+    res.status(200).json(teams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -223,4 +251,5 @@ export {
   deleteEmployee,
   addEmployeeToTeam,
   removeEmployeeFromTeam,
+  getTeamsByEmployee,
 };
