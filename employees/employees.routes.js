@@ -6,25 +6,40 @@ import {
   deleteEmployee,
   addEmployeeToTeam,
   removeEmployeeFromTeam,
-
+  getTeamsByEmployee,
+  changeEmployeeRole,
+  searchEmployees,
+  getEmployeesCount,
 } from "./employees.controllers.js";
 
 const employeeRouter = express.Router();
 
 // Routes for managing employees within an organization
+
+employeeRouter.get("/:organizationId/employees/search", searchEmployees);
+
+employeeRouter.get("/:organizationId/employees/count", getEmployeesCount);
+
 employeeRouter.get("/:organizationId/employees", getAllEmployees);
 employeeRouter.get("/:organizationId/employees/:employeeId", getEmployeeById);
 employeeRouter.patch("/:organizationId/employees/:employeeId", updateEmployee);
 employeeRouter.delete("/:organizationId/employees/:employeeId", deleteEmployee);
 
 employeeRouter.post(
-  "/:organizationId/teams/:teamId/add-member",
+  "/:organizationId/teams/:teamId/add-employee",
   addEmployeeToTeam
 );
 employeeRouter.post(
-  "/:organizationId/teams/:teamId/remove-member",
+  "/:organizationId/teams/:teamId/remove-employee",
   removeEmployeeFromTeam
 );
-
+employeeRouter.get(
+  "/:organizationId/employees/:employeeId/teams",
+  getTeamsByEmployee
+);
+employeeRouter.patch(
+  "/:organizationId/employees/:employeeId/change-role",
+  changeEmployeeRole
+);
 
 export default employeeRouter;

@@ -216,6 +216,125 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
   }
 });
 
+// Get a list of teams that an employee is a member of in the organization
+const getTeamsByEmployee = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
+
+  try {
+    // Find the organization and verify it exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+    // Find the employee and verify it exists
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    // Find teams where the employee is a member
+    const teams = await Team.find({
+      _id: { $in: organization.teams },
+      employees: employeeId,
+    });
+
+    res.status(200).json(teams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Change Employee Role
+const changeEmployeeRole = asyncHandler(async (req, res) => {
+  const { organizationId, employeeId } = req.params;
+  const { role } = req.body;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Check if the employee exists within the organization
+    const employee = await Employee.findOne({
+      _id: employeeId,
+      organization: organizationId,
+    });
+
+    if (!employee) {
+      return res
+        .status(404)
+        .json({ error: "Employee not found in the organization" });
+    }
+
+    // Validate the new role to be either "Admin" or "Member"
+    if (role !== "Admin" && role !== "Member") {
+      return res
+        .status(400)
+        .json({ error: "Invalid role. Role must be 'Admin' or 'Member'" });
+    }
+
+    // Update the employee's role
+    employee.role = role;
+    await employee.save();
+
+    res.status(200).json({ message: "Employee role updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Search Employees
+const searchEmployees = asyncHandler(async (req, res) => {
+  const { organizationId } = req.params;
+  const { query } = req.query;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Search for employees based on the query parameter
+    const employees = await Employee.find({
+      organization: organizationId,
+      $or: [
+        { fullName: { $regex: new RegExp(query, "i") } },
+        { email: { $regex: new RegExp(query, "i") } },
+      ],
+    });
+
+    res.status(200).json(employees);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Employee Count
+const getEmployeesCount = asyncHandler(async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Count the number of employees in the organization
+    const employeeCount = await Employee.countDocuments({
+      organization: organizationId,
+    });
+
+    res.status(200).json({ count: employeeCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -223,4 +342,8 @@ export {
   deleteEmployee,
   addEmployeeToTeam,
   removeEmployeeFromTeam,
+  getTeamsByEmployee,
+  changeEmployeeRole,
+  searchEmployees,
+  getEmployeesCount,
 };
