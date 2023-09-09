@@ -244,6 +244,7 @@ const getTeamsByEmployee = asyncHandler(async (req, res) => {
   }
 });
 
+// Change Employee Role
 const changeEmployeeRole = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   const { role } = req.body;
@@ -284,6 +285,7 @@ const changeEmployeeRole = asyncHandler(async (req, res) => {
   }
 });
 
+// Search Employees
 const searchEmployees = asyncHandler(async (req, res) => {
   const { organizationId } = req.params;
   const { query } = req.query;
@@ -311,6 +313,28 @@ const searchEmployees = asyncHandler(async (req, res) => {
   }
 });
 
+// Get Employee Count
+const getEmployeesCount = asyncHandler(async (req, res) => {
+  const { organizationId } = req.params;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Count the number of employees in the organization
+    const employeeCount = await Employee.countDocuments({
+      organization: organizationId,
+    });
+
+    res.status(200).json({ count: employeeCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -321,4 +345,5 @@ export {
   getTeamsByEmployee,
   changeEmployeeRole,
   searchEmployees,
+  getEmployeesCount,
 };
