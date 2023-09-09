@@ -284,6 +284,33 @@ const changeEmployeeRole = asyncHandler(async (req, res) => {
   }
 });
 
+const searchEmployees = asyncHandler(async (req, res) => {
+  const { organizationId } = req.params;
+  const { query } = req.query;
+
+  try {
+    // Check if the organization exists
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
+    // Search for employees based on the query parameter
+    const employees = await Employee.find({
+      organization: organizationId,
+      $or: [
+        { fullName: { $regex: new RegExp(query, "i") } },
+        { email: { $regex: new RegExp(query, "i") } },
+      ],
+    });
+
+    res.status(200).json(employees);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -293,4 +320,5 @@ export {
   removeEmployeeFromTeam,
   getTeamsByEmployee,
   changeEmployeeRole,
+  searchEmployees,
 };
