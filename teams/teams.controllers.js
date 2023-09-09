@@ -64,7 +64,7 @@ const getAllTeams = asyncHandler(async (req, res) => {
 });
 
 // Get a team by ID within an organization
-const getTeamMembers = asyncHandler(async (req, res) => {
+const getTeamById = asyncHandler(async (req, res) => {
   const { organizationId, teamId } = req.params;
 
   try {
@@ -82,11 +82,7 @@ const getTeamMembers = asyncHandler(async (req, res) => {
     if (!team) {
       res.status(404).json(`Team ${teamId} not found`);
     }
-
-    // Fetch the members of the team
-    const employees = await Employee.find({ _id: { $in: team.employees } });
-
-    res.status(200).json(employees);
+    res.status(200).json(team);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -123,6 +119,12 @@ const updateTeam = asyncHandler(async (req, res) => {
   const { organizationId, teamId } = req.params;
 
   try {
+    // Find the organization and verify it exists
+    const organization = await Organization.findById(organizationId);
+    if (!organization) {
+      return res.status(404).json({ error: "Organization not found" });
+    }
+
     const team = await Team.findOne({
       _id: teamId,
       organization: organizationId,
@@ -141,6 +143,42 @@ const updateTeam = asyncHandler(async (req, res) => {
   }
 });
 
+// Get a list of employees in a team
+const getTeamEmployees = asyncHandler(async (req, res) => {
+  const { organizationId, teamId } = req.params;
+
+  try {
+    const organization = await Organization.findById(organizationId);
+
+    if (!organization) {
+      return res
+        .status(404)
+        .json({ error: `Organization ${organizationId} not found` });
+    }
+    const team = await Team.findOne({
+      _id: teamId,
+      organization: organizationId,
+    });
+    if (!team) {
+      res.status(404).json(`Team ${teamId} not found`);
+    }
+
+    // Fetch the employees of the team
+    const employees = await Employee.find({ _id: { $in: team.employees } });
+
+    res.status(200).json(employees);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
-export { createTeam, getAllTeams, getTeamMembers, deleteTeam, updateTeam };
+
+export {
+  createTeam,
+  getAllTeams,
+  getTeamById,
+  deleteTeam,
+  updateTeam,
+  getTeamEmployees,
+};
