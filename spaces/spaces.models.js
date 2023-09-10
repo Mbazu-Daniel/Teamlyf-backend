@@ -16,6 +16,11 @@ const spaceSchema = mongoose.Schema(
         index: true,
       },
     ],
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization",
+      index: true,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
