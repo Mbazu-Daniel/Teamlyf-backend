@@ -43,7 +43,7 @@ app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/organizations`, teamsRouter);
 
 // Task Management
-app.use(`${basePath}/spaces`, spaceRouter);
+app.use(`${basePath}/organizations`, spaceRouter);
 app.use(`${basePath}/projects`, projectRouter);
 app.use(`${basePath}/tasks`, taskRouter);
 app.use(`${basePath}/subtasks`, subTaskRouter);

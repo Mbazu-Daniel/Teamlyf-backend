@@ -3,6 +3,8 @@ import Employee from "./employees.models.js";
 import Organization from "../organizations/organizations.models.js";
 import Team from "../teams/teams.models.js";
 
+// TODO: use checkTeamExist Middleware on routes
+
 // Get all employees by organization
 const getAllEmployees = asyncHandler(async (req, res) => {
   const { organizationId } = req.params;
@@ -10,14 +12,6 @@ const getAllEmployees = asyncHandler(async (req, res) => {
     const employees = await Employee.find({
       organization: organizationId,
     });
-
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res
-        .status(404)
-        .json({ error: `Organization ${organizationId} not found` });
-    }
-
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -28,17 +22,10 @@ const getAllEmployees = asyncHandler(async (req, res) => {
 const getEmployeeById = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res
-        .status(404)
-        .json({ error: `Organization ${organizationId} not found` });
-    }
-
     const employee = await Employee.findOne({
       _id: employeeId,
       organization: organizationId,
-    }).populate("teams");
+    });
     if (!employee) {
       return res.status(404).json({
         message: `Employee ${employeeId} not found in the organization`,
@@ -59,13 +46,6 @@ const getEmployeeById = asyncHandler(async (req, res) => {
 const updateEmployee = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res
-        .status(404)
-        .json({ error: `Organization ${organizationId} not found` });
-    }
-
     const employee = await Employee.findOneAndUpdate(
       { _id: employeeId, organization: organizationId },
       req.body,
@@ -86,13 +66,6 @@ const updateEmployee = asyncHandler(async (req, res) => {
 const deleteEmployee = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
   try {
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res
-        .status(404)
-        .json({ error: `Organization ${organizationId} not found` });
-    }
-
     const employee = await Employee.findOneAndDelete({
       _id: employeeId,
       organization: organizationId,
@@ -116,12 +89,6 @@ const addEmployeeToTeam = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Find the organization and verify it exists
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
-
     // Find the team and verify it exists
     const team = await Team.findById(teamId);
     if (!team) {
@@ -165,12 +132,6 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Check if the organization exists
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
-
     // Find the team based on its ID and organization
     const team = await Team.findOne({
       _id: teamId,
@@ -219,13 +180,9 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
 // Get a list of teams that an employee is a member of in the organization
 const getTeamsByEmployee = asyncHandler(async (req, res) => {
   const { organizationId, employeeId } = req.params;
+  const { organization } = req;
 
   try {
-    // Find the organization and verify it exists
-    const organization = await Organization.findById(organizationId);
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
-    }
     // Find the employee and verify it exists
     const employee = await Employee.findById(employeeId);
     if (!employee) {

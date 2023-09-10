@@ -12,7 +12,11 @@ import {
   getEmployeesCount,
 } from "./employees.controllers.js";
 
-const employeeRouter = express.Router();
+const employeeRouter = express.Router({ mergeParams: true });
+
+import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+
+employeeRouter.use("/:organizationId", checkOrganizationExists);
 
 // Routes for managing employees within an organization
 
