@@ -6,6 +6,7 @@ const projectSchema = mongoose.Schema(
       type: String,
       required: true,
       index: true,
+      lowercase: true,
     },
     description: {
       type: String,
@@ -25,9 +26,10 @@ const projectSchema = mongoose.Schema(
         index: true,
       },
     ],
-    teamSpace: {
+    space: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Space",
+      required: true,
       index: true,
     },
     createdBy: {

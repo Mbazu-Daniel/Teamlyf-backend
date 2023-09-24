@@ -23,6 +23,12 @@ const organizationSchema = new mongoose.Schema(
         ref: "Team",
       },
     ],
+    spaces: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Space",
+      },
+    ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

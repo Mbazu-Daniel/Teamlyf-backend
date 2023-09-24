@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const TeamsSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, required: true },
+    name: { type: String, required: true, required: true, lowercase: true },
     description: { type: String },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,0 +1,156 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  organizations Organization[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("User")
+}
+
+// Organization Model
+model Organization {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  address     String?
+  logo        String?
+  employees   Employee[]
+  // teams       Team[]
+  // spaces      Space[]
+  owner       User       @relation(fields: [createdById], references: [id])
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  Invite      Invite[]
+
+  @@map("Organization")
+}
+
+// Invite Model
+model Invite {
+  id             String        @id @default(uuid())
+  token          String
+  email          String
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+  expirationDate DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("Invite")
+}
+
+// Employee Model
+model Employee {
+  id             String       @id @default(uuid())
+  fullName       String?
+  displayName    String?
+  email          String       @unique
+  birthDate      DateTime?
+  gender         String?
+  contactNumber  String?
+  address        String?
+  image          String?
+  salary         Float?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       
+  // teams          Team[]
+  role           String?      @default("Member")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("Employee")
+}
+
+// // Team Model
+// model Team {
+//   id             String        @id @default(uuid())
+//   name           String
+//   description    String?
+//   createdById    String        @map("createdBy")
+//   employees      Employee[]
+//   organization   Organization? @relation(fields: [organizationId], references: [id])
+//   organizationId String?       @map("organization")
+//   createdAt      DateTime      @default(now())
+//   updatedAt      DateTime      @updatedAt
+
+//   @@map("Team")
+// }
+
+// Space Model
+// model Space {
+//   id           String     @id @default(uuid())
+//   title        String
+//   projects     Project[]
+//   tasks        Task[]
+//   organization Organization @relation(fields: [organizationId], references: [id])
+//   organizationId String    @map("organization")
+//   createdBy     Employee   @relation(fields: [createdById], references: [id])
+//   createdById   String     @map("createdBy")
+//   createdAt     DateTime   @default(now())
+//   updatedAt     DateTime   @updatedAt
+//   @@map("Space")
+// }
+
+// Project Model
+// model Project {
+//   id          String     @id @default(uuid())
+//   title       String
+//   description String?
+//   tasks       Task[]
+//   space       Space      @relation(fields: [spaceId], references: [id])
+//   spaceId     String     @map("space")
+//   createdBy   Employee   @relation(fields: [createdById], references: [id])
+//   createdById String     @map("createdBy")
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+//   @@map("Project")
+// }
+
+// Task Model
+// model Task {
+//   id          String     @id @default(uuid())
+//   title       String
+//   description String?
+//   priority    String     @default("normal")
+//   status      String     @default("pending")
+//   tags        String[]
+//   projects    Project[]  @relation(fields: [projectId], references: [id])
+//   projectId   String     @map("projects")
+//   assignees   Employee[] @relation(fields: [assigneeId], references: [id])
+//   assigneeId  String     @map("assignees")
+//   comments    Comment[]
+//   isCompleted Boolean    @default(false)
+//   startDate   DateTime?
+//   dueDate     DateTime?
+//   createdBy   Employee   @relation(fields: [createdById], references: [id])
+//   createdById String     @map("createdBy")
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+//   @@map("Task")
+// }
+
+// // Comment Model (if not already defined)
+// model Comment {
+//   id        String   @id @default(uuid())
+//   content   String
+//   taskId    String   @map("task")
+//   task      Task     @relation(fields: [taskId], references: [id])
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   @@map("Comment")
+// }

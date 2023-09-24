@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true },
-    email: { type: String, required: true },
-    password: { type: String, required: true },
+    fullName: { type: String },
+    displayName: { type: String },
+    email: { type: String, required: true, unique: true },
     birthDate: { type: Date },
     gender: { type: String, enum: ["Male", "Female", "Others"], index: true },
     contactNumber: { type: String },
