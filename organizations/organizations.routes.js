@@ -11,10 +11,11 @@ import {
   verifyUser,
   verifyToken,
 } from "../middleware/authenticate.js";
+const organizationsRouter = express.Router({ mergeParams: true });
 
-const organizationsRouter = express.Router();
+organizationsRouter.use("/", verifyToken);
 
-organizationsRouter.post("/", verifyToken, createOrganization);
+organizationsRouter.post("/", createOrganization);
 organizationsRouter.get("/", getAllOrganizations);
 organizationsRouter.get("/:id", getOrganizationById);
 organizationsRouter.patch("/:id", updateOrganization);
