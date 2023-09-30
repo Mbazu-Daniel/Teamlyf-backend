@@ -1,4 +1,3 @@
-import User from "../users/users.models.js";
 import asyncHandler from "express-async-handler";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -18,7 +17,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     try {
-      return res.status(201).json(newUser);
+      return res.status(201).json({ message: "User registered successfully" });
     } catch (error) {
       return res
         .status(500)
@@ -51,19 +50,19 @@ const loginUser = asyncHandler(async (req, res) => {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      password: user.password,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET);
-    const { password, ...otherDetails } = user;
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
     res
       .cookie("access_token", token, {
         httpOnly: true,
       })
       .status(200)
-      .json({ message: `${email} logged in successful` });
+      .json({ message: `${email} logged in successfully` });
   } catch (error) {
-    console.error(error);
+    console.error({ error: "An error occurred while logging in" });
   }
 });
 
