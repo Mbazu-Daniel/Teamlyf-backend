@@ -1,14 +1,35 @@
-import Organization from "./organizations.models.js";
-import Employee from "../employees/employees.models.js";
+import { PrismaClient } from "@prisma/client";
 import asyncHandler from "express-async-handler";
+import Joi from "joi";
+
+const prisma = new PrismaClient();
+
+// Validation schema for creating an organization
+const createOrganizationSchema = Joi.object({
+  name: Joi.string().required(),
+  address: Joi.string().allow(null, ""),
+  logo: Joi.string().allow(null, ""),
+});
 
 // Create a new organizations
-const createOrganization = asyncHandler(async (req, res) => {
-  const { id: createdBy } = req.user;
-  const { name } = req.body;
+const createOrganization = async (req, res) => {
+  const { id: createdById } = req.user;
+  const { name, address, logo } = req.body;
+
+  // Convert the organization name to lowercase
+  const lowercaseName = name.toLowerCase();
+
   try {
+    // Validate input data
+    const { error } = createOrganizationSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     // Check if an organization with the same name already exists
-    const existingOrganization = await Organization.findOne({ name });
+    const existingOrganization = await prisma.organization.findFirst({
+      where: { name: lowercaseName },
+    });
 
     if (existingOrganization) {
       return res
@@ -16,36 +37,65 @@ const createOrganization = asyncHandler(async (req, res) => {
         .json({ error: `Organization name ${name} already exists.` });
     }
 
+    console.log("existing organization", existingOrganization);
+
+    // Check if a user with the provided email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: req.user.email },
+    });
+
     // Create a new organization with the provided data
-    const newOrganization = await Organization.create({
-      ...req.body,
-      createdBy: createdBy,
+    const newOrganization = await prisma.organization.create({
+      data: {
+        name: name,
+        address: address || null,
+        logo: logo || null,
+        owner: {
+          connect: { id: createdById },
+        },
+        employees: {
+          create: [
+            {
+              fullName: existingUser.fullName,
+              email: existingUser.email,
+              role: "Owner",
+            },
+          ],
+        },
+      },
     });
-
-    // Create a new employee associated with the user who created the organization
-    const newEmployee = await Employee.create({
-      organization: newOrganization._id,
-      fullName: req.user.fullName,
-      email: req.user.email,
-      password: req.user.password,
-      role: "Owner",
-    });
-
-    // add the newly created employee to the the organization's employee array
-    newOrganization.employees.push(newEmployee);
-    await newOrganization.save();
 
     res.status(201).json(newOrganization);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+};
 
 // Get all organizations
 const getAllOrganizations = asyncHandler(async (req, res) => {
+  const { email } = req.user;
   try {
-    const organization = await Organization.find();
-    res.status(200).json(organization);
+    const organizations = await prisma.organization.findMany({
+      where: {
+        OR: [
+          { createdById: req.user.id },
+          { employees: { some: { email: email } } },
+        ],
+      },
+      include: {
+        employees: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Check if the user is not part of any organizations
+    if (organizations.length === 0) {
+      return res.status(200).json({message: "You're not a part of any organization"}); 
+    }
+    res.status(200).json(organizations);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -56,10 +106,30 @@ const getOrganizationById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   try {
-    const organization = await Organization.findById(id);
+    const organization = await prisma.organization.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        employees: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
     if (!organization) {
-      res.status(404).json(`Organization ${id} not found`);
+      return res.status(404).json(`Organization ${id} not found`);
     }
+
+    // Check if the user is authorized to access this organization
+    if (
+      organization.createdById !== req.user.id &&
+      !organization.employees.some((employee) => employee.id === req.user.id)
+    ) {
+      return res.status(403).json("Unauthorized to access this organization");
+    }
+
     res.status(200).json(organization);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -71,15 +141,24 @@ const updateOrganization = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   try {
-    const organization = await Organization.findById(id);
+    const organization = await prisma.organization.findUnique({
+      where: { id },
+    });
+
     if (!organization) {
-      res.status(404).json(`Organization ${id} not found`);
+      return res.status(404).json(`Organization ${id} not found`);
     }
-    const updatedOrganization = await Organization.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true }
-    );
+
+    // Check if the user is authorized to update the organization (e.g., user is the owner)
+    if (organization.createdById !== req.user.id) {
+      return res.status(403).json("Unauthorized to update this organization");
+    }
+
+    const updatedOrganization = await prisma.organization.update({
+      where: { id },
+      data: req.body,
+    });
+
     res.status(202).json(updatedOrganization);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -91,10 +170,23 @@ const deleteOrganization = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   try {
-    const organization = await Organization.findByIdAndDelete(id);
+    const organization = await prisma.organization.findUnique({
+      where: { id },
+    });
+
     if (!organization) {
       return res.status(404).json(`Organization ${id} not found`);
     }
+
+    // Check if the user is authorized to delete the organization (e.g., user is the owner)
+    if (organization.createdById !== req.user.id) {
+      return res.status(403).json("Unauthorized to delete this organization");
+    }
+
+    await prisma.organization.delete({
+      where: { id },
+    });
+
     return res.status(204).json(`Organization ${id} deleted`);
   } catch (error) {
     return res.status(500).json({ error: error.message });

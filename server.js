@@ -16,7 +16,11 @@ import {
   subTaskRouter,
   inviteRouter,
 } from "./localImport.js";
-
+import {
+  verifyAdmin,
+  verifyUser,
+  verifyToken,
+} from "./middleware/authenticate.js";
 dotenv.config();
 
 const app = express();
@@ -52,6 +56,6 @@ const PORT = process.env.PORT || process.env.API_PORT;
 console.log("Port: " + PORT);
 
 app.listen(PORT, () => {
-  connectDB();
+  // connectDB();
   console.log(`Server is running on PORT ${PORT}`);
 });

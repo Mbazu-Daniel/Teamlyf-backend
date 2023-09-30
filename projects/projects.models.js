@@ -19,13 +19,6 @@ const projectSchema = mongoose.Schema(
         index: true,
       },
     ],
-    assignees: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Employee",
-        index: true,
-      },
-    ],
     space: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Space",

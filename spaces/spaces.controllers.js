@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Space from "./spaces.models.js";
 
-// TODO: use checkOrganizationExist Middleware on routes
+
 
 // Create a new space
 const createSpace = asyncHandler(async (req, res) => {

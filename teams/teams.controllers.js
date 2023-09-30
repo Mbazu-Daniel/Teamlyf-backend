@@ -3,6 +3,9 @@ import Team from "./teams.models.js";
 import Organization from "../organizations/organizations.models.js";
 import Employee from "../employees/employees.models.js";
 
+
+// TODO: use checkOrganizationExist Middleware on routes
+
 // Create a new team within an organization
 const createTeam = asyncHandler(async (req, res) => {
   try {

@@ -10,90 +10,93 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Model
 model User {
-  id            String         @id @default(uuid())
+  id            String         @id @default(cuid())
   email         String         @unique
   password      String
   organizations Organization[]
+  invites       Invite[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  Employee      Employee?      @relation(fields: [employeeId], references: [id])
+  employeeId    String?
 
   @@map("User")
 }
 
-// Organization Model
 model Organization {
-  id          String     @id @default(uuid())
+  id          String     @id @default(cuid())
   name        String     @unique
   address     String?
   logo        String?
-  employees   Employee[]
-  // teams       Team[]
-  // spaces      Space[]
-  owner       User       @relation(fields: [createdById], references: [id])
-  createdById String
+  employees   Employee[] // Employees of the organization
+  owner       User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdById String // Add the createdById field
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  Invite      Invite[]
+  invites     Invite[] // Invites related to the organization
+  Team        Team[]
 
   @@map("Organization")
 }
 
-// Invite Model
-model Invite {
-  id             String        @id @default(uuid())
-  token          String
-  email          String
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?
-  expirationDate DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  @@map("Invite")
-}
-
-// Employee Model
 model Employee {
-  id             String       @id @default(uuid())
+  id             String       @id @default(cuid())
   fullName       String?
   displayName    String?
-  email          String       @unique
+  email          String
   birthDate      DateTime?
   gender         String?
   contactNumber  String?
   address        String?
   image          String?
   salary         Float?
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  organizationId String       
-  // teams          Team[]
-  role           String?      @default("Member")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  role           String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  User           User[]
+  Team           Team?        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId         String?
 
   @@map("Employee")
 }
 
-// // Team Model
-// model Team {
-//   id             String        @id @default(uuid())
-//   name           String
-//   description    String?
-//   createdById    String        @map("createdBy")
-//   employees      Employee[]
-//   organization   Organization? @relation(fields: [organizationId], references: [id])
-//   organizationId String?       @map("organization")
-//   createdAt      DateTime      @default(now())
-//   updatedAt      DateTime      @updatedAt
+model Invite {
+  id             String        @id @default(cuid())
+  token          String
+  email          String
+  role           String
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  expirationDate DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  User           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String?
 
-//   @@map("Team")
-// }
+  @@map("Invite")
+}
+
+// Team Model
+model Team {
+  id             String        @id @default(cuid())
+  name           String
+  description    String?
+  createdById    String
+  employees      Employee[]
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("Team")
+}
 
 // Space Model
 // model Space {
-//   id           String     @id @default(uuid())
+//   id           String     @id @default(cuid())
 //   title        String
 //   projects     Project[]
 //   tasks        Task[]
@@ -108,7 +111,7 @@ model Employee {
 
 // Project Model
 // model Project {
-//   id          String     @id @default(uuid())
+//   id          String     @id @default(cuid())
 //   title       String
 //   description String?
 //   tasks       Task[]
@@ -123,7 +126,7 @@ model Employee {
 
 // Task Model
 // model Task {
-//   id          String     @id @default(uuid())
+//   id          String     @id @default(cuid())
 //   title       String
 //   description String?
 //   priority    String     @default("normal")
@@ -146,7 +149,7 @@ model Employee {
 
 // // Comment Model (if not already defined)
 // model Comment {
-//   id        String   @id @default(uuid())
+//   id        String   @id @default(cuid())
 //   content   String
 //   taskId    String   @map("task")
 //   task      Task     @relation(fields: [taskId], references: [id])
