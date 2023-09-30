@@ -5,6 +5,7 @@ const taskSchema = mongoose.Schema(
     title: {
       type: String,
       required: true,
+      lowercase: true,
     },
     description: {
       type: String,
@@ -30,9 +31,17 @@ const taskSchema = mongoose.Schema(
     },
     tags: {
       type: [String],
+      lowercase: true,
       index: true,
     },
 
+    projects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Project",
+        index: true,
+      },
+    ],
     assignees: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -40,9 +49,17 @@ const taskSchema = mongoose.Schema(
         index: true,
       },
     ],
+
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+        required: false,
+      },
+    ],
     isCompleted: { type: Boolean, default: false, index: true },
+    startDate: { type: Date, index: true },
     dueDate: { type: Date, index: true },
-    reminderDate: { type: Date, index: true },
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

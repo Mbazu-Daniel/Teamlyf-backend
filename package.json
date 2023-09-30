@@ -5,10 +5,11 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "npx supervisor server.js",
     "watch": "node --watch server.js"
   },
   "dependencies": {
+    "@prisma/client": "^5.3.1",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
@@ -24,5 +25,8 @@
     "nodemon": "^3.0.1",
     "resend": "^1.0.0",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.3.1"
   }
 }

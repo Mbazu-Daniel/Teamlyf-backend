@@ -1,32 +1,31 @@
 import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
-import Invite from "./invites.models.js";
-import Employee from "../employees/employees.models.js";
-import User from "../users/users.models.js";
-import Organization from "../organizations/organizations.models.js";
 import bcrypt from "bcrypt";
 import sendMail from "../services/sendMail.js";
+import { PrismaClient } from "@prisma/client";
 
-// TODO: send invite link with the role you want to give to the user
+const prisma = new PrismaClient();
 
 const url = "http://localhost/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
-  const { email, organizationId } = req.body;
-  // const { organizationId } = req.params;
+  let { email, role } = req.body;
+  const { organizationId } = req.params;
+  email = email.toLowerCase();
 
   try {
     // Check if the organization exists
-    const organization = await Organization.findById(organizationId);
+    const organization = await prisma.organization.findUnique({
+      where: { id: organizationId },
+    });
 
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
     }
 
     // Check if the email already exists in the organization
-    const existingEmployee = await Employee.findOne({
-      email,
-      organization: organizationId,
+    const existingEmployee = await prisma.employee.findFirst({
+      where: { email, organizationId },
     });
 
     if (existingEmployee) {
@@ -35,21 +34,23 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         .json({ error: "Email already exists in the organization" });
     }
 
-    // generate unique token
+    // Generate unique token
     const inviteToken = uuidv4();
 
-    // set expiration date
+    // Set expiration date
     const expireDate = new Date();
     expireDate.setDate(expireDate.getDate() + 7);
 
-    // save the invite link
-    const invite = new Invite({
-      token: inviteToken,
-      email: email,
-      organization: organizationId,
-      expireDate,
+    // Save the invite link with the organization relationship
+    const invite = await prisma.invite.create({
+      data: {
+        token: inviteToken,
+        email,
+        role,
+        organization: { connect: { id: organizationId } },
+        expirationDate: expireDate,
+      },
     });
-    await invite.save();
 
     // Send an email with the invite link
     const mailOptions = {
@@ -64,22 +65,26 @@ const generateInviteLink = asyncHandler(async (req, res) => {
           </div>
         `,
     };
-    // sending the invitation
+
+    // Sending the invitation email
     const data = await sendMail(mailOptions);
 
     res.status(201).json({ inviteToken, data });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 const joinOrganization = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
   const { fullName, email, password } = req.body;
+  const lowercasedEmail = email.toLowerCase();
 
   try {
-    // Find the invite link in the database
-    const invite = await Invite.findOne({ token: inviteToken });
+    // Find the invite link in the database using Prisma
+    const invite = await prisma.invite.findFirst({
+      where: { token: inviteToken },
+    });
 
     if (!invite || invite.expirationDate < new Date()) {
       return res
@@ -88,15 +93,19 @@ const joinOrganization = asyncHandler(async (req, res) => {
     }
 
     // Check if the provided email matches the one associated with the invite link
-    if (email !== invite.email) {
+    if (lowercasedEmail !== invite.email) {
       return res.status(400).json({ error: "Invalid email address" });
     }
 
     // Check if the user already exists with this email
-    let user = await User.findOne({ email });
+    let existingUser = await prisma.user.findUnique({
+      where: { email: lowercasedEmail },
+    });
 
     // Check if the organization exists
-    const organization = await Organization.findById(invite.organization);
+    const organization = await prisma.organization.findUnique({
+      where: { id: invite.organizationId },
+    });
 
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
@@ -106,45 +115,53 @@ const joinOrganization = asyncHandler(async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // If the user doesn't exist, create a new user
-    if (!user) {
-      user = new User({
-        email,
-        password: hashedPassword,
-        organizations: [invite.organization],
+    if (!existingUser) {
+      existingUser = await prisma.user.create({
+        data: {
+          email: lowercasedEmail,
+          password: hashedPassword,
+          organizations: { connect: { id: invite.organizationId } },
+        },
       });
-
-      // Save the new user record to the database
-      await user.save();
     } else {
       // If the user already exists, add the organization to their organizations array
-      user.organizations.push(invite.organization);
-      await user.save();
+      existingUser = await prisma.user.update({
+        where: { email: lowercasedEmail },
+        data: {
+          organizations: {
+            connect: { id: invite.organizationId },
+          },
+        },
+      });
     }
 
     // Create a new employee record
-    const newEmployee = new Employee({
-      fullName,
-      email,
-      organization: organization._id,
-      role: "Member",
+    const newEmployee = await prisma.employee.create({
+      data: {
+        fullName,
+        email: lowercasedEmail,
+        organization: { connect: { id: organization.id } },
+        role: invite.role,
+      },
     });
 
-    // Save the new employee record to the database
-    await newEmployee.save();
-
     // Add the new employee to the organization's employee array
-    organization.employees.push(newEmployee._id);
-    await organization.save();
+    await prisma.organization.update({
+      where: { id: organization.id },
+      data: {
+        employees: { connect: { id: newEmployee.id } },
+      },
+    });
 
     // Delete the invite link as it has been used
-    await invite.deleteOne();
+    await prisma.invite.deleteMany({
+      where: { token: inviteToken },
+    });
 
     res.status(200).json({ user: newEmployee });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
-// TODO: run a cronjob that will clean out the invitation database every week
 
 export { generateInviteLink, joinOrganization };

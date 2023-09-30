@@ -4,12 +4,12 @@ import Space from "../spaces/spaces.models.js";
 
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
+  const { title, spaceId } = req.body;
+  const { id: createdBy } = req.user;
   try {
-    const { title, spaceId } = req.body;
-
     // Check if a project with the same name already exists in the space
     const existingProject = await Project.findOne({ title, space: spaceId });
-    console.log("spaceId: " + spaceId);
+
     if (!spaceId) {
       return res.status(400).json({
         error: `Space ${spaceId} does not exists`,
@@ -24,13 +24,13 @@ const createProject = asyncHandler(async (req, res) => {
     const project = await Project.create({
       title,
       space: spaceId,
-      createdBy: req.user.id,
+      createdBy: createdBy,
     });
 
     // Add the project to the space's projects array
-    const space = await Space.findByIdAndUpdate(spaceId, {
-      $addToSet: { projects: project._id },
-    });
+    space.projects.push(project._id);
+    await space.save();
+
     res.status(201).json(project);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -39,8 +39,16 @@ const createProject = asyncHandler(async (req, res) => {
 
 // Get all projects
 const getAllProjects = asyncHandler(async (req, res) => {
+  const { spaceId } = req.params;
   try {
-    const projects = await Project.find();
+    // Find the space
+    const space = await Space.findById(spaceId);
+    if (!space) {
+      return res.status(404).json({ message: `Space ${spaceId} not found` });
+    }
+    // Find all projects in the space
+    const projects = await Project.find({ space: spaceId });
+
     res.status(200).json(projects);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -49,11 +57,13 @@ const getAllProjects = asyncHandler(async (req, res) => {
 
 // Get project by ID
 const getProjectById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { projectId } = req.params;
   try {
-    const project = await Project.findById(id);
+    const project = await Project.findById(projectId);
     if (!project) {
-      return res.status(404).json({ message: `Project  ${id} not found` });
+      return res
+        .status(404)
+        .json({ message: `Project  ${projectId} not found` });
     }
     res.status(200).json(project);
   } catch (error) {
@@ -63,13 +73,16 @@ const getProjectById = asyncHandler(async (req, res) => {
 
 // Update project by ID
 const updateProject = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { projectId, spaceId } = req.params;
+  const { ...updateFields } = req.body;
   try {
-    const project = await Project.findByIdAndUpdate(id, req.body, {
+    const project = await Project.findByIdAndUpdate(projectId, req.body, {
       new: true,
     });
     if (!project) {
-      return res.status(404).json({ message: `Project  ${id} not found` });
+      return res
+        .status(404)
+        .json({ message: `Project  ${projectId} not found` });
     }
     res.status(200).json(project);
   } catch (error) {
@@ -79,12 +92,23 @@ const updateProject = asyncHandler(async (req, res) => {
 
 // Delete project by ID
 const deleteProject = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { projectId } = req.params;
   try {
-    const project = await Project.findOneAndDelete(id);
+    const project = await Project.findOneAndDelete({ _id: projectId });
     if (!project) {
-      return res.status(404).json({ message: `Project  ${id} not found` });
+      return res
+        .status(404)
+        .json({ message: `Project  ${projectId} not found` });
     }
+
+    // Find the associated space
+    const space = await Space.findById(project.space);
+
+    // Use $pull to remove the project from the space's projects array
+    space.projects.pull(id);
+
+    // Save the updated space
+    await space.save();
     res.status(204).json();
   } catch (error) {
     res.status(500).json({ error: error.message });

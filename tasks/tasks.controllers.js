@@ -37,7 +37,7 @@ const getTaskById = asyncHandler(async (req, res) => {
 
 // Update task by ID
 const updateTask = asyncHandler(async (req, res) => {
-  const {id} = req.params
+  const { id } = req.params;
   try {
     const task = await Task.findByIdAndUpdate(id, req.body, {
       new: true,
@@ -55,7 +55,7 @@ const updateTask = asyncHandler(async (req, res) => {
 const deleteTask = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const task = await Task.findByIdAndRemove(id);
+    const task = await Task.findOneAndDelete(id);
     if (!task) {
       return res.status(404).json({ message: `Task  ${id} not found` });
     }
@@ -65,10 +65,4 @@ const deleteTask = asyncHandler(async (req, res) => {
   }
 });
 
-export {
-  createTask,
-  getAllTasks,
-  getTaskById,
-  deleteTask,
-  updateTask,
-};
+export { createTask, getAllTasks, getTaskById, deleteTask, updateTask };

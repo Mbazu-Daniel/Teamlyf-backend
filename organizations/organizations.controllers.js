@@ -1,7 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import asyncHandler from "express-async-handler";
+import Joi from "joi";
 
 const prisma = new PrismaClient();
+
+// Validation schema for creating an organization
+const createOrganizationSchema = Joi.object({
+  name: Joi.string().required(),
+  address: Joi.string().allow(null, ""),
+  logo: Joi.string().allow(null, ""),
+});
 
 // Create a new organizations
 const createOrganization = async (req, res) => {
@@ -12,6 +20,12 @@ const createOrganization = async (req, res) => {
   const lowercaseName = name.toLowerCase();
 
   try {
+    // Validate input data
+    const { error } = createOrganizationSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     // Check if an organization with the same name already exists
     const existingOrganization = await prisma.organization.findFirst({
       where: { name: lowercaseName },
@@ -23,6 +37,8 @@ const createOrganization = async (req, res) => {
         .json({ error: `Organization name ${name} already exists.` });
     }
 
+    console.log("existing organization", existingOrganization);
+
     // Check if a user with the provided email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: req.user.email },
@@ -31,9 +47,9 @@ const createOrganization = async (req, res) => {
     // Create a new organization with the provided data
     const newOrganization = await prisma.organization.create({
       data: {
-        name,
-        address,
-        logo,
+        name: name,
+        address: address || null,
+        logo: logo || null,
         owner: {
           connect: { id: createdById },
         },
@@ -57,17 +73,29 @@ const createOrganization = async (req, res) => {
 
 // Get all organizations
 const getAllOrganizations = asyncHandler(async (req, res) => {
-  const { email } = req.user; 
+  const { email } = req.user;
   try {
-    const organization = await prisma.organization.findMany({
+    const organizations = await prisma.organization.findMany({
       where: {
         OR: [
           { createdById: req.user.id },
           { employees: { some: { email: email } } },
         ],
       },
+      include: {
+        employees: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
-    res.status(200).json(organization);
+
+    // Check if the user is not part of any organizations
+    if (organizations.length === 0) {
+      return res.status(200).json({message: "You're not a part of any organization"}); 
+    }
+    res.status(200).json(organizations);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -80,10 +108,26 @@ const getOrganizationById = asyncHandler(async (req, res) => {
   try {
     const organization = await prisma.organization.findUnique({
       where: { id },
+      select: {
+        id: true,
+        employees: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
 
     if (!organization) {
       return res.status(404).json(`Organization ${id} not found`);
+    }
+
+    // Check if the user is authorized to access this organization
+    if (
+      organization.createdById !== req.user.id &&
+      !organization.employees.some((employee) => employee.id === req.user.id)
+    ) {
+      return res.status(403).json("Unauthorized to access this organization");
     }
 
     res.status(200).json(organization);
@@ -91,7 +135,6 @@ const getOrganizationById = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // Update an Organization by ID
 const updateOrganization = asyncHandler(async (req, res) => {
@@ -149,7 +192,6 @@ const deleteOrganization = asyncHandler(async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 });
-
 
 export {
   createOrganization,

@@ -1,10 +1,13 @@
-import User from "./users.models.js";
+import { PrismaClient } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
+const prisma = new PrismaClient();
 const getSingleUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findById(id);
+    const user = await prisma.user.findUnique({
+      where: { id: id },
+    });
     res.status(200).json(user);
   } catch (err) {
     throw new Error(err);
@@ -13,7 +16,7 @@ const getSingleUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await prisma.user.findMany();
     res.status(200).json(users);
   } catch (err) {
     throw new Error(err);
@@ -23,7 +26,11 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedUser = await prisma.user.delete({
+      where: {
+        id,
+      },
+    });
 
     if (!deletedUser) {
       return res

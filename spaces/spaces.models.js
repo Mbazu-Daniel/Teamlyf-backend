@@ -16,6 +16,13 @@ const spaceSchema = mongoose.Schema(
         index: true,
       },
     ],
+    tasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+        index: true,
+      },
+    ],
     organization: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Organization",
