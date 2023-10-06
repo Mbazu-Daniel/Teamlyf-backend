@@ -10,150 +10,207 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Administration 
+
 model User {
   id            String         @id @default(cuid())
   email         String         @unique
   password      String
   organizations Organization[]
-  invites       Invite[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  Employee      Employee?      @relation(fields: [employeeId], references: [id])
-  employeeId    String?
+  employees     Employee[]
+  teams         Team[]
+  invite        Invite[]
+  createdBy     Task[]         @relation("CreatedBy")
+  collaborators Task[]         @relation("Collaborators")
 
-  @@map("User")
+  taskComments TaskComment[]
+  taskHistory  TaskHistory[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Organization {
-  id          String     @id @default(cuid())
-  name        String     @unique
-  address     String?
-  logo        String?
-  employees   Employee[] // Employees of the organization
-  owner       User       @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdById String // Add the createdById field
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  invites     Invite[] // Invites related to the organization
-  Team        Team[]
+  id         String  @id @default(cuid())
+  name       String  @unique
+  imageUrl   String?
+  address    String?
+  inviteCode String  @unique
 
-  @@map("Organization")
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  employees Employee[]
+  teams     Team[]
+  invite    Invite[]
+  tasks     Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, name])
+}
+
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
 }
 
 model Employee {
-  id             String       @id @default(cuid())
-  fullName       String?
-  displayName    String?
-  email          String
-  birthDate      DateTime?
-  gender         String?
-  contactNumber  String?
-  address        String?
-  image          String?
-  salary         Float?
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId String
-  role           String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  User           User[]
-  Team           Team?        @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  teamId         String?
+  id            String    @id @default(cuid())
+  fullName      String?
+  displayName   String?
+  email         String?
+  birthDate     DateTime?
+  gender        String?
+  contactNumber String?
+  address       String?
+  image         String?
+  salary        Float?
 
-  @@map("Employee")
+  role   EmployeeRole @default(MEMBER)
+  userId String
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, organizationId])
+}
+
+enum TeamType {
+  TEXT
+  AUDIO
+  VIDEO
+}
+
+// Team or Department
+model Team {
+  id     String   @id @default(cuid())
+  name   String   @unique
+  alias  String?
+  type   TeamType @default(TEXT)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, organizationId])
 }
 
 model Invite {
-  id             String        @id @default(cuid())
+  id             String       @id @default(uuid())
   token          String
   email          String
-  role           String
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId String?
-  expirationDate DateTime?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  User           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String?
+  role           EmployeeRole @default(MEMBER)
+  expirationDate DateTime
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("Invite")
 }
 
-// Team Model
-model Team {
-  id             String        @id @default(cuid())
-  name           String
-  description    String?
-  createdById    String
-  employees      Employee[]
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  @@map("Team")
+// Project Management 
+model TaskPriority {
+  id        String   @id @default(cuid())
+  name      String
+  tasks     Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// Space Model
-// model Space {
-//   id           String     @id @default(cuid())
-//   title        String
-//   projects     Project[]
-//   tasks        Task[]
-//   organization Organization @relation(fields: [organizationId], references: [id])
-//   organizationId String    @map("organization")
-//   createdBy     Employee   @relation(fields: [createdById], references: [id])
-//   createdById   String     @map("createdBy")
-//   createdAt     DateTime   @default(now())
-//   updatedAt     DateTime   @updatedAt
-//   @@map("Space")
-// }
+model TaskStatus {
+  id        String   @id @default(cuid())
+  name      String
+  tasks     Task[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-// Project Model
-// model Project {
-//   id          String     @id @default(cuid())
-//   title       String
-//   description String?
-//   tasks       Task[]
-//   space       Space      @relation(fields: [spaceId], references: [id])
-//   spaceId     String     @map("space")
-//   createdBy   Employee   @relation(fields: [createdById], references: [id])
-//   createdById String     @map("createdBy")
-//   createdAt   DateTime   @default(now())
-//   updatedAt   DateTime   @updatedAt
-//   @@map("Project")
-// }
+model Task {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  labels        String[]
+  isCompleted   Boolean  @default(false)
+  notifications Boolean  @default(true)
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  reminderDate  DateTime
 
-// Task Model
-// model Task {
-//   id          String     @id @default(cuid())
-//   title       String
-//   description String?
-//   priority    String     @default("normal")
-//   status      String     @default("pending")
-//   tags        String[]
-//   projects    Project[]  @relation(fields: [projectId], references: [id])
-//   projectId   String     @map("projects")
-//   assignees   Employee[] @relation(fields: [assigneeId], references: [id])
-//   assigneeId  String     @map("assignees")
-//   comments    Comment[]
-//   isCompleted Boolean    @default(false)
-//   startDate   DateTime?
-//   dueDate     DateTime?
-//   createdBy   Employee   @relation(fields: [createdById], references: [id])
-//   createdById String     @map("createdBy")
-//   createdAt   DateTime   @default(now())
-//   updatedAt   DateTime   @updatedAt
-//   @@map("Task")
-// }
+  taskComments TaskComment[]
+  taskHistory  TaskHistory[]
 
-// // Comment Model (if not already defined)
-// model Comment {
-//   id        String   @id @default(cuid())
-//   content   String
-//   taskId    String   @map("task")
-//   task      Task     @relation(fields: [taskId], references: [id])
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   @@map("Comment")
-// }
+  userId String
+  user   User   @relation("CreatedBy", fields: [userId], references: [id])
+
+  collaboratorsId String?
+  collaborators   User?   @relation("Collaborators", fields: [collaboratorsId], references: [id])
+
+  organizationId String?
+  Organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  taskPriorityId String?
+  TaskPriority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+
+  taskStatusId String?
+  TaskStatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TaskComment {
+  id   String @id @default(cuid())
+  text String
+
+  userId String
+  User   User   @relation(fields: [userId], references: [id])
+
+  taskId String
+  Task   Task   @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum TaskAction {
+  ADDED_TASKS
+  UPDATED_TASKS
+  DELETED_TASKS
+  COMPLETED_TASKS
+  UNCOMPLETED_TASKS
+  ADDED_COMMENTS
+  UPDATED_COMMENTS
+  DELETED_COMMENTS
+  COLLABORATOR_ADDED
+  COLLABORATOR_DELETED
+}
+
+model TaskHistory {
+  id     String     @id @default(cuid())
+  action TaskAction
+  taskId String?
+  Task   Task?      @relation(fields: [taskId], references: [id])
+
+  userId String?
+  User   User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
