@@ -4,8 +4,6 @@ import {
   getEmployeeById,
   updateEmployee,
   deleteEmployee,
-  addEmployeeToTeam,
-  removeEmployeeFromTeam,
   getTeamsByEmployee,
   changeEmployeeRole,
   searchEmployees,
@@ -29,14 +27,6 @@ employeeRouter.get("/:organizationId/employees/:employeeId", getEmployeeById);
 employeeRouter.patch("/:organizationId/employees/:employeeId", updateEmployee);
 employeeRouter.delete("/:organizationId/employees/:employeeId", deleteEmployee);
 
-employeeRouter.post(
-  "/:organizationId/teams/:teamId/add-employee",
-  addEmployeeToTeam
-);
-employeeRouter.post(
-  "/:organizationId/teams/:teamId/remove-employee",
-  removeEmployeeFromTeam
-);
 employeeRouter.get(
   "/:organizationId/employees/:employeeId/teams",
   getTeamsByEmployee
