@@ -42,7 +42,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
     expireDate.setDate(expireDate.getDate() + 7);
 
     // Save the invite link with the organization relationship
-    const invite = await prisma.invite.create({
+    await prisma.Invite.create({
       data: {
         token: inviteToken,
         email,
@@ -71,6 +71,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
     res.status(201).json({ inviteToken, data });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
