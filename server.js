@@ -16,11 +16,6 @@ import {
   subTaskRouter,
   inviteRouter,
 } from "./localImport.js";
-import {
-  verifyAdmin,
-  verifyUser,
-  verifyToken,
-} from "./middleware/authenticate.js";
 dotenv.config();
 
 const app = express();
