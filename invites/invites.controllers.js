@@ -10,13 +10,13 @@ const url = "http://localhost/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
-  const { organizationId } = req.params;
+  const { orgId } = req.params;
   email = email.toLowerCase();
 
   try {
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: orgId },
     });
 
     if (!organization) {
@@ -25,7 +25,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
     // Check if the email already exists in the organization
     const existingEmployee = await prisma.employee.findFirst({
-      where: { email, organizationId },
+      where: { email, orgId },
     });
 
     if (existingEmployee) {
@@ -47,7 +47,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         token: inviteToken,
         email,
         role,
-        organization: { connect: { id: organizationId } },
+        organization: { connect: { id: orgId } },
         expirationDate: expireDate,
       },
     });
@@ -105,7 +105,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
 
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { id: invite.organizationId },
+      where: { id: invite.orgId },
     });
 
     if (!organization) {
@@ -121,7 +121,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
         data: {
           email: lowercasedEmail,
           password: hashedPassword,
-          organizations: { connect: { id: invite.organizationId } },
+          organizations: { connect: { id: invite.orgId } },
         },
       });
     } else {
@@ -130,7 +130,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
         where: { email: lowercasedEmail },
         data: {
           organizations: {
-            connect: { id: invite.organizationId },
+            connect: { id: invite.orgId },
           },
         },
       });

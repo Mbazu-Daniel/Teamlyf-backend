@@ -3,17 +3,15 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const checkOrganizationExists = async (req, res, next) => {
-  const { organizationId } = req.params;
+  const { orgId } = req.params;
 
   try {
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: orgId },
     });
 
     if (!organization) {
-      return res
-        .status(404)
-        .json({ error: `Organization ${organizationId} not found` });
+      return res.status(404).json({ error: `Organization ${orgId} not found` });
     }
 
     // Attach the organization object to the request

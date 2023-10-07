@@ -17,10 +17,10 @@ const organizationSchema = new mongoose.Schema(
         ref: "Team",
       },
     ],
-    spaces: [
+    folders: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Space",
+        ref: "folder",
       },
     ],
     createdBy: {
