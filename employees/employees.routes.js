@@ -9,12 +9,16 @@ import {
   searchEmployees,
   getEmployeesCount,
 } from "./employees.controllers.js";
-
+import {
+  verifyAdmin,
+  verifyUser,
+  verifyToken,
+} from "../middleware/authenticate.js";
 const employeeRouter = express.Router({ mergeParams: true });
 
 import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
 
-employeeRouter.use("/:orgId", checkOrganizationExists);
+employeeRouter.use("/:orgId", verifyToken, checkOrganizationExists);
 
 // Routes for managing employees within an organization
 

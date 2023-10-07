@@ -59,6 +59,13 @@ const getAllFolders = asyncHandler(async (req, res) => {
       where: {
         organizationId,
       },
+      include: {
+        projects: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
 
     res.status(200).json(folders);
@@ -76,6 +83,13 @@ const getFolderById = asyncHandler(async (req, res) => {
       where: {
         id,
         organizationId,
+      },
+      include: {
+        projects: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
     if (!folder) {
