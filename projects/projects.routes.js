@@ -12,12 +12,21 @@ import {
   verifyToken,
 } from "../middleware/authenticate.js";
 
-const projectRouter = express.Router();
+import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
 
-projectRouter.post("/", verifyToken, createProject);
-projectRouter.get("/", getAllProjects);
-projectRouter.get("/:projectId", getProjectById);
-projectRouter.patch("/:projectId", updateProject);
-projectRouter.delete("/:projectId", deleteProject);
+// const projectRouter = express.Router();
+const projectRouter = express.Router({ mergeParams: true });
+
+projectRouter.use("/:orgId", checkOrganizationExists);
+
+projectRouter.post(
+  "/:orgId/folders/:folderId/projects",
+  verifyToken,
+  createProject
+);
+projectRouter.get("/:orgId/folders/:folderId/projects", getAllProjects);
+projectRouter.get("/:orgId/folders/:folderId/projects/:id", getProjectById);
+projectRouter.patch("/:orgId/folders/:folderId/projects/:id", updateProject);
+projectRouter.delete("/:orgId/folders/:folderId/projects/:id", deleteProject);
 
 export default projectRouter;

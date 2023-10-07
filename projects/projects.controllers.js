@@ -1,116 +1,148 @@
 import asyncHandler from "express-async-handler";
-import Project from "./projects.models.js";
-import Space from "../spaces/spaces.models.js";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
-  const { title, spaceId } = req.body;
-  const { id: createdBy } = req.user;
+  const { folderId } = req.params;
+  const { id: userId } = req.user;
+  const { name, description } = req.body;
   try {
-    // Check if a project with the same name already exists in the space
-    const existingProject = await Project.findOne({ title, space: spaceId });
-
-    if (!spaceId) {
-      return res.status(400).json({
-        error: `Space ${spaceId} does not exists`,
-      });
+    console.log("folderId", folderId);
+    const existingFolder = await prisma.folder.findFirst({
+      where: {
+        id: folderId,
+      },
+    });
+    if (!existingFolder) {
+      return res.status(404).json({ message: `Folder  ${id} not found` });
     }
-
-    if (existingProject) {
-      return res.status(400).json({
-        error: `${title} already exists`,
-      });
-    }
-    const project = await Project.create({
-      title,
-      space: spaceId,
-      createdBy: createdBy,
+    // check if the nsmr exist in the folder
+    const existingProject = await prisma.project.findFirst({
+      where: { name, folderId },
     });
 
-    // Add the project to the space's projects array
-    space.projects.push(project._id);
-    await space.save();
+    if (existingProject) {
+      return res.status(400).json({ error: `Project ${name} already exists` });
+    }
+    const project = await prisma.project.create({
+      data: {
+        name,
+        description: description || null,
+        userId,
+        folderId,
+      },
+    });
 
     res.status(201).json(project);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 });
 
 // Get all projects
 const getAllProjects = asyncHandler(async (req, res) => {
-  const { spaceId } = req.params;
+  const { folderId } = req.params;
   try {
-    // Find the space
-    const space = await Space.findById(spaceId);
-    if (!space) {
-      return res.status(404).json({ message: `Space ${spaceId} not found` });
+    const existingFolder = await prisma.folder.findFirst({
+      where: {
+        id: folderId,
+      },
+    });
+    if (!existingFolder) {
+      return res.status(404).json({ message: `Folder  ${id} not found` });
     }
-    // Find all projects in the space
-    const projects = await Project.find({ space: spaceId });
+
+    const projects = await prisma.project.findMany({
+      where: {
+        folderId,
+      },
+    });
 
     res.status(200).json(projects);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Get project by ID
 const getProjectById = asyncHandler(async (req, res) => {
-  const { projectId } = req.params;
+  const { id, folderId } = req.params;
   try {
-    const project = await Project.findById(projectId);
+    const project = await prisma.project.findUnique({
+      where: {
+        id,
+        folderId,
+      },
+    });
     if (!project) {
-      return res
-        .status(404)
-        .json({ message: `Project  ${projectId} not found` });
+      return res.status(404).json({ message: `Project  ${id} not found` });
     }
     res.status(200).json(project);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Update project by ID
 const updateProject = asyncHandler(async (req, res) => {
-  const { projectId, spaceId } = req.params;
-  const { ...updateFields } = req.body;
+  const { folderId, id } = req.params;
   try {
-    const project = await Project.findByIdAndUpdate(projectId, req.body, {
-      new: true,
+    const existingProject = await prisma.project.findUnique({
+      where: {
+        id,
+        folderId,
+      },
+    });
+    if (!existingProject) {
+      return res.status(404).json({ message: `Project  ${id} not found` });
+    }
+    const project = await prisma.project.update({
+      where: {
+        id,
+        folderId,
+      },
+      data: req.body,
     });
     if (!project) {
-      return res
-        .status(404)
-        .json({ message: `Project  ${projectId} not found` });
+      return res.status(404).json({ message: `Project  ${id} not found` });
     }
     res.status(200).json(project);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Delete project by ID
 const deleteProject = asyncHandler(async (req, res) => {
-  const { projectId } = req.params;
+  const { id, folderId } = req.params;
   try {
-    const project = await Project.findOneAndDelete({ _id: projectId });
-    if (!project) {
-      return res
-        .status(404)
-        .json({ message: `Project  ${projectId} not found` });
+    const existingProject = await prisma.project.findUnique({
+      where: {
+        id,
+        folderId,
+      },
+    });
+    if (!existingProject) {
+      return res.status(404).json({ message: `Project  ${id} not found` });
     }
 
-    // Find the associated space
-    const space = await Space.findById(project.space);
+    await prisma.project.delete({
+      where: {
+        id,
+        folderId,
+      },
+    });
 
-    // Use $pull to remove the project from the space's projects array
-    space.projects.pull(id);
-
-    // Save the updated space
-    await space.save();
-    res.status(204).json();
+    res.status(204).json(`Project ${id} deleted `);
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({ error: error.message });
   }
 });
