@@ -25,7 +25,7 @@ const createOrganization = asyncHandler(async (req, res) => {
 
     // Check if a user with the provided email already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: req.user.email },
+      where: { email },
     });
 
     // Create a new organization with the provided data
