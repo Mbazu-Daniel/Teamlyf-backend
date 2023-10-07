@@ -20,6 +20,8 @@ model User {
   employees     Employee[]
   teams         Team[]
   invite        Invite[]
+  folders       Folder[]
+  projects      Project[]
   createdBy     Task[]         @relation("CreatedBy")
   collaborators Task[]         @relation("Collaborators")
 
@@ -29,10 +31,11 @@ model User {
   updatedAt    DateTime      @updatedAt
 }
 
+// workspace
 model Organization {
   id         String  @id @default(cuid())
   name       String  @unique
-  imageUrl   String?
+  logo       String?
   address    String?
   inviteCode String  @unique
 
@@ -42,7 +45,7 @@ model Organization {
   employees Employee[]
   teams     Team[]
   invite    Invite[]
-  tasks     Task[]
+  folders   Folder[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +109,10 @@ model Team {
   @@index([userId, organizationId])
 }
 
+// Group / channel
+// model Group {
+
+// }
 model Invite {
   id             String       @id @default(uuid())
   token          String
@@ -126,18 +133,64 @@ model Invite {
 }
 
 // Project Management 
+
+// Todo: Add members to model 
+// Todo: Add Team to this model
+// Todo: change avater to avatar
+
+// subspace
+model Folder {
+  id       String    @id @default(cuid())
+  title    String
+  avatar   String?
+  tasks    Task[]
+  projects Project[]
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  tasks Task[]
+
+  folderId String
+  folders  Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model TaskPriority {
-  id        String   @id @default(cuid())
-  name      String
-  tasks     Task[]
+  id   String @id @default(cuid())
+  name String
+
+  taskId String?
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model TaskStatus {
-  id        String   @id @default(cuid())
-  name      String
-  tasks     Task[]
+  id   String @id @default(cuid())
+  name String
+
+  taskId String?
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -157,19 +210,20 @@ model Task {
   taskHistory  TaskHistory[]
 
   userId String
-  user   User   @relation("CreatedBy", fields: [userId], references: [id])
+  user   User   @relation("CreatedBy", fields: [userId], references: [id], onDelete: Cascade)
 
   collaboratorsId String?
-  collaborators   User?   @relation("Collaborators", fields: [collaboratorsId], references: [id])
+  collaborators   User?   @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
 
-  organizationId String?
-  Organization   Organization? @relation(fields: [organizationId], references: [id])
+  taskPriority TaskPriority[]
 
-  taskPriorityId String?
-  TaskPriority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  taskStatus TaskStatus[]
 
-  taskStatusId String?
-  TaskStatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
+  folderId String?
+  folders  Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  projectId String?
+  Project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -180,10 +234,10 @@ model TaskComment {
   text String
 
   userId String
-  User   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   taskId String
-  Task   Task   @relation(fields: [taskId], references: [id])
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -206,10 +260,10 @@ model TaskHistory {
   id     String     @id @default(cuid())
   action TaskAction
   taskId String?
-  Task   Task?      @relation(fields: [taskId], references: [id])
+  tasks  Task?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   userId String?
-  User   User?   @relation(fields: [userId], references: [id])
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
