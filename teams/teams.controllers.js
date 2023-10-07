@@ -8,13 +8,13 @@ const prisma = new PrismaClient();
 // Create a new team within an organization
 const createTeam = asyncHandler(async (req, res) => {
   try {
-    const { organizationId } = req.params;
+    const { orgId } = req.params;
     const { id: userId } = req.user;
     const { name } = req.body;
 
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: orgId },
     });
 
     if (!organization) {
@@ -23,7 +23,7 @@ const createTeam = asyncHandler(async (req, res) => {
 
     // Check if the team name already exists within the organization
     const existingTeam = await prisma.team.findFirst({
-      where: { name, organizationId },
+      where: { name, orgId },
     });
 
     if (existingTeam) {
@@ -37,7 +37,7 @@ const createTeam = asyncHandler(async (req, res) => {
       data: {
         name,
         user: { connect: { id: userId } },
-        organization: { connect: { id: organizationId } },
+        organization: { connect: { id: orgId } },
       },
     });
 
@@ -50,10 +50,10 @@ const createTeam = asyncHandler(async (req, res) => {
 // Get all teams within an organization
 const getAllTeams = asyncHandler(async (req, res) => {
   try {
-    const { organizationId } = req.params;
+    const { orgId } = req.params;
 
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: orgId },
       include: { employees: true },
     });
 
@@ -62,7 +62,7 @@ const getAllTeams = asyncHandler(async (req, res) => {
     }
 
     const teams = await prisma.team.findMany({
-      where: { organizationId },
+      where: { orgId },
     });
 
     res.status(200).json(teams);
@@ -73,11 +73,11 @@ const getAllTeams = asyncHandler(async (req, res) => {
 
 // Get a team by ID within an organization
 const getTeamById = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
 
   try {
     const team = await prisma.team.findFirst({
-      where: { id: teamId, organizationId },
+      where: { id: teamId, orgId },
     });
 
     if (!team) {
@@ -92,11 +92,11 @@ const getTeamById = asyncHandler(async (req, res) => {
 
 // Delete a team by ID within an organization
 const deleteTeam = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
 
   try {
     const team = await prisma.team.findFirst({
-      where: { id: teamId, organizationId },
+      where: { id: teamId, orgId },
     });
 
     if (!team) {
@@ -115,11 +115,11 @@ const deleteTeam = asyncHandler(async (req, res) => {
 
 // Update a team by ID within an organization
 const updateTeam = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
 
   try {
     const team = await prisma.team.findFirst({
-      where: { id: teamId, organizationId },
+      where: { id: teamId, orgId },
     });
 
     if (!team) {
@@ -139,7 +139,7 @@ const updateTeam = asyncHandler(async (req, res) => {
 
 // Add an employee to a team
 const addEmployeeToTeam = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
   const { email } = req.body;
 
   try {
@@ -161,7 +161,7 @@ const addEmployeeToTeam = asyncHandler(async (req, res) => {
     const employee = await prisma.employee.findFirst({
       where: {
         email,
-        organizationId,
+        orgId,
       },
     });
 
@@ -198,14 +198,14 @@ const addEmployeeToTeam = asyncHandler(async (req, res) => {
 
 // Remove an employee from a team
 const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
   const { email } = req.body;
 
   try {
     // Find the team based on its ID and organization
     const team = await Team.findOne({
       _id: teamId,
-      organization: organizationId,
+      organization: orgId,
     });
 
     if (!team) {
@@ -217,7 +217,7 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
     // Find the employee based on their email address and organization
     const employee = await Employee.findOne({
       email,
-      organization: organizationId,
+      organization: orgId,
     });
 
     if (!employee) {
@@ -249,11 +249,11 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
 
 // Get a list of employees in a team
 const getTeamEmployees = asyncHandler(async (req, res) => {
-  const { organizationId, teamId } = req.params;
+  const { orgId, teamId } = req.params;
 
   try {
     const team = await prisma.team.findFirst({
-      where: { id: teamId, organizationId },
+      where: { id: teamId, orgId },
     });
 
     if (!team) {

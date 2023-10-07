@@ -14,25 +14,22 @@ const employeeRouter = express.Router({ mergeParams: true });
 
 import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
 
-employeeRouter.use("/:organizationId", checkOrganizationExists);
+employeeRouter.use("/:orgId", checkOrganizationExists);
 
 // Routes for managing employees within an organization
 
-employeeRouter.get("/:organizationId/employees/search", searchEmployees);
+employeeRouter.get("/:orgId/employees/search", searchEmployees);
 
-employeeRouter.get("/:organizationId/employees/count", getEmployeesCount);
+employeeRouter.get("/:orgId/employees/count", getEmployeesCount);
 
-employeeRouter.get("/:organizationId/employees", getAllEmployees);
-employeeRouter.get("/:organizationId/employees/:employeeId", getEmployeeById);
-employeeRouter.patch("/:organizationId/employees/:employeeId", updateEmployee);
-employeeRouter.delete("/:organizationId/employees/:employeeId", deleteEmployee);
+employeeRouter.get("/:orgId/employees", getAllEmployees);
+employeeRouter.get("/:orgId/employees/:employeeId", getEmployeeById);
+employeeRouter.patch("/:orgId/employees/:employeeId", updateEmployee);
+employeeRouter.delete("/:orgId/employees/:employeeId", deleteEmployee);
 
-employeeRouter.get(
-  "/:organizationId/employees/:employeeId/teams",
-  getTeamsByEmployee
-);
+employeeRouter.get("/:orgId/employees/:employeeId/teams", getTeamsByEmployee);
 employeeRouter.patch(
-  "/:organizationId/employees/:employeeId/change-role",
+  "/:orgId/employees/:employeeId/change-role",
   changeEmployeeRole
 );
 

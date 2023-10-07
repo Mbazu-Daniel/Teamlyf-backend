@@ -4,26 +4,23 @@ import ShortUniqueId from "short-unique-id";
 
 const prisma = new PrismaClient();
 
-const { randomUUID } = new ShortUniqueId({ length: 6 });
+const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 // Create a new organization
 const createOrganization = asyncHandler(async (req, res) => {
-  const { name } = req.body;
+  const { name, logo, address } = req.body;
   const { id: userId, email } = req.user;
-
-  // Convert the organization name to lowercase
-  const lowercaseName = name.toLowerCase();
 
   try {
     // Check if an organization with the same name already exists
     const existingOrganization = await prisma.organization.findFirst({
-      where: { name: lowercaseName },
+      where: { name },
     });
 
     if (existingOrganization) {
       return res
         .status(400)
-        .json({ error: `Organization name ${lowercaseName} already exists.` });
+        .json({ error: `Organization name ${name} already exists.` });
     }
 
     // Check if a user with the provided email already exists
@@ -34,8 +31,9 @@ const createOrganization = asyncHandler(async (req, res) => {
     // Create a new organization with the provided data
     const newOrganization = await prisma.organization.create({
       data: {
-        name: lowercaseName,
-        imageUrl: "img-1",
+        name: name,
+        logo: logo || null,
+        address: address || null,
         inviteCode: randomUUID(),
         userId,
       },
@@ -47,7 +45,7 @@ const createOrganization = asyncHandler(async (req, res) => {
         email: email,
         role: EmployeeRole.OWNER,
         userId,
-        organizationId: newOrganization.id,
+        orgId: newOrganization.id,
       },
     });
 
@@ -139,6 +137,7 @@ const updateOrganization = asyncHandler(async (req, res) => {
   }
 });
 
+// TODO: handle delete error correctly
 // Delete an organization by ID
 const deleteOrganization = asyncHandler(async (req, res) => {
   const { id } = req.params;
