@@ -10,14 +10,6 @@ const createFolder = asyncHandler(async (req, res) => {
   const { title, avatar } = req.body;
   try {
     console.log("organizationId", organizationId);
-    const existingOrganization = await prisma.organization.findFirst({
-      where: {
-        id: organizationId,
-      },
-    });
-    if (!existingOrganization) {
-      return res.status(404).json({ message: `Organization  ${id} not found` });
-    }
     // check if the title exist in the organization
     const existingFolder = await prisma.folder.findFirst({
       where: { title, organizationId },
@@ -46,14 +38,6 @@ const createFolder = asyncHandler(async (req, res) => {
 const getAllFolders = asyncHandler(async (req, res) => {
   const { organizationId } = req.params;
   try {
-    const existingOrganization = await prisma.organization.findFirst({
-      where: {
-        id: organizationId,
-      },
-    });
-    if (!existingOrganization) {
-      return res.status(404).json({ message: `Organization  ${id} not found` });
-    }
 
     const folders = await prisma.folder.findMany({
       where: {

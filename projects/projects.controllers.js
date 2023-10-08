@@ -18,7 +18,7 @@ const createProject = asyncHandler(async (req, res) => {
     if (!existingFolder) {
       return res.status(404).json({ message: `Folder  ${id} not found` });
     }
-    // check if the nsmr exist in the folder
+    // check if the name exist in the folder
     const existingProject = await prisma.project.findFirst({
       where: { name, folderId },
     });
