@@ -11,6 +11,8 @@ const url = "http://localhost/api/v1";
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
   const { orgId } = req.params;
+  const { id: userId } = req.user;
+
   email = email.toLowerCase();
 
   try {
@@ -25,7 +27,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
     // Check if the email already exists in the organization
     const existingEmployee = await prisma.employee.findFirst({
-      where: { email, orgId },
+      where: { email, organizationId: orgId },
     });
 
     if (existingEmployee) {
@@ -47,6 +49,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         token: inviteToken,
         email,
         role,
+        user: { connect: { id: userId } },
         organization: { connect: { id: orgId } },
         expirationDate: expireDate,
       },
@@ -102,12 +105,12 @@ const joinOrganization = asyncHandler(async (req, res) => {
     let existingUser = await prisma.user.findUnique({
       where: { email: lowercasedEmail },
     });
-
+    console.log("invite", invite.organizationId);
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { id: invite.orgId },
+      where: { id: invite.organizationId },
     });
-
+    console.log("hello world ", organization);
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
     }
@@ -121,7 +124,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
         data: {
           email: lowercasedEmail,
           password: hashedPassword,
-          organizations: { connect: { id: invite.orgId } },
+          organizations: { connect: { id: invite.organizationId } },
         },
       });
     } else {
@@ -130,7 +133,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
         where: { email: lowercasedEmail },
         data: {
           organizations: {
-            connect: { id: invite.orgId },
+            connect: { id: invite.organizationId },
           },
         },
       });
@@ -143,6 +146,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
         email: lowercasedEmail,
         organization: { connect: { id: organization.id } },
         role: invite.role,
+        user: { connect: { id: existingUser.id } },
       },
     });
 
@@ -161,6 +165,7 @@ const joinOrganization = asyncHandler(async (req, res) => {
 
     res.status(200).json({ user: newEmployee });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });

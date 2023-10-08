@@ -42,7 +42,7 @@ app.use(`${basePath}/orgs`, teamsRouter);
 
 // Task Management
 app.use(`${basePath}/orgs`, folderRouter);
-app.use(`${basePath}/projects`, projectRouter);
+app.use(`${basePath}/orgs`, projectRouter);
 app.use(`${basePath}/tasks`, taskRouter);
 app.use(`${basePath}/subtasks`, subTaskRouter);
 

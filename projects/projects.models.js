@@ -19,9 +19,9 @@ const projectSchema = mongoose.Schema(
         index: true,
       },
     ],
-    space: {
+    folder: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Space",
+      ref: "folder",
       required: true,
       index: true,
     },
