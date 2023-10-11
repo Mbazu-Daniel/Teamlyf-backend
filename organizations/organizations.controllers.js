@@ -44,13 +44,14 @@ const createOrganization = asyncHandler(async (req, res) => {
       data: {
         email: email,
         role: EmployeeRole.OWNER,
-        userId,
-        orgId: newOrganization.id,
+        user: { connect: { id: userId } },
+        organization: { connect: { id: newOrganization.id } },
       },
     });
 
     res.status(201).json(newOrganization);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
