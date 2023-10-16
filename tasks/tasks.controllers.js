@@ -1,12 +1,61 @@
+import { Priority, PrismaClient, Status, TaskAction } from "@prisma/client";
 import asyncHandler from "express-async-handler";
-import Task from "./tasks.models.js";
+const prisma = new PrismaClient();
+
+// TODO: develop CRUD tasks endpoints for inside a folder
+// TODO: develop CRUD tasks endpoints for inside a folder/projects
+// you can use if statement for the above statement
+
+// TODO: develop CRUD for tasks status and tasks priority
 
 // Create a new task
 const createTask = asyncHandler(async (req, res) => {
+  const { id: userId } = req.user;
+  const { folderId, orgId } = req.params;
+  console.log("org", orgId);
+  console.log("folder", folderId);
+  const {
+    title,
+    description,
+    labels,
+    startDate,
+    endDate,
+    reminderDate,
+    projectId,
+  } = req.body;
   try {
-    const task = await Task.create(req.body);
-    res.status(201).json(task);
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+    const newTask = await prisma.task.create({
+      data: {
+        title,
+        description: description || null,
+        labels: labels || null,
+        startDate: startDate || new Date(),
+        endDate: endDate || new Date(),
+        reminderDate: reminderDate || new Date(),
+        user: { connect: { id: userId } },
+        collaborators: null || { connect: collaborators.map((id) => ({ id })) },
+        priority: Priority.NORMAL,
+        status: Status.TODO,
+        folders: { connect: { id: folderId } },
+        project: { connect: { id: projectId } },
+      },
+    });
+
+    // Log task addition in history using Prisma
+    await prisma.taskHistory.create({
+      data: {
+        tasks: { connect: { id: newTask.id } },
+        user: { connect: { id: userId } },
+        action: TaskAction.ADDED_TASKS,
+      },
+    });
+
+    res.status(201).json(newTask);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 });
@@ -14,9 +63,10 @@ const createTask = asyncHandler(async (req, res) => {
 // Get all tasks
 const getAllTasks = asyncHandler(async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const tasks = await prisma.task.findMany({});
     res.status(200).json(tasks);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -65,4 +115,4 @@ const deleteTask = asyncHandler(async (req, res) => {
   }
 });
 
-export { createTask, getAllTasks, getTaskById, deleteTask, updateTask };
+export { createTask, deleteTask, getAllTasks, getTaskById, updateTask };

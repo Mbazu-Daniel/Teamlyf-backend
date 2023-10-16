@@ -141,9 +141,9 @@ model Invite {
 
 // subspace
 model Folder {
-  id       String    @id @default(cuid())
-  title    String
-  avatar   String?
+  id     String  @id @default(cuid())
+  title  String
+  avatar String?
 
   tasks    Task[]
   projects Project[]
@@ -151,10 +151,8 @@ model Folder {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-
-  userId String
-  creator   User   @relation(fields: [userId], references: [id])
-
+  userId  String
+  creator User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,41 +175,53 @@ model Project {
   updatedAt DateTime @updatedAt
 }
 
-model TaskPriority {
-  id    String  @id @default(cuid())
-  name  String
-  color String?
+// model TaskPriority {
+//   id    String  @id @default(cuid())
+//   name  String
+//   color String?
 
-  tasks Task[]
+//   tasks Task[]
 
-  subtasks SubTask[]
+//   subtasks SubTask[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
 }
 
-model TaskStatus {
-  id    String  @id @default(cuid())
-  name  String
-  color String?
-
-  tasks Task[]
-
-  subtasks SubTask[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum Status {
+  TODO
+  IN_PROGRESS
+  COMPLETED
 }
+
+// model TaskStatus {
+//   id    String  @id @default(cuid())
+//   name  String
+//   color String?
+
+//   tasks Task[]
+
+//   subtasks SubTask[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
 
 model Task {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   title         String
   description   String?
   labels        String[]
-  isCompleted   Boolean  @default(false)
-  notifications Boolean  @default(true)
-  startDate     DateTime @default(now())
-  endDate       DateTime
+  isCompleted   Boolean   @default(false) // move to project side
+  notifications Boolean   @default(true)
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
   reminderDate  DateTime?
 
   subtasks     SubTask[]
@@ -228,12 +238,10 @@ model Task {
   folders  Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   projectId String?
-  Project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  priority       TaskPriority? @relation(fields: [taskPriorityId], references: [id])
-  taskPriorityId String?
-  status         TaskStatus?   @relation(fields: [taskStatusId], references: [id])
-  taskStatusId   String?
+  status   Status   @default(TODO)
+  priority Priority @default(NORMAL)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -249,18 +257,14 @@ model SubTask {
   userId    String?
   assignees User?   @relation(fields: [userId], references: [id])
 
-  taskStatusId String?
-  taskstatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
-
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
 
-  taskPriorityId String?
-  priority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  status   Status   @default(TODO)
+  priority Priority @default(NORMAL)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
 
 model TaskComment {
@@ -295,7 +299,7 @@ model TaskHistory {
   action TaskAction
 
   taskId String?
-  tasks  Task?      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -303,3 +307,6 @@ model TaskHistory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+

@@ -1,8 +1,8 @@
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
 import sendMail from "../services/sendMail.js";
-import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -10,15 +10,14 @@ const url = "http://localhost/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
-  const { orgId } = req.params;
+  const { orgId: organizationId } = req.params;
   const { id: userId } = req.user;
-
   email = email.toLowerCase();
 
   try {
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
-      where: { id: orgId },
+      where: { id: organizationId },
     });
 
     if (!organization) {
@@ -27,7 +26,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
     // Check if the email already exists in the organization
     const existingEmployee = await prisma.employee.findFirst({
-      where: { email, organizationId: orgId },
+      where: { email, organizationId },
     });
 
     if (existingEmployee) {
@@ -49,9 +48,9 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         token: inviteToken,
         email,
         role,
-        user: { connect: { id: userId } },
-        organization: { connect: { id: orgId } },
         expirationDate: expireDate,
+        organization: { connect: { id: organizationId } },
+        user: { connect: { id: userId } },
       },
     });
 
@@ -105,12 +104,12 @@ const joinOrganization = asyncHandler(async (req, res) => {
     let existingUser = await prisma.user.findUnique({
       where: { email: lowercasedEmail },
     });
-    console.log("invite", invite.organizationId);
+
     // Check if the organization exists
     const organization = await prisma.organization.findUnique({
       where: { id: invite.organizationId },
     });
-    console.log("hello world ", organization);
+
     if (!organization) {
       return res.status(404).json({ error: "Organization not found" });
     }
