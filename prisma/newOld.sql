@@ -5,9 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// TODO: change from user to a better name
-// TODO: add permission level on the project side
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -50,7 +47,6 @@ model Organization {
   teams     Team[]
   invite    Invite[]
   folders   Folder[]
-  tasks     Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,7 +107,7 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, organizationId, name])
+  @@index([userId, organizationId])
 }
 
 // Group / channel
@@ -179,17 +175,42 @@ model Project {
   updatedAt DateTime @updatedAt
 }
 
-enum Priority {
+// model TaskPriority {
+//   id    String  @id @default(cuid())
+//   name  String
+//   color String?
+
+//   tasks Task[]
+
+//   subtasks SubTask[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+enum TaskPriority {
   LOW
   NORMAL
   HIGH
 }
 
-enum Status {
+enum TaskStatus {
   TODO
-  IN_PROGRESS
+  INPROGRESS
   COMPLETED
 }
+
+// model TaskStatus {
+//   id    String  @id @default(cuid())
+//   name  String
+//   color String?
+
+//   tasks Task[]
+
+//   subtasks SubTask[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
 
 model Task {
   id            String    @id @default(cuid())
@@ -199,7 +220,7 @@ model Task {
   isCompleted   Boolean   @default(false) // move to project side
   notifications Boolean   @default(true)
   startDate     DateTime  @default(now())
-  endDate       DateTime?
+  endDate       DateTime
   reminderDate  DateTime?
 
   subtasks     SubTask[]
@@ -216,13 +237,16 @@ model Task {
   folders  Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  Project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  status   Status   @default(TODO)
-  priority Priority @default(NORMAL)
+  // taskPriorityId String?
+  // priority       TaskPriority? @relation(fields: [taskPriorityId], references: [id])
 
-  organizationId String
-  organization  Organization @relation(fields: [organizationId], references: [id])
+  // status         TaskStatus?   @relation(fields: [taskStatusId], references: [id])
+  // taskStatusId   String?
+
+  status   TaskStatus
+  priority TaskPriority
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -238,11 +262,18 @@ model SubTask {
   userId    String?
   assignees User?   @relation(fields: [userId], references: [id])
 
+
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
 
-  status   Status   @default(TODO)
-  priority Priority @default(NORMAL)
+  status   TaskStatus
+  priority TaskPriority
+
+  // taskStatusId String?
+  // taskstatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
+
+  // taskPriorityId String?
+  // priority       TaskPriority? @relation(fields: [taskPriorityId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
