@@ -1,5 +1,5 @@
-import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
+import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 
@@ -9,7 +9,6 @@ const createProject = asyncHandler(async (req, res) => {
   const { id: userId } = req.user;
   const { name, description } = req.body;
   try {
-    console.log("folderId", folderId);
     const existingFolder = await prisma.folder.findFirst({
       where: {
         id: folderId,
@@ -46,13 +45,14 @@ const createProject = asyncHandler(async (req, res) => {
 const getAllProjects = asyncHandler(async (req, res) => {
   const { folderId } = req.params;
   try {
+    console.log(folderId);
     const existingFolder = await prisma.folder.findFirst({
       where: {
         id: folderId,
       },
     });
     if (!existingFolder) {
-      return res.status(404).json({ message: `Folder  ${id} not found` });
+      return res.status(404).json({ message: `Folder  ${folderId} not found` });
     }
 
     const projects = await prisma.project.findMany({
@@ -149,8 +149,8 @@ const deleteProject = asyncHandler(async (req, res) => {
 
 export {
   createProject,
+  deleteProject,
   getAllProjects,
   getProjectById,
-  deleteProject,
   updateProject,
 };

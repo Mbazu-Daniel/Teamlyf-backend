@@ -1,32 +1,39 @@
 import express from "express";
+import { verifyToken } from "../middleware/authenticate.js";
 import {
   createTask,
+  deleteTask,
   getAllTasks,
   getTaskById,
-  deleteTask,
   updateTask,
 } from "./tasks.controllers.js";
 import {
-  verifyAdmin,
-  verifyUser,
-  verifyToken,
-} from "../middleware/authenticate.js";
+  createTaskFolder,
+  deleteTaskFolder,
+  getAllTasksFolder,
+  getTaskByIdFolder,
+  updateTaskFolder,
+} from "./tasksFolder.controllers.js";
 
 import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
 
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
 
-taskRouter.use("/:orgId", checkOrganizationExists);
+taskRouter.use("/:orgId", verifyToken, checkOrganizationExists);
 
-taskRouter.post(
-  "/:orgId/folders/:folderId/tasks",
-  verifyToken,
-  createTask
-);
-taskRouter.get("/:orgId/folders/:folderId/tasks", getAllTasks);
-taskRouter.get("/:orgId/folders/:folderId/tasks/:id", getTaskById);
-taskRouter.patch("/:orgId/folders/:folderId/tasks/:id", updateTask);
-taskRouter.delete("/:orgId/folders/:folderId/tasks/:id", deleteTask);
+// Get tasks
+taskRouter.post("/:orgId/tasks", createTask);
+taskRouter.get("/:orgId/tasks", getAllTasks);
+taskRouter.get("/:orgId/tasks/:id", getTaskById);
+taskRouter.patch("/:orgId/tasks/:id", updateTask);
+taskRouter.delete("/:orgId/tasks/:id", deleteTask);
+
+// Get all Folder related tasks
+taskRouter.post("/:orgId/folders/:folderId/tasks", createTaskFolder);
+taskRouter.get("/:orgId/folders/:folderId/tasks", getAllTasksFolder);
+taskRouter.get("/:orgId/folders/:folderId/tasks/:id", getTaskByIdFolder);
+taskRouter.patch("/:orgId/folders/:folderId/tasks/:id", updateTaskFolder);
+taskRouter.delete("/:orgId/folders/:folderId/tasks/:id", deleteTaskFolder);
 
 export default taskRouter;

@@ -2,37 +2,16 @@ import { Priority, PrismaClient, Status, TaskAction } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
-// TODO: develop CRUD tasks endpoints for inside a folder
-// TODO: develop CRUD tasks endpoints for inside a folder/projects
-// you can use if statement for the above statement
-
-// TODO: develop CRUD for tasks status and tasks priority
-
 // Create a new task
-const createTask = asyncHandler(async (req, res) => {
+const createTaskFolder = asyncHandler(async (req, res) => {
   const { id: userId } = req.user;
-  const { orgId: organizationId } = req.params;
-  const {
-    title,
-    description,
-    labels,
-    startDate,
-    endDate,
-    reminderDate,
-    projectId,
-    collaboratorsId,
-  } = req.body;
+  const { orgId: organizationId, folderId } = req.params;
+  const { title, description, labels, startDate, endDate, reminderDate } =
+    req.body;
   try {
     if (!title) {
       return res.status(400).json({ error: "Title is required" });
     }
-
-    const projectConnect = projectId ? { connect: { id: projectId } } : null;
-
-    const collaboratorsConnect = collaboratorsId
-      ? { connect: { id: collaboratorsId } }
-      : null;
-
     const newTask = await prisma.task.create({
       data: {
         ...req.body,
@@ -45,9 +24,8 @@ const createTask = asyncHandler(async (req, res) => {
         user: { connect: { id: userId } },
         priority: Priority.NORMAL,
         status: Status.TODO,
+        folders: { connect: { id: folderId } },
         organization: { connect: { id: organizationId } },
-        // project: projectConnect,
-        // collaborators: collaboratorsConnect,
       },
     });
 
@@ -67,15 +45,24 @@ const createTask = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all tasks in the organization
-const getAllTasks = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+// Get all tasks
+const getAllTasksFolder = asyncHandler(async (req, res) => {
+  const { orgId: organizationId, folderId } = req.params;
   try {
-    const tasks = await prisma.task.findMany({
+    // Check if the folder specified exists
+    const folder = await prisma.folder.findUnique({
       where: {
-        organizationId: organizationId,
+        id: folderId,
+        organizationId,
       },
     });
+
+    if (!folder) {
+      return res.status(404).json({ message: `Folder ${folderId} not found` });
+    }
+    const tasks = await prisma.task.findMany({});
+    res.status(200).json(tasks);
+
     res.status(200).json(tasks);
   } catch (error) {
     console.error(error);
@@ -84,13 +71,24 @@ const getAllTasks = asyncHandler(async (req, res) => {
 });
 
 // Get task by ID
-const getTaskById = asyncHandler(async (req, res) => {
-  const { id, orgId: organizationId } = req.params;
+const getTaskByIdFolder = asyncHandler(async (req, res) => {
+  const { id, orgId: organizationId, folderId } = req.params;
   try {
+    // Check if the folder specified exists
+    const folder = await prisma.folder.findUnique({
+      where: {
+        id: folderId,
+    organizationId,
+      },
+    });
+
+    if (!folder) {
+      return res.status(404).json({ message: `Folder ${folderId} not found` });
+    }
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        folderId,
       },
     });
     if (!task) {
@@ -104,13 +102,24 @@ const getTaskById = asyncHandler(async (req, res) => {
 });
 
 // Update task by ID
-const updateTask = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+const updateTaskFolder = asyncHandler(async (req, res) => {
+  const { id, folderId, orgId: organizationId } = req.params;
   try {
+    // Check if the folder specified exists
+    const folder = await prisma.folder.findUnique({
+      where: {
+        id: folderId,
+        organizationId,
+      },
+    });
+
+    if (!folder) {
+      return res.status(404).json({ message: `Folder ${folderId} not found` });
+    }
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        folderId,
       },
     });
     if (!task) {
@@ -131,13 +140,24 @@ const updateTask = asyncHandler(async (req, res) => {
 });
 
 // Delete task by ID
-const deleteTask = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+const deleteTaskFolder = asyncHandler(async (req, res) => {
+  const { id, folderId, orgId: organizationId } = req.params;
   try {
+    // Check if the folder specified exists
+    const folder = await prisma.folder.findUnique({
+      where: {
+        id: folderId,
+        organizationId,
+      },
+    });
+
+    if (!folder) {
+      return res.status(404).json({ message: `Folder ${folderId} not found` });
+    }
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        folderId,
       },
     });
     if (!task) {
@@ -156,4 +176,10 @@ const deleteTask = asyncHandler(async (req, res) => {
   }
 });
 
-export { createTask, deleteTask, getAllTasks, getTaskById, updateTask };
+export {
+  createTaskFolder,
+  deleteTaskFolder,
+  getAllTasksFolder,
+  getTaskByIdFolder,
+  updateTaskFolder,
+};
