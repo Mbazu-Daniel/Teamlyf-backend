@@ -1,7 +1,7 @@
-import asyncHandler from "express-async-handler";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import asyncHandler from "express-async-handler";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -29,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    // res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({ message: "Registration failed" });
   }
 });
 
@@ -65,7 +65,7 @@ const loginUser = asyncHandler(async (req, res) => {
         httpOnly: true,
       })
       .status(200)
-      .json({ message: `${email} logged in successfully` });
+      .json({ access_token: token });
   } catch (error) {
     console.error({ error: "An error occurred while logging in" });
   }
@@ -77,4 +77,4 @@ const logoutUser = asyncHandler((req, res) => {
     .status(200)
     .json({ message: "Logged out successfully" });
 });
-export { registerUser, loginUser, logoutUser };
+export { loginUser, logoutUser, registerUser };

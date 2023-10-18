@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 
 export const checkOrganizationExists = async (req, res, next) => {
   const { orgId } = req.params;
-
   try {
     const organization = await prisma.organization.findUnique({
       where: { id: orgId },
@@ -18,6 +17,7 @@ export const checkOrganizationExists = async (req, res, next) => {
     req.organization = organization;
     next();
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };

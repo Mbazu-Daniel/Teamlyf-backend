@@ -1,5 +1,5 @@
-import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
+import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 // TODO: use checkTeamExist Middleware on routes
@@ -10,11 +10,12 @@ const getAllEmployees = asyncHandler(async (req, res) => {
   try {
     const employees = await prisma.employee.findMany({
       where: {
-        orgId: orgId,
+        organizationId: orgId,
       },
     });
     res.status(200).json(employees);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -27,13 +28,37 @@ const getEmployeeById = asyncHandler(async (req, res) => {
     const employee = await prisma.employee.findUnique({
       where: {
         id: employeeId,
-        orgId,
+        organizationId: orgId,
       },
     });
 
     if (!employee) {
       return res.status(404).json({
         message: `Employee ${employeeId} not found in the organization`,
+      });
+    }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// Get employee by email
+const getEmployeeByEmail = asyncHandler(async (req, res) => {
+  const { orgId } = req.params;
+  const { email } = req.query; // Use a query parameter for the email
+
+  try {
+    const employee = await prisma.employee.findFirst({
+      where: {
+        organizationId: orgId,
+        email: email, // Email to search for
+      },
+    });
+
+    if (!employee) {
+      return res.status(404).json({
+        message: `Employee with email ${email} not found in the organization`,
       });
     }
 
@@ -51,7 +76,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
     const updatedEmployee = await prisma.employee.update({
       where: {
         id: employeeId,
-        orgId,
+        organizationId: orgId,
       },
       data: req.body,
     });
@@ -70,7 +95,7 @@ const deleteEmployee = asyncHandler(async (req, res) => {
     await prisma.employee.delete({
       where: {
         id: employeeId,
-        orgId,
+        organizationId: orgId,
       },
     });
 
@@ -127,7 +152,7 @@ const changeEmployeeRole = asyncHandler(async (req, res) => {
 
     // Check if the employee exists within the organization
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId, orgId },
+      where: { id: employeeId, organizationId: orgId }, // Specify organizationId
     });
 
     if (!employee) {
@@ -137,7 +162,7 @@ const changeEmployeeRole = asyncHandler(async (req, res) => {
     }
 
     // Validate the new role to be either "Admin" or "Member"
-    if (role !== "Admin" && role !== "Member") {
+    if (role !== "ADMIN" && role !== "MEMBER") {
       return res
         .status(400)
         .json({ error: "Invalid role. Role must be 'Admin' or 'Member'" });
@@ -170,19 +195,21 @@ const searchEmployees = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    // Search for employees based on the query parameter
-    const employees = await prisma.employee.findMany({
+    // Search for an employee by email address within the organization
+    const employee = await prisma.employee.findFirst({
       where: {
-        orgId,
-        OR: [
-          { fullName: { contains: query, mode: "insensitive" } },
-          { email: { contains: query, mode: "insensitive" } },
-        ],
+        organizationId: orgId,
+        email: query, // Email to search for
       },
     });
 
-    res.status(200).json(employees);
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    res.status(200).json(employee);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -203,7 +230,7 @@ const getEmployeesCount = asyncHandler(async (req, res) => {
 
     // Count the number of employees in the organization
     const employeeCount = await prisma.employee.count({
-      where: { orgId },
+      where: { organizationId: orgId },
     });
 
     res.status(200).json({ count: employeeCount });
@@ -213,12 +240,13 @@ const getEmployeesCount = asyncHandler(async (req, res) => {
 });
 
 export {
-  getAllEmployees,
-  getEmployeeById,
-  updateEmployee,
-  deleteEmployee,
-  getTeamsByEmployee,
   changeEmployeeRole,
-  searchEmployees,
+  deleteEmployee,
+  getAllEmployees,
+  getEmployeeByEmail,
+  getEmployeeById,
   getEmployeesCount,
+  getTeamsByEmployee,
+  searchEmployees,
+  updateEmployee,
 };

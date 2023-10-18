@@ -44,13 +44,14 @@ const createOrganization = asyncHandler(async (req, res) => {
       data: {
         email: email,
         role: EmployeeRole.OWNER,
-        userId,
-        orgId: newOrganization.id,
+        user: { connect: { id: userId } },
+        organization: { connect: { id: newOrganization.id } },
       },
     });
 
     res.status(201).json(newOrganization);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -143,6 +144,17 @@ const deleteOrganization = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Check if the organization with the specified ID exists
+    const existingOrganization = await prisma.organization.findUnique({
+      where: { id },
+    });
+
+    if (!existingOrganization) {
+      return res
+        .status(404)
+        .json({ error: `Organization with ID ${id} not found.` });
+    }
+
     await prisma.organization.delete({
       where: { id },
     });
@@ -155,8 +167,8 @@ const deleteOrganization = asyncHandler(async (req, res) => {
 
 export {
   createOrganization,
+  deleteOrganization,
   getAllOrganizations,
   getOrganizationById,
   updateOrganization,
-  deleteOrganization,
 };

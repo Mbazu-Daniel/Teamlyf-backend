@@ -10,8 +10,7 @@ import subTaskRouter from "./subTasks/subTasks.routes.js";
 import inviteRouter from "./invites/invites.routes.js";
 import folderRouter from "./folders/folders.routes.js";
 
-export {
-  
+export { 
   authRouter,
   userRouter,
   organizationsRouter,
