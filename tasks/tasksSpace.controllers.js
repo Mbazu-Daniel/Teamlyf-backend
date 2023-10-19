@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // Create a new task
 const createTaskSpace = asyncHandler(async (req, res) => {
   const { id: userId } = req.user;
-  const { workspaceId: workspaceId, spaceId } = req.params;
+  const { workspaceId, spaceId } = req.params;
   const {
     title,
     description,
