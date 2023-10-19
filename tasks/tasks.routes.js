@@ -1,5 +1,4 @@
 import express from "express";
-import { verifyToken } from "../middleware/authenticate.js";
 import {
   createTask,
   deleteTask,
@@ -15,12 +14,10 @@ import {
   updateTaskSpace,
 } from "./tasksSpace.controllers.js";
 
-import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
-
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
 
-taskRouter.use("/:workspaceId", verifyToken, checkWorkspaceExists);
+// taskRouter.use("/:workspaceId", verifyToken, employeeExist, workspaceExists);
 
 // Get tasks
 taskRouter.post("/:workspaceId/tasks", createTask);
