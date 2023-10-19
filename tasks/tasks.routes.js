@@ -8,32 +8,32 @@ import {
   updateTask,
 } from "./tasks.controllers.js";
 import {
-  createTaskFolder,
-  deleteTaskFolder,
-  getAllTasksFolder,
-  getTaskByIdFolder,
-  updateTaskFolder,
-} from "./tasksFolder.controllers.js";
+  createTaskSpace,
+  deleteTaskSpace,
+  getAllTasksSpace,
+  getTaskByIdSpace,
+  updateTaskSpace,
+} from "./tasksSpace.controllers.js";
 
-import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
 
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
 
-taskRouter.use("/:orgId", verifyToken, checkOrganizationExists);
+taskRouter.use("/:workspaceId", verifyToken, checkWorkspaceExists);
 
 // Get tasks
-taskRouter.post("/:orgId/tasks", createTask);
-taskRouter.get("/:orgId/tasks", getAllTasks);
-taskRouter.get("/:orgId/tasks/:id", getTaskById);
-taskRouter.patch("/:orgId/tasks/:id", updateTask);
-taskRouter.delete("/:orgId/tasks/:id", deleteTask);
+taskRouter.post("/:workspaceId/tasks", createTask);
+taskRouter.get("/:workspaceId/tasks", getAllTasks);
+taskRouter.get("/:workspaceId/tasks/:id", getTaskById);
+taskRouter.patch("/:workspaceId/tasks/:id", updateTask);
+taskRouter.delete("/:workspaceId/tasks/:id", deleteTask);
 
-// Get all Folder related tasks
-taskRouter.post("/:orgId/folders/:folderId/tasks", createTaskFolder);
-taskRouter.get("/:orgId/folders/:folderId/tasks", getAllTasksFolder);
-taskRouter.get("/:orgId/folders/:folderId/tasks/:id", getTaskByIdFolder);
-taskRouter.patch("/:orgId/folders/:folderId/tasks/:id", updateTaskFolder);
-taskRouter.delete("/:orgId/folders/:folderId/tasks/:id", deleteTaskFolder);
+// Get all space related tasks
+taskRouter.post("/:workspaceId/spaces/:spaceId/tasks", createTaskSpace);
+taskRouter.get("/:workspaceId/spaces/:spaceId/tasks", getAllTasksSpace);
+taskRouter.get("/:workspaceId/spaces/:spaceId/tasks/:id", getTaskByIdSpace);
+taskRouter.patch("/:workspaceId/spaces/:spaceId/tasks/:id", updateTaskSpace);
+taskRouter.delete("/:workspaceId/spaces/:spaceId/tasks/:id", deleteTaskSpace);
 
 export default taskRouter;

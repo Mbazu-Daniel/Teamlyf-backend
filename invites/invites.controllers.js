@@ -10,29 +10,29 @@ const url = "http://localhost/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
-  const { orgId: organizationId } = req.params;
+  const { workspaceId: workspaceId } = req.params;
   const { id: userId } = req.user;
   email = email.toLowerCase();
 
   try {
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
     });
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
     }
 
-    // Check if the email already exists in the organization
+    // Check if the email already exists in the workspace
     const existingEmployee = await prisma.employee.findFirst({
-      where: { email, organizationId },
+      where: { email, workspaceId },
     });
 
     if (existingEmployee) {
       return res
         .status(400)
-        .json({ error: "Email already exists in the organization" });
+        .json({ error: "Email already exists in the workspace" });
     }
 
     // Generate unique token
@@ -42,14 +42,14 @@ const generateInviteLink = asyncHandler(async (req, res) => {
     const expireDate = new Date();
     expireDate.setDate(expireDate.getDate() + 7);
 
-    // Save the invite link with the organization relationship
+    // Save the invite link with the workspace relationship
     await prisma.Invite.create({
       data: {
         token: inviteToken,
         email,
         role,
         expirationDate: expireDate,
-        organization: { connect: { id: organizationId } },
+        workspace: { connect: { id: workspaceId } },
         user: { connect: { id: userId } },
       },
     });
@@ -58,10 +58,10 @@ const generateInviteLink = asyncHandler(async (req, res) => {
     const mailOptions = {
       from: "TeamLyf <onboarding@resend.dev>",
       to: email,
-      subject: "Invitation to Join Organization",
+      subject: "Invitation to Join workspace",
       html: `
           <div class="container" style="max-width: 90%; margin: auto; padding-top: 20px">
-            <h2>You have been invited to join an organization.</h2>
+            <h2>You have been invited to join an workspace.</h2>
             <p>Click the following link to accept the invitation:</p>
             <a href="${url}/join/${inviteToken}">Accept Invitation</a>
           </div>
@@ -78,7 +78,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
   }
 });
 
-const joinOrganization = asyncHandler(async (req, res) => {
+const joinworkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
   const { fullName, email, password } = req.body;
   const lowercasedEmail = email.toLowerCase();
@@ -105,13 +105,13 @@ const joinOrganization = asyncHandler(async (req, res) => {
       where: { email: lowercasedEmail },
     });
 
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: { id: invite.organizationId },
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: invite.workspaceId },
     });
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
     }
 
     // Hash the user's password
@@ -123,16 +123,16 @@ const joinOrganization = asyncHandler(async (req, res) => {
         data: {
           email: lowercasedEmail,
           password: hashedPassword,
-          organizations: { connect: { id: invite.organizationId } },
+          workspaces: { connect: { id: invite.workspaceId } },
         },
       });
     } else {
-      // If the user already exists, add the organization to their organizations array
+      // If the user already exists, add the workspace to their workspaces array
       existingUser = await prisma.user.update({
         where: { email: lowercasedEmail },
         data: {
-          organizations: {
-            connect: { id: invite.organizationId },
+          workspaces: {
+            connect: { id: invite.workspaceId },
           },
         },
       });
@@ -143,15 +143,15 @@ const joinOrganization = asyncHandler(async (req, res) => {
       data: {
         fullName,
         email: lowercasedEmail,
-        organization: { connect: { id: organization.id } },
+        workspace: { connect: { id: workspace.id } },
         role: invite.role,
         user: { connect: { id: existingUser.id } },
       },
     });
 
-    // Add the new employee to the organization's employee array
-    await prisma.organization.update({
-      where: { id: organization.id },
+    // Add the new employee to the workspace's employee array
+    await prisma.workspace.update({
+      where: { id: workspace.id },
       data: {
         employees: { connect: { id: newEmployee.id } },
       },
@@ -169,4 +169,4 @@ const joinOrganization = asyncHandler(async (req, res) => {
   }
 });
 
-export { generateInviteLink, joinOrganization };
+export { generateInviteLink, joinworkspace };

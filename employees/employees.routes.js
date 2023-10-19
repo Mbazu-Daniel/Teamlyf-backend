@@ -13,27 +13,30 @@ import {
 } from "./employees.controllers.js";
 const employeeRouter = express.Router({ mergeParams: true });
 
-import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
 
-employeeRouter.use("/:orgId", verifyToken, checkOrganizationExists);
+employeeRouter.use("/:workspaceId", verifyToken, checkWorkspaceExists);
 
-// Routes for managing employees within an organization
+// Routes for managing employees within an workspace
 
-employeeRouter.get("/:orgId/employees/search", searchEmployees);
+employeeRouter.get("/:workspaceId/employees/search", searchEmployees);
 
-employeeRouter.get("/:orgId/employees/", getEmployeeByEmail);
+employeeRouter.get("/:workspaceId/employees/", getEmployeeByEmail);
 
-employeeRouter.get("/:orgId/employees/count", getEmployeesCount);
+employeeRouter.get("/:workspaceId/employees/count", getEmployeesCount);
 
-employeeRouter.get("/:orgId/employees", getAllEmployees);
-employeeRouter.get("/:orgId/employees/:employeeId", getEmployeeById);
-employeeRouter.get("/:orgId/employees/", getEmployeeByEmail);
-employeeRouter.patch("/:orgId/employees/:employeeId", updateEmployee);
-employeeRouter.delete("/:orgId/employees/:employeeId", deleteEmployee);
+employeeRouter.get("/:workspaceId/employees", getAllEmployees);
+employeeRouter.get("/:workspaceId/employees/:employeeId", getEmployeeById);
+employeeRouter.get("/:workspaceId/employees/", getEmployeeByEmail);
+employeeRouter.patch("/:workspaceId/employees/:employeeId", updateEmployee);
+employeeRouter.delete("/:workspaceId/employees/:employeeId", deleteEmployee);
 
-employeeRouter.get("/:orgId/employees/:employeeId/teams", getTeamsByEmployee);
+employeeRouter.get(
+  "/:workspaceId/employees/:employeeId/teams",
+  getTeamsByEmployee
+);
 employeeRouter.patch(
-  "/:orgId/employees/:employeeId/change-role",
+  "/:workspaceId/employees/:employeeId/change-role",
   changeEmployeeRole
 );
 

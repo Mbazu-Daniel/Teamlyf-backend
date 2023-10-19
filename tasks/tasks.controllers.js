@@ -1,9 +1,9 @@
-import { Priority, PrismaClient, Status, TaskAction } from "@prisma/client";
+import { TaskPriority, PrismaClient, TaskStatus, TaskAction } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
-// TODO: develop CRUD tasks endpoints for inside a folder
-// TODO: develop CRUD tasks endpoints for inside a folder/projects
+// TODO: develop CRUD tasks endpoints for inside a space
+// TODO: develop CRUD tasks endpoints for inside a space/projects
 // you can use if statement for the above statement
 
 // TODO: develop CRUD for tasks status and tasks priority
@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 // Create a new task
 const createTask = asyncHandler(async (req, res) => {
   const { id: userId } = req.user;
-  const { orgId: organizationId } = req.params;
+  const { workspaceId: workspaceId } = req.params;
   const {
     title,
     description,
@@ -27,12 +27,6 @@ const createTask = asyncHandler(async (req, res) => {
       return res.status(400).json({ error: "Title is required" });
     }
 
-    const projectConnect = projectId ? { connect: { id: projectId } } : null;
-
-    const collaboratorsConnect = collaboratorsId
-      ? { connect: { id: collaboratorsId } }
-      : null;
-
     const newTask = await prisma.task.create({
       data: {
         ...req.body,
@@ -45,7 +39,7 @@ const createTask = asyncHandler(async (req, res) => {
         user: { connect: { id: userId } },
         priority: Priority.NORMAL,
         status: Status.TODO,
-        organization: { connect: { id: organizationId } },
+        workspace: { connect: { id: workspaceId } },
         // project: projectConnect,
         // collaborators: collaboratorsConnect,
       },
@@ -67,13 +61,13 @@ const createTask = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all tasks in the organization
+// Get all tasks in the workspace
 const getAllTasks = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+  const { workspaceId: workspaceId } = req.params;
   try {
     const tasks = await prisma.task.findMany({
       where: {
-        organizationId: organizationId,
+        workspaceId: workspaceId,
       },
     });
     res.status(200).json(tasks);
@@ -85,12 +79,12 @@ const getAllTasks = asyncHandler(async (req, res) => {
 
 // Get task by ID
 const getTaskById = asyncHandler(async (req, res) => {
-  const { id, orgId: organizationId } = req.params;
+  const { id, workspaceId: workspaceId } = req.params;
   try {
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        workspaceId,
       },
     });
     if (!task) {
@@ -105,12 +99,12 @@ const getTaskById = asyncHandler(async (req, res) => {
 
 // Update task by ID
 const updateTask = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+  const { workspaceId: workspaceId } = req.params;
   try {
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        workspaceId,
       },
     });
     if (!task) {
@@ -132,12 +126,12 @@ const updateTask = asyncHandler(async (req, res) => {
 
 // Delete task by ID
 const deleteTask = asyncHandler(async (req, res) => {
-  const { orgId: organizationId } = req.params;
+  const { workspaceId: workspaceId } = req.params;
   try {
     const task = await prisma.task.findFirst({
       where: {
         id: id,
-        organizationId,
+        workspaceId,
       },
     });
     if (!task) {

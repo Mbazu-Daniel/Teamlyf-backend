@@ -1,17 +1,17 @@
 import express from "express";
 import { verifyToken } from "../middleware/authenticate.js";
-import { generateInviteLink, joinOrganization } from "./invites.controllers.js";
+import { generateInviteLink, joinworkspace } from "./invites.controllers.js";
 
-import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
 
 const inviteRouter = express.Router({ mergeParams: true });
-inviteRouter.use("/:orgId", verifyToken);
+inviteRouter.use("/:workspaceId", verifyToken);
 
 inviteRouter.post(
-  "/:orgId/generate-invite-link",
-  checkOrganizationExists,
+  "/:workspaceId/generate-invite-link",
+  checkWorkspaceExists,
   generateInviteLink
 );
-inviteRouter.post("/join/:inviteToken", joinOrganization);
+inviteRouter.post("/join/:inviteToken", joinworkspace);
 
 export default inviteRouter;

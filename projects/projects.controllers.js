@@ -5,21 +5,21 @@ const prisma = new PrismaClient();
 
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
-  const { folderId } = req.params;
+  const { spaceId } = req.params;
   const { id: userId } = req.user;
   const { name, description } = req.body;
   try {
-    const existingFolder = await prisma.folder.findFirst({
+    const existingspace = await prisma.space.findFirst({
       where: {
-        id: folderId,
+        id: spaceId,
       },
     });
-    if (!existingFolder) {
-      return res.status(404).json({ message: `Folder  ${id} not found` });
+    if (!existingspace) {
+      return res.status(404).json({ message: `space  ${id} not found` });
     }
-    // check if the name exist in the folder
+    // check if the name exist in the space
     const existingProject = await prisma.project.findFirst({
-      where: { name, folderId },
+      where: { name, spaceId },
     });
 
     if (existingProject) {
@@ -30,7 +30,7 @@ const createProject = asyncHandler(async (req, res) => {
         name,
         description: description || null,
         userId,
-        folderId,
+        spaceId,
       },
     });
 
@@ -43,21 +43,21 @@ const createProject = asyncHandler(async (req, res) => {
 
 // Get all projects
 const getAllProjects = asyncHandler(async (req, res) => {
-  const { folderId } = req.params;
+  const { spaceId } = req.params;
   try {
-    console.log(folderId);
-    const existingFolder = await prisma.folder.findFirst({
+    console.log(spaceId);
+    const existingspace = await prisma.space.findFirst({
       where: {
-        id: folderId,
+        id: spaceId,
       },
     });
-    if (!existingFolder) {
-      return res.status(404).json({ message: `Folder  ${folderId} not found` });
+    if (!existingspace) {
+      return res.status(404).json({ message: `space  ${spaceId} not found` });
     }
 
     const projects = await prisma.project.findMany({
       where: {
-        folderId,
+        spaceId,
       },
     });
 
@@ -70,12 +70,12 @@ const getAllProjects = asyncHandler(async (req, res) => {
 
 // Get project by ID
 const getProjectById = asyncHandler(async (req, res) => {
-  const { id, folderId } = req.params;
+  const { id, spaceId } = req.params;
   try {
     const project = await prisma.project.findUnique({
       where: {
         id,
-        folderId,
+        spaceId,
       },
     });
     if (!project) {
@@ -90,12 +90,12 @@ const getProjectById = asyncHandler(async (req, res) => {
 
 // Update project by ID
 const updateProject = asyncHandler(async (req, res) => {
-  const { folderId, id } = req.params;
+  const { spaceId, id } = req.params;
   try {
     const existingProject = await prisma.project.findUnique({
       where: {
         id,
-        folderId,
+        spaceId,
       },
     });
     if (!existingProject) {
@@ -104,7 +104,7 @@ const updateProject = asyncHandler(async (req, res) => {
     const project = await prisma.project.update({
       where: {
         id,
-        folderId,
+        spaceId,
       },
       data: req.body,
     });
@@ -120,12 +120,12 @@ const updateProject = asyncHandler(async (req, res) => {
 
 // Delete project by ID
 const deleteProject = asyncHandler(async (req, res) => {
-  const { id, folderId } = req.params;
+  const { id, spaceId } = req.params;
   try {
     const existingProject = await prisma.project.findUnique({
       where: {
         id,
-        folderId,
+        spaceId,
       },
     });
     if (!existingProject) {
@@ -135,7 +135,7 @@ const deleteProject = asyncHandler(async (req, res) => {
     await prisma.project.delete({
       where: {
         id,
-        folderId,
+        spaceId,
       },
     });
 

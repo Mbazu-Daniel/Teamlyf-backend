@@ -5,6 +5,9 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// TODO: change from user to a better name
+// TODO: add permission level on the project side
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -47,6 +50,7 @@ model Organization {
   teams     Team[]
   invite    Invite[]
   folders   Folder[]
+  tasks     Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -107,7 +111,7 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, organizationId])
+  @@index([userId, organizationId, name])
 }
 
 // Group / channel
@@ -135,10 +139,6 @@ model Invite {
 
 // Project Management 
 
-// Todo: Add members to model 
-// Todo: Add Team to this model
-// Todo: change avater to avatar
-
 // subspace
 model Folder {
   id     String  @id @default(cuid())
@@ -158,6 +158,12 @@ model Folder {
   updatedAt DateTime @updatedAt
 }
 
+// Todo: Add Employee to model 
+// Todo: Add Team to this model ?
+// Todo: isFavourite boolean, start and Due date, thumbnails, attachments, priority
+
+// Todo: client representative, assign PM, assign members
+
 model Project {
   id          String  @id @default(cuid())
   name        String
@@ -169,48 +175,23 @@ model Project {
   folders  Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  creator   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// model TaskPriority {
-//   id    String  @id @default(cuid())
-//   name  String
-//   color String?
-
-//   tasks Task[]
-
-//   subtasks SubTask[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-enum TaskPriority {
+enum Priority {
   LOW
   NORMAL
   HIGH
 }
 
-enum TaskStatus {
+enum Status {
   TODO
-  INPROGRESS
+  IN_PROGRESS
   COMPLETED
 }
-
-// model TaskStatus {
-//   id    String  @id @default(cuid())
-//   name  String
-//   color String?
-
-//   tasks Task[]
-
-//   subtasks SubTask[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
 
 model Task {
   id            String    @id @default(cuid())
@@ -220,7 +201,7 @@ model Task {
   isCompleted   Boolean   @default(false) // move to project side
   notifications Boolean   @default(true)
   startDate     DateTime  @default(now())
-  endDate       DateTime
+  endDate       DateTime?
   reminderDate  DateTime?
 
   subtasks     SubTask[]
@@ -230,23 +211,20 @@ model Task {
   userId String
   user   User   @relation("CreatedBy", fields: [userId], references: [id], onDelete: Cascade)
 
-  collaboratorsId String?
-  collaborators   User?   @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
+  collaboratorsId String[]
+  collaborators   User?    @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
 
   folderId String?
   folders  Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
   projectId String?
-  Project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  // taskPriorityId String?
-  // priority       TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  status   Status   @default(TODO)
+  priority Priority @default(NORMAL)
 
-  // status         TaskStatus?   @relation(fields: [taskStatusId], references: [id])
-  // taskStatusId   String?
-
-  status   TaskStatus
-  priority TaskPriority
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -262,18 +240,11 @@ model SubTask {
   userId    String?
   assignees User?   @relation(fields: [userId], references: [id])
 
-
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
 
-  status   TaskStatus
-  priority TaskPriority
-
-  // taskStatusId String?
-  // taskstatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
-
-  // taskPriorityId String?
-  // priority       TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  status   Status   @default(TODO)
+  priority Priority @default(NORMAL)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

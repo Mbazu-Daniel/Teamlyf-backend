@@ -4,13 +4,13 @@ import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 // TODO: use checkTeamExist Middleware on routes
 
-// Get all employees by organization
+// Get all employees by workspace
 const getAllEmployees = asyncHandler(async (req, res) => {
-  const { orgId } = req.params;
+  const { workspaceId } = req.params;
   try {
     const employees = await prisma.employee.findMany({
       where: {
-        organizationId: orgId,
+        workspaceId: workspaceId,
       },
     });
     res.status(200).json(employees);
@@ -20,21 +20,21 @@ const getAllEmployees = asyncHandler(async (req, res) => {
   }
 });
 
-// Get employee by ID by organization
+// Get employee by ID by workspace
 const getEmployeeById = asyncHandler(async (req, res) => {
-  const { orgId, employeeId } = req.params;
+  const { workspaceId, employeeId } = req.params;
 
   try {
     const employee = await prisma.employee.findUnique({
       where: {
         id: employeeId,
-        organizationId: orgId,
+        workspaceId: workspaceId,
       },
     });
 
     if (!employee) {
       return res.status(404).json({
-        message: `Employee ${employeeId} not found in the organization`,
+        message: `Employee ${employeeId} not found in the workspace`,
       });
     }
 
@@ -45,20 +45,20 @@ const getEmployeeById = asyncHandler(async (req, res) => {
 });
 // Get employee by email
 const getEmployeeByEmail = asyncHandler(async (req, res) => {
-  const { orgId } = req.params;
+  const { workspaceId } = req.params;
   const { email } = req.query; // Use a query parameter for the email
 
   try {
     const employee = await prisma.employee.findFirst({
       where: {
-        organizationId: orgId,
+        workspaceId: workspaceId,
         email: email, // Email to search for
       },
     });
 
     if (!employee) {
       return res.status(404).json({
-        message: `Employee with email ${email} not found in the organization`,
+        message: `Employee with email ${email} not found in the workspace`,
       });
     }
 
@@ -68,15 +68,15 @@ const getEmployeeByEmail = asyncHandler(async (req, res) => {
   }
 });
 
-// Update employee by ID by organization
+// Update employee by ID by workspace
 const updateEmployee = asyncHandler(async (req, res) => {
-  const { orgId, employeeId } = req.params;
+  const { workspaceId, employeeId } = req.params;
 
   try {
     const updatedEmployee = await prisma.employee.update({
       where: {
         id: employeeId,
-        organizationId: orgId,
+        workspaceId: workspaceId,
       },
       data: req.body,
     });
@@ -87,15 +87,15 @@ const updateEmployee = asyncHandler(async (req, res) => {
   }
 });
 
-// Delete employee by ID by organization
+// Delete employee by ID by workspace
 const deleteEmployee = asyncHandler(async (req, res) => {
-  const { orgId, employeeId } = req.params;
+  const { workspaceId, employeeId } = req.params;
 
   try {
     await prisma.employee.delete({
       where: {
         id: employeeId,
-        organizationId: orgId,
+        workspaceId: workspaceId,
       },
     });
 
@@ -107,9 +107,9 @@ const deleteEmployee = asyncHandler(async (req, res) => {
   }
 });
 
-// Get a list of teams that an employee is a member of in the organization
+// Get a list of teams that an employee is a member of in the workspace
 const getTeamsByEmployee = asyncHandler(async (req, res) => {
-  const { orgId, employeeId } = req.params;
+  const { workspaceId, employeeId } = req.params;
 
   try {
     // Find the employee and verify it exists
@@ -124,7 +124,7 @@ const getTeamsByEmployee = asyncHandler(async (req, res) => {
     // Find teams where the employee is a member
     const teams = await prisma.team.findMany({
       where: {
-        orgId,
+        workspaceId,
         employees: { some: { id: employeeId } },
       },
     });
@@ -137,28 +137,28 @@ const getTeamsByEmployee = asyncHandler(async (req, res) => {
 
 // Change Employee Role
 const changeEmployeeRole = asyncHandler(async (req, res) => {
-  const { orgId, employeeId } = req.params;
+  const { workspaceId, employeeId } = req.params;
   const { role } = req.body;
 
   try {
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: { id: orgId },
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
     });
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
     }
 
-    // Check if the employee exists within the organization
+    // Check if the employee exists within the workspace
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId, organizationId: orgId }, // Specify organizationId
+      where: { id: employeeId, workspaceId: workspaceId }, // Specify workspaceId
     });
 
     if (!employee) {
       return res
         .status(404)
-        .json({ error: "Employee not found in the organization" });
+        .json({ error: "Employee not found in the workspace" });
     }
 
     // Validate the new role to be either "Admin" or "Member"
@@ -182,23 +182,23 @@ const changeEmployeeRole = asyncHandler(async (req, res) => {
 
 // Search Employees
 const searchEmployees = asyncHandler(async (req, res) => {
-  const { orgId } = req.params;
+  const { workspaceId } = req.params;
   const { query } = req.query;
 
   try {
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: { id: orgId },
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
     });
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
     }
 
-    // Search for an employee by email address within the organization
+    // Search for an employee by email address within the workspace
     const employee = await prisma.employee.findFirst({
       where: {
-        organizationId: orgId,
+        workspaceId: workspaceId,
         email: query, // Email to search for
       },
     });
@@ -216,21 +216,21 @@ const searchEmployees = asyncHandler(async (req, res) => {
 
 // Get Employee Count
 const getEmployeesCount = asyncHandler(async (req, res) => {
-  const { orgId } = req.params;
+  const { workspaceId } = req.params;
 
   try {
-    // Check if the organization exists
-    const organization = await prisma.organization.findUnique({
-      where: { id: orgId },
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
     });
 
-    if (!organization) {
-      return res.status(404).json({ error: "Organization not found" });
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
     }
 
-    // Count the number of employees in the organization
+    // Count the number of employees in the workspace
     const employeeCount = await prisma.employee.count({
-      where: { organizationId: orgId },
+      where: { workspaceId: workspaceId },
     });
 
     res.status(200).json({ count: employeeCount });
