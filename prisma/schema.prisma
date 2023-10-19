@@ -22,7 +22,6 @@ model User {
   workspaces Workspace[]
   employees  Employee[]
   teams      Team[]
-  invite     Invite[]
   spaces     Space[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
@@ -79,8 +78,8 @@ model Employee {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   SubTask     SubTask[]
-  TaskComment TaskComment[]
-  TaskHistory TaskHistory[]
+  taskComments TaskComment[]
+  taskHistory TaskHistory[]
 
   taskCreator   Task[] @relation("CreatedBy")
   collaborators Task[] @relation("Collaborators")
@@ -90,7 +89,8 @@ model Employee {
   assignedManager       Project[]      @relation("AssignedManager")
   assignedClientProject Project[]      @relation("AssignedClientProject")
   assignedClientTask    Task[]         @relation("AssignedClientTask")
-  EmployeeTeam          EmployeeTeam[]
+  employeeTeam          EmployeeTeam[]
+  invite    Invite[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,7 +115,7 @@ model Team {
 
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  EmployeeTeam EmployeeTeam[]
+  employeeTeam EmployeeTeam[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,8 +147,8 @@ model Invite {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  userId    String
-  invitedBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId String
+  invitedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
