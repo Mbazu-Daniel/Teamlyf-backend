@@ -8,12 +8,15 @@ import {
   updateProject,
 } from "./projects.controllers.js";
 
-import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
+import {
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../middleware/index.js";
 
 // const projectRouter = express.Router();
 const projectRouter = express.Router({ mergeParams: true });
 
-projectRouter.use("/:workspaceId", checkWorkspaceExists);
+projectRouter.use("/:workspaceId", getCurrentEmployee, getCurrentWorkspace);
 
 projectRouter.post(
   "/:workspaceId/spaces/:spaceId/projects",

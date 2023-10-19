@@ -5,32 +5,24 @@ const prisma = new PrismaClient();
 
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
-  const { spaceId } = req.params;
-  const { id: userId } = req.user;
+  const { spaceId, workspaceId } = req.params;
   const { name, description } = req.body;
   try {
-    const existingspace = await prisma.space.findFirst({
+    const existingSpace = await prisma.space.findFirst({
       where: {
         id: spaceId,
       },
     });
-    if (!existingspace) {
+    if (!existingSpace) {
       return res.status(404).json({ message: `space  ${id} not found` });
     }
-    // check if the name exist in the space
-    const existingProject = await prisma.project.findFirst({
-      where: { name, spaceId },
-    });
 
-    if (existingProject) {
-      return res.status(400).json({ error: `Project ${name} already exists` });
-    }
     const project = await prisma.project.create({
       data: {
         name,
         description: description || null,
-        userId,
-        spaceId,
+        createdBy: { connect: { id: req.employeeId } },
+        spaces: { connect: { id: spaceId } },
       },
     });
 
@@ -45,13 +37,13 @@ const createProject = asyncHandler(async (req, res) => {
 const getAllProjects = asyncHandler(async (req, res) => {
   const { spaceId } = req.params;
   try {
-    console.log(spaceId);
-    const existingspace = await prisma.space.findFirst({
+  
+    const existingSpace = await prisma.space.findFirst({
       where: {
         id: spaceId,
       },
     });
-    if (!existingspace) {
+    if (!existingSpace) {
       return res.status(404).json({ message: `space  ${spaceId} not found` });
     }
 
