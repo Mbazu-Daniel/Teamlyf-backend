@@ -11,7 +11,6 @@ const url = "http://localhost/api/v1";
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
   const { workspaceId: workspaceId } = req.params;
-  const { id: userId } = req.user;
   email = email.toLowerCase();
 
   try {
@@ -50,7 +49,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         role,
         expirationDate: expireDate,
         workspace: { connect: { id: workspaceId } },
-        user: { connect: { id: userId } },
+        invitedBy: { connect: {id: req.employeeId  } },
       },
     });
 
@@ -78,7 +77,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
   }
 });
 
-const joinworkspace = asyncHandler(async (req, res) => {
+const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
   const { fullName, email, password } = req.body;
   const lowercasedEmail = email.toLowerCase();
@@ -162,11 +161,11 @@ const joinworkspace = asyncHandler(async (req, res) => {
       where: { token: inviteToken },
     });
 
-    res.status(200).json({ user: newEmployee });
+    res.status(200).json( newEmployee );
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-export { generateInviteLink, joinworkspace };
+export { generateInviteLink, joinWorkspace };
