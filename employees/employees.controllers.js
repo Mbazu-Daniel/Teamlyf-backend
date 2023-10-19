@@ -28,7 +28,7 @@ const getEmployeeById = asyncHandler(async (req, res) => {
     const employee = await prisma.employee.findUnique({
       where: {
         id: employeeId,
-        workspaceId: workspaceId,
+        workspaceId,
       },
     });
 

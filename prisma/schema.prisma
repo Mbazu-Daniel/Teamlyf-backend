@@ -200,14 +200,14 @@ model Project {
   spaceId String
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  clientId       String
-  assignedClient Employee @relation("AssignedClientProject", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String?
+  assignedClient Employee? @relation("AssignedClientProject", fields: [clientId], references: [id], onDelete: Cascade)
 
-  managerId       String
-  assignedManager Employee @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
+  managerId       String?
+  assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-  employeeId String
-  createdBy  Employee @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String?
+  createdBy  Employee? @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
 
   collaboratorsId  String?
   projectAssignees Employee? @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
