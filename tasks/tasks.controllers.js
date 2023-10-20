@@ -4,62 +4,9 @@ const prisma = new PrismaClient();
 
 // TODO: develop CRUD tasks endpoints for inside a space
 // TODO: develop CRUD tasks endpoints for inside a space/projects
-// you can use if statement for the above statement
 
 // TODO: develop CRUD for tasks status and tasks priority
 
-// Create a new task
-const createTask = asyncHandler(async (req, res) => {
-  const { id: userId } = req.user;
-  const { workspaceId: workspaceId } = req.params;
-  const {
-    title,
-    description,
-    labels,
-    startDate,
-    endDate,
-    reminderDate,
-    projectId,
-    collaboratorsId,
-  } = req.body;
-  try {
-    if (!title) {
-      return res.status(400).json({ error: "Title is required" });
-    }
-
-    const newTask = await prisma.task.create({
-      data: {
-        ...req.body,
-        title,
-        description: description || null,
-        labels: labels || null,
-        startDate: startDate || new Date(),
-        endDate: endDate || new Date(),
-        reminderDate: reminderDate || new Date(),
-        user: { connect: { id: userId } },
-        priority: Priority.NORMAL,
-        status: Status.TODO,
-        workspace: { connect: { id: workspaceId } },
-        // project: projectConnect,
-        // collaborators: collaboratorsConnect,
-      },
-    });
-
-    // Log task addition in history using Prisma
-    await prisma.taskHistory.create({
-      data: {
-        tasks: { connect: { id: newTask.id } },
-        user: { connect: { id: userId } },
-        action: TaskAction.ADDED_TASKS,
-      },
-    });
-
-    res.status(201).json(newTask);
-  } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: error.message });
-  }
-});
 
 // Get all tasks in the workspace
 const getAllTasks = asyncHandler(async (req, res) => {
@@ -150,4 +97,4 @@ const deleteTask = asyncHandler(async (req, res) => {
   }
 });
 
-export { createTask, deleteTask, getAllTasks, getTaskById, updateTask };
+export { deleteTask, getAllTasks, getTaskById, updateTask };

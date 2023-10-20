@@ -1,8 +1,12 @@
 import express from "express";
+import { verifyToken } from "../middleware/authenticate.js";
 import {
-  createTask,
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../middleware/index.js";
+import {
+  
   deleteTask,
-  getAllTasks,
   getTaskById,
   updateTask,
 } from "./tasks.controllers.js";
@@ -12,19 +16,31 @@ import {
   getAllTasksSpace,
   getTaskByIdSpace,
   updateTaskSpace,
+  getAllTasksInWorkspace,
+  getTaskCountInWorkspace
 } from "./tasksSpace.controllers.js";
-
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
 
-// taskRouter.use("/:workspaceId", verifyToken, employeeExist, workspaceExists);
+taskRouter.use(
+  "/:workspaceId",
+  verifyToken,
+  getCurrentEmployee,
+  getCurrentWorkspace
+);
 
 // Get tasks
-taskRouter.post("/:workspaceId/tasks", createTask);
-taskRouter.get("/:workspaceId/tasks", getAllTasks);
-taskRouter.get("/:workspaceId/tasks/:id", getTaskById);
-taskRouter.patch("/:workspaceId/tasks/:id", updateTask);
-taskRouter.delete("/:workspaceId/tasks/:id", deleteTask);
+
+
+// taskRouter.get("/:workspaceId/tasks/:id", getTaskById);
+// taskRouter.patch("/:workspaceId/tasks/:id", updateTask);
+// taskRouter.delete("/:workspaceId/tasks/:id", deleteTask);
+
+
+taskRouter.get("/:workspaceId/tasks", getAllTasksInWorkspace);
+
+// Get task count in the workspace
+taskRouter.get('/:workspaceId/tasks-count', getTaskCountInWorkspace);
 
 // Get all space related tasks
 taskRouter.post("/:workspaceId/spaces/:spaceId/tasks", createTaskSpace);

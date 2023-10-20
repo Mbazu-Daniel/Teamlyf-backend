@@ -1,20 +1,26 @@
-import { TaskPriority, PrismaClient, TaskStatus, TaskAction } from "@prisma/client";
+import { PrismaClient, TaskAction } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
+//TODO: get tasks by their priority
+//TODO: get tasks by their status
+// TODO: get all tasks in the work place
+// Todo: get tasks assigned to me
+
 // Create a new task
 const createTaskSpace = asyncHandler(async (req, res) => {
-  const { id: userId } = req.user;
   const { workspaceId, spaceId } = req.params;
   const {
     title,
     description,
     labels,
     startDate,
-    endDate,
+    dueDate,
+    priority,
+    status,
     reminderDate,
     project,
-    collaborators,
+    taskCollaborators,
   } = req.body;
 
   try {
@@ -25,25 +31,30 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     const taskData = {
       ...req.body,
       title,
-      description: description || null,
-      labels: labels || null,
-      startDate: startDate || new Date(),
-      endDate: endDate || new Date(),
-      reminderDate: reminderDate || new Date(),
-      user: { connect: { id: userId } },
-      priority: Priority.NORMAL,
-      status: Status.TODO,
+      description,
+      labels,
+      startDate,
+      dueDate,
+      reminderDate,
+      priority,
+      status,
+      createdBy: { connect: { id: req.employeeId } },
       spaces: { connect: { id: spaceId } },
       workspace: { connect: { id: workspaceId } },
     };
 
-    if (collaborators) {
-      // If collaborators is provided add them
-      taskData.collaborators = { connect: { id: collaborators } };
-    }
     if (project) {
-      // If projectId is provided, create the task inside the project
       taskData.project = { connect: { id: project } };
+    }
+
+    if (taskCollaborators) {
+      // Create a list of taskCollaborators
+      const collaborators = taskCollaborators.map((id) => ({ id: id }));
+
+      // Connect the collaborators to the task
+      taskData.taskCollaborators = {
+        create: collaborators,
+      };
     }
 
     const newTask = await prisma.task.create({
@@ -54,7 +65,7 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     await prisma.taskHistory.create({
       data: {
         tasks: { connect: { id: newTask.id } },
-        user: { connect: { id: userId } },
+        employee: { connect: { id: req.employeeId } },
         action: TaskAction.ADDED_TASKS,
       },
     });
@@ -197,10 +208,56 @@ const deleteTaskSpace = asyncHandler(async (req, res) => {
   }
 });
 
+// Get all tasks in the workspace
+const getAllTasksInWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId: workspaceId } = req.params;
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        workspaceId: workspaceId,
+      },
+    });
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get task count in the workspace
+const getTaskCountInWorkspace = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+
+  try {
+    // Check if the workspace exists
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+    });
+
+    if (!workspace) {
+      return res.status(404).json({ error: "workspace not found" });
+    }
+
+    // Get the count of tasks in the workspace
+    const taskCount = await prisma.task.count({
+      where: {
+        workspaceId: workspaceId,
+      },
+    });
+
+    res.status(200).json({ count: taskCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   createTaskSpace,
   deleteTaskSpace,
+  getAllTasksInWorkspace,
   getAllTasksSpace,
   getTaskByIdSpace,
+  getTaskCountInWorkspace,
   updateTaskSpace,
 };
