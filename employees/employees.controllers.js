@@ -12,7 +12,7 @@ const getAllEmployees = asyncHandler(async (req, res) => {
       where: {
         workspaceId: workspaceId,
       },
-    });
+    })
     res.status(200).json(employees);
   } catch (error) {
     console.error(error);

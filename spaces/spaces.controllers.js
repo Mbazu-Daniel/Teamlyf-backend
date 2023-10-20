@@ -48,6 +48,12 @@ const getAllSpaces = asyncHandler(async (req, res) => {
             id: true,
           },
         },
+
+        tasks: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
 
@@ -69,6 +75,12 @@ const getSpaceById = asyncHandler(async (req, res) => {
       },
       include: {
         projects: {
+          select: {
+            id: true,
+          },
+        },
+
+        tasks: {
           select: {
             id: true,
           },

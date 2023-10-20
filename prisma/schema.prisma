@@ -70,27 +70,28 @@ model Employee {
   salary        Float?
   dateJoined    DateTime?
 
-  role   EmployeeRole @default(MEMBER)
+  role EmployeeRole @default(MEMBER)
+
   userId String
-  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  SubTask     SubTask[]
+  subtasks     SubTask[]
   taskComments TaskComment[]
-  taskHistory TaskHistory[]
+  taskHistory  TaskHistory[]
 
-  taskCreator   Task[] @relation("CreatedBy")
-  collaborators Task[] @relation("Collaborators")
+  taskCreator       Task[] @relation("CreatedBy")
+  taskCollaborators Task[] @relation("TaskCollaborators")
+  tasksAssigned     Task[] @relation("AssignedTask")
 
-  projectCreator        Project[]      @relation("CreatedBy")
-  projectAssignees      Project[]      @relation("Collaborators")
-  assignedManager       Project[]      @relation("AssignedManager")
-  assignedClientProject Project[]      @relation("AssignedClientProject")
-  assignedClientTask    Task[]         @relation("AssignedClientTask")
-  employeeTeam          EmployeeTeam[]
-  invite    Invite[]
+  projectCreator       Project[] @relation("ProjectCreator")
+  projectCollaborators Project[] @relation("ProjectCollaborators")
+  assignedManager      Project[] @relation("AssignedManager")
+
+  employeeTeam EmployeeTeam[]
+  invite       Invite[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -200,17 +201,14 @@ model Project {
   spaceId String
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  clientId       String?
-  assignedClient Employee? @relation("AssignedClientProject", fields: [clientId], references: [id], onDelete: Cascade)
+  projectCollabaratorsId String?
+  projectCollaborators   Employee? @relation("ProjectCollaborators", fields: [projectCollabaratorsId], references: [id], onDelete: Cascade)
+
+  projectCreatorId String?
+  projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
   managerId       String?
   assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
-
-  employeeId String?
-  createdBy  Employee? @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
-
-  collaboratorsId  String?
-  projectAssignees Employee? @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,14 +249,14 @@ model Task {
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
 
-  clientId       String
-  assignedClient Employee @relation("AssignedClientTask", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId       String?
+  assignedClient Employee? @relation("AssignedTask", fields: [clientId], references: [id], onDelete: Cascade)
 
   employeeId String
-  createBy   Employee @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
 
-  collaboratorsId String?
-  collaborators   Employee? @relation("Collaborators", fields: [collaboratorsId], references: [id], onDelete: Cascade)
+  taskCollaboratorsId String?
+  taskCollaborators   Employee? @relation("TaskCollaborators", fields: [taskCollaboratorsId], references: [id], onDelete: Cascade)
 
   spaceId String?
   spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)

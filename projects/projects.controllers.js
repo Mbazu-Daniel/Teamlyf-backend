@@ -37,7 +37,6 @@ const createProject = asyncHandler(async (req, res) => {
 const getAllProjects = asyncHandler(async (req, res) => {
   const { spaceId } = req.params;
   try {
-  
     const existingSpace = await prisma.space.findFirst({
       where: {
         id: spaceId,
@@ -50,6 +49,14 @@ const getAllProjects = asyncHandler(async (req, res) => {
     const projects = await prisma.project.findMany({
       where: {
         spaceId,
+      },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+          },
+        },
+        
       },
     });
 
