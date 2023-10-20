@@ -3,7 +3,7 @@ import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 
-// TODO: update deleteUser to remove user from all the organization they are part of as well as delete the user
+// TODO: update deleteUser to remove user from all the workspace they are part of as well as delete the user
 // TODO: before the user is deleted, remove the user from all the teams they are a part of
 // TODO: users account should be permanently deleted after 30 days of clicking delete
 // TODO: user can undo their account deletion

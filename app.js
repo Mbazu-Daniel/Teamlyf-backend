@@ -1,19 +1,19 @@
-import express from "express";
-import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import express from "express";
 
 import {
   authRouter,
-  userRouter,
-  organizationsRouter,
   employeeRouter,
-  teamsRouter,
-  folderRouter,
-  projectRouter,
-  taskRouter,
-  subTaskRouter,
   inviteRouter,
+  projectRouter,
+  spaceRouter,
+  subTaskRouter,
+  taskRouter,
+  teamsRouter,
+  userRouter,
+  workspaceRouter,
 } from "./localImport.js";
 dotenv.config();
 
@@ -34,16 +34,16 @@ const basePath = "/api/v1";
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
 
-// Administration (Organization)
-app.use(`${basePath}/orgs`, organizationsRouter);
-app.use(`${basePath}/orgs`, employeeRouter);
+// Administration (workspace)
+app.use(`${basePath}/workspace`, workspaceRouter);
+app.use(`${basePath}/workspace`, employeeRouter);
 app.use(`${basePath}/invites`, inviteRouter);
-app.use(`${basePath}/orgs`, teamsRouter);
+app.use(`${basePath}/workspace`, teamsRouter);
 
 // Task Management
-app.use(`${basePath}/orgs`, folderRouter);
-app.use(`${basePath}/orgs`, projectRouter);
-app.use(`${basePath}/orgs`, taskRouter);
+app.use(`${basePath}/workspace`, spaceRouter);
+app.use(`${basePath}/workspace`, projectRouter);
+app.use(`${basePath}/workspace`, taskRouter);
 app.use(`${basePath}/subtasks`, subTaskRouter);
 
 export default app;
