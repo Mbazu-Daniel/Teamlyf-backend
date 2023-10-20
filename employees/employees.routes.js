@@ -1,39 +1,50 @@
 import express from "express";
 import { verifyToken } from "../middleware/authenticate.js";
 import {
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../middleware/index.js";
+import {
   changeEmployeeRole,
   deleteEmployee,
   getAllEmployees,
-  getEmployeeByEmail,
   getEmployeeById,
   getEmployeesCount,
+  getEmployeeByEmail,
   getTeamsByEmployee,
   searchEmployees,
   updateEmployee,
 } from "./employees.controllers.js";
+
 const employeeRouter = express.Router({ mergeParams: true });
 
-import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+employeeRouter.use(
+  "/:workspaceId",
+  verifyToken,
+  getCurrentEmployee,
+  getCurrentWorkspace
+);
 
-employeeRouter.use("/:orgId", verifyToken, checkOrganizationExists);
+// Routes for managing employees within an workspace
 
-// Routes for managing employees within an organization
+employeeRouter.get("/:workspaceId/employees/search", searchEmployees);
 
-employeeRouter.get("/:orgId/employees/search", searchEmployees);
+employeeRouter.get("/:workspaceId/employees/count", getEmployeesCount);
 
-employeeRouter.get("/:orgId/employees/", getEmployeeByEmail);
+employeeRouter.get("/:workspaceId/employees", getAllEmployees);
 
-employeeRouter.get("/:orgId/employees/count", getEmployeesCount);
+employeeRouter.get("/:workspaceId/employees/", getEmployeeByEmail);
 
-employeeRouter.get("/:orgId/employees", getAllEmployees);
-employeeRouter.get("/:orgId/employees/:employeeId", getEmployeeById);
-employeeRouter.get("/:orgId/employees/", getEmployeeByEmail);
-employeeRouter.patch("/:orgId/employees/:employeeId", updateEmployee);
-employeeRouter.delete("/:orgId/employees/:employeeId", deleteEmployee);
+employeeRouter.get("/:workspaceId/employees/:employeeId", getEmployeeById);
+employeeRouter.patch("/:workspaceId/employees/:employeeId", updateEmployee);
+employeeRouter.delete("/:workspaceId/employees/:employeeId", deleteEmployee);
 
-employeeRouter.get("/:orgId/employees/:employeeId/teams", getTeamsByEmployee);
+employeeRouter.get(
+  "/:workspaceId/employees/:employeeId/teams",
+  getTeamsByEmployee
+);
 employeeRouter.patch(
-  "/:orgId/employees/:employeeId/change-role",
+  "/:workspaceId/employees/:employeeId/change-role",
   changeEmployeeRole
 );
 

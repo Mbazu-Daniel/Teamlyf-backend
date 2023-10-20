@@ -1,37 +1,33 @@
 import express from "express";
 import {
+  addEmployeeToTeam,
   createTeam,
+  deleteTeam,
   getAllTeams,
   getTeamById,
-  deleteTeam,
-  updateTeam,
-  addEmployeeToTeam,
-  removeEmployeeFromTeam,
   getTeamEmployees,
+  removeEmployeeFromTeam,
+  updateTeam,
 } from "./teams.controllers.js";
 
-import {
-  verifyAdmin,
-  verifyUser,
-  verifyToken,
-} from "../middleware/authenticate.js";
-import { checkOrganizationExists } from "../organizations/organizations.middleware.js";
+import { verifyToken } from "../middleware/authenticate.js";
+import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
 
 const teamsRouter = express.Router({ mergeParams: true });
 
-teamsRouter.use("/:orgId", verifyToken, checkOrganizationExists);
+teamsRouter.use("/:workspaceId", verifyToken, checkWorkspaceExists);
 
-teamsRouter.post("/:orgId/teams/:teamId/add-employee", addEmployeeToTeam);
+teamsRouter.post("/:workspaceId/teams/:teamId/add-employee", addEmployeeToTeam);
 teamsRouter.post(
-  "/:orgId/teams/:teamId/remove-employee",
+  "/:workspaceId/teams/:teamId/remove-employee",
   removeEmployeeFromTeam
 );
-teamsRouter.get("/:orgId/teams/:teamId/employees", getTeamEmployees);
+teamsRouter.get("/:workspaceId/teams/:teamId/employees", getTeamEmployees);
 
-teamsRouter.post("/:orgId/teams", createTeam);
-teamsRouter.get("/:orgId/teams", getAllTeams);
-teamsRouter.get("/:orgId/teams/:teamId", getTeamById);
-teamsRouter.patch("/:orgId/teams/:teamId", updateTeam);
-teamsRouter.delete("/:orgId/teams/:teamId", deleteTeam);
+teamsRouter.post("/:workspaceId/teams", createTeam);
+teamsRouter.get("/:workspaceId/teams", getAllTeams);
+teamsRouter.get("/:workspaceId/teams/:teamId", getTeamById);
+teamsRouter.patch("/:workspaceId/teams/:teamId", updateTeam);
+teamsRouter.delete("/:workspaceId/teams/:teamId", deleteTeam);
 
 export default teamsRouter;
