@@ -40,7 +40,7 @@ const verifyUser = (req, res, next) => {
   verifyToken(req, res, (err) => {
     if (err) return next(err);
 
-    if (req.user.id === req.params.id || req.user.isAdmin || req.user.superAdmin) {
+    if (req.user.id === req.params.id || req.user.role === 'ADMIN' || req.user.role === 'SUPER_ADMIN') {
       next();
     } else {
       res.status(403).json({ message: "You are not authorized! User" });
@@ -52,7 +52,7 @@ const verifySuperAdmin = (req, res, next) => {
   verifyToken(req, res, (err) => {
     if (err) return next(err);
 
-    if (req.user.superAdmin) {
+    if (req.user.role === 'SUPER_ADMIN') {
       next();
     } else {
       res.status(403).json({message: "You are not an administrator"});

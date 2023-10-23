@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient,UserRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword},
+        data: { email: lowercaseEmail, password: hashedPassword, role: UserRole.USER},
       });
 
       return res.status(201).json({ message: "User registered successfully" });
@@ -40,14 +40,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const registerAdminUser = asyncHandler(async (req, res) => {
   try {
-    const { email, password, isAdmin } = req.body;
+    const { email, password, role } = req.body;
 
     const lowercaseEmail = email.toLowerCase();
 
     // Check if the user making the request is a superAdmin
     const currentUser = req.user; // Replace this with your actual user identification method
-console.log(currentUser)
-    if (!currentUser.superAdmin) {
+
+    if (!currentUser.role === UserRole.SUPER_ADMIN) {
       return res.status(403).json({ error: "Permission denied. Only superAdmin can create isAdmin users." });
     }
 
@@ -60,7 +60,7 @@ console.log(currentUser)
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword, isAdmin: isAdmin },
+        data: { email: lowercaseEmail, password: hashedPassword, role },
       });
 
       return res.status(201).json({ message: "User registered successfully" });
@@ -95,12 +95,11 @@ const loginUser = asyncHandler(async (req, res) => {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      isAdmin: user.isAdmin,
-      superAdmin: user.superAdmin,
+      role: user.role
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "10h",
+      expiresIn: "1h",
     });
     res
       .cookie("access_token", token, {
