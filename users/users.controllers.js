@@ -8,6 +8,8 @@ const prisma = new PrismaClient();
 // TODO: users account should be permanently deleted after 30 days of clicking delete
 // TODO: user can undo their account deletion
 // TODO: the deletion can be a cronJob that will complete after 30days of requesting deletion
+// TODO: get user by their email address
+// TODO: get user where their employee role is OWNER
 
 const getSingleUser = asyncHandler(async (req, res) => {
   const { id } = req.params;

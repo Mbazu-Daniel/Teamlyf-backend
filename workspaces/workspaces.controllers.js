@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import ShortUniqueId from "short-unique-id";
 
 const prisma = new PrismaClient();
+// TODO: transfer ownership of workspaces to employee within the organization
 
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 

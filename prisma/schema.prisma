@@ -19,10 +19,10 @@ model User {
   id                 String      @id @default(cuid())
   email              String      @unique
   password           String
+  role  UserRole @default(USER)
+  source SourceType @default(OTHER)
   passwordResetToken String?
   passwordResetAt    DateTime?
-  isAdmin Boolean @default(false)
-  superAdmin Boolean @default(false)
   workspaces         Workspace[]
   employees          Employee[]
 
@@ -53,12 +53,7 @@ model Workspace {
   @@index([userId, name])
 }
 
-enum EmployeeRole {
-  OWNER
-  ADMIN
-  MEMBER
-  GUEST
-}
+
 
 model Employee {
   id            String    @id @default(cuid())
@@ -103,11 +98,7 @@ model Employee {
   @@index([userId, workspaceId, fullName, email, gender])
 }
 
-enum TeamType {
-  TEXT
-  AUDIO
-  VIDEO
-}
+
 
 // Team or Department
 model Team {
@@ -218,26 +209,7 @@ model Project {
   updatedAt           DateTime              @updatedAt
 }
 
-enum TaskPriority {
-  HIGH
-  MEDIUM
-  LOW
-  CRITICAL
-  URGENT
-  NORMAL
-  MINOR
-}
 
-enum TaskStatus {
-  TO_DO
-  IN_PROGRESS
-  PENDING
-  COMPLETED
-  CANCELED
-  DEFERRED
-  ON_HOLD
-  IN_REVIEW
-}
 
 model Task {
   id            String    @id @default(cuid())
@@ -309,18 +281,6 @@ model TaskComment {
   employee   Employee @relation(fields: [employeeId], references: [id])
 }
 
-enum TaskAction {
-  ADDED_TASKS
-  UPDATED_TASKS
-  DELETED_TASKS
-  COMPLETED_TASKS
-  UNCOMPLETED_TASKS
-  ADDED_COMMENTS
-  UPDATED_COMMENTS
-  DELETED_COMMENTS
-  COLLABORATOR_ADDED
-  COLLABORATOR_DELETED
-}
 
 model TaskHistory {
   id     String     @id @default(cuid())
@@ -360,4 +320,69 @@ model ProjectCollaborator {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+
+
+// ENUMS
+enum TaskAction {
+  ADDED_TASKS
+  UPDATED_TASKS
+  DELETED_TASKS
+  COMPLETED_TASKS
+  UNCOMPLETED_TASKS
+  ADDED_COMMENTS
+  UPDATED_COMMENTS
+  DELETED_COMMENTS
+  COLLABORATOR_ADDED
+  COLLABORATOR_DELETED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+  CRITICAL
+  URGENT
+  NORMAL
+  MINOR
+}
+
+enum TaskStatus {
+  TO_DO
+  IN_PROGRESS
+  PENDING
+  COMPLETED
+  CANCELED
+  DEFERRED
+  ON_HOLD
+  IN_REVIEW
+}
+
+enum TeamType {
+  TEXT
+  AUDIO
+  VIDEO
+}
+
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum SourceType {
+  FACEBOOK 
+  TWITTER
+  INSTAGRAM
+  LINKEDIN
+  GOOGLE
+  OTHER
+}
+
+enum UserRole {
+  USER
+  ADMIN 
+  SUPER_ADMIN
 }
