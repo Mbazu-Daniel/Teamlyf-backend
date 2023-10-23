@@ -47,6 +47,7 @@ const createTaskSpace = asyncHandler(async (req, res) => {
       taskData.project = { connect: { id: project } };
     }
 
+    // todo: 
     if (taskCollaborators) {
       // Create a list of taskCollaborators
       const collaborators = taskCollaborators.map((id) => ({ id: id }));
@@ -79,7 +80,7 @@ const createTaskSpace = asyncHandler(async (req, res) => {
 
 // Get all tasks
 const getAllTasksSpace = asyncHandler(async (req, res) => {
-  const { workspaceId: workspaceId, spaceId } = req.params;
+  const { workspaceId, spaceId } = req.params;
   try {
     // Check if the space specified exists
     const space = await prisma.space.findUnique({
@@ -93,8 +94,6 @@ const getAllTasksSpace = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: `space ${spaceId} not found` });
     }
     const tasks = await prisma.task.findMany({ where: { spaceId } });
-    res.status(200).json(tasks);
-
     res.status(200).json(tasks);
   } catch (error) {
     console.error(error);

@@ -21,7 +21,7 @@ const createProject = asyncHandler(async (req, res) => {
       data: {
         name,
         description: description || null,
-        createdBy: { connect: { id: req.employeeId } },
+        projectCreator: { connect: { id: req.employeeId } },
         spaces: { connect: { id: spaceId } },
       },
     });
@@ -145,6 +145,42 @@ const deleteProject = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+// Get all projects
+const getAllTasksInProjects = asyncHandler(async (req, res) => {
+  const { spaceId } = req.params;
+  try {
+    const existingSpace = await prisma.space.findFirst({
+      where: {
+        id: spaceId,
+      },
+    });
+    if (!existingSpace) {
+      return res.status(404).json({ message: `space  ${spaceId} not found` });
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: {
+        projectId,
+      },
+      include: {
+        tasks: {
+          select: {
+            id: true,
+          },
+        },
+        
+      },
+    });
+
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 export {
   createProject,
