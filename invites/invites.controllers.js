@@ -6,7 +6,7 @@ import sendMail from "../services/sendMail.js";
 
 const prisma = new PrismaClient();
 
-const url = "http://localhost/api/v1";
+const url = "http://localhost:8000/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
@@ -70,7 +70,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
     // Sending the invitation email
     const data = await sendMail(mailOptions);
 
-    res.status(201).json({ inviteToken, data });
+    res.status(201).json({ inviteToken, data, msg: "Invitation sent" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
