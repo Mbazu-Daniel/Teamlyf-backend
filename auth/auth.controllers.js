@@ -5,13 +5,22 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
+// const BASE_URL =
+
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, isAdmin } = req.body;
 
     const lowercaseEmail = email.toLowerCase();
 
-    // check if the user already exists
+    // Check if the user making the request is a superAdmin
+    const currentUser = req.user; // Replace this with your actual user identification method
+
+    if (!currentUser.superAdmin) {
+      return res.status(403).json({ error: "Permission denied. Only superAdmin can create isAdmin users." });
+    }
+
+    // Check if the user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email: lowercaseEmail },
     });
@@ -20,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword },
+        data: { email: lowercaseEmail, password: hashedPassword, isAdmin: isAdmin || false },
       });
 
       return res.status(201).json({ message: "User registered successfully" });
@@ -77,4 +86,30 @@ const logoutUser = asyncHandler((req, res) => {
     .status(200)
     .json({ message: "Logged out successfully" });
 });
+
+
+const forgotPassword = asyncHandler(async(req, res) => {
+  const {email} = req.body
+
+  // Get the user 
+  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+
+  if (!user) {
+    return res.status(200).json({
+      msg: "You will receive a reset email if a user with that email exists",
+    });
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordResetToken,
+      passwordResetAt: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
+})
 export { loginUser, logoutUser, registerUser };

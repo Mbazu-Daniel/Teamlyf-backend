@@ -16,15 +16,18 @@ datasource db {
 // Administration 
 
 model User {
-  id         String      @id @default(cuid())
-  email      String      @unique
-  password   String
-  workspaces Workspace[]
-  employees  Employee[]
-  teams      Team[]
-  spaces     Space[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id                 String      @id @default(cuid())
+  email              String      @unique
+  password           String
+  passwordResetToken String?
+  passwordResetAt    DateTime?
+  isAdmin Boolean @default(false)
+  superAdmin Boolean @default(false)
+  workspaces         Workspace[]
+  employees          Employee[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // workspace
@@ -78,23 +81,24 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  spaces       Space[]
   subtasks     SubTask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
+  teamCreator  Team[]
 
-  taskCreator       Task[] @relation("CreatedBy")
-  taskCollaborators Task[] @relation("TaskCollaborators")
-  tasksAssigned     Task[] @relation("AssignedTask")
+  taskCreator       Task[] @relation("TaskCreator")
 
   projectCreator       Project[] @relation("ProjectCreator")
-  projectCollaborators Project[] @relation("ProjectCollaborators")
   assignedManager      Project[] @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  TaskCollaborator    TaskCollaborator[]
+  ProjectCollaborator ProjectCollaborator[]
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
@@ -107,12 +111,13 @@ enum TeamType {
 
 // Team or Department
 model Team {
-  id     String   @id @default(cuid())
-  name   String   @unique
-  alias  String?
-  type   TeamType @default(TEXT)
-  userId String
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id    String   @id @default(cuid())
+  name  String   @unique
+  alias String?
+  type  TeamType @default(TEXT)
+
+  employeeId  String
+  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -121,7 +126,7 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workspaceId, name])
+  @@index([employeeId, workspaceId, name])
 }
 
 model EmployeeTeam {
@@ -170,8 +175,8 @@ model Space {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  userId    String
-  createdBy User   @relation(fields: [userId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -201,8 +206,7 @@ model Project {
   spaceId String
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  projectCollabaratorsId String?
-  projectCollaborators   Employee? @relation("ProjectCollaborators", fields: [projectCollabaratorsId], references: [id], onDelete: Cascade)
+   projectCollaborators ProjectCollaborator[]
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
@@ -210,8 +214,8 @@ model Project {
   managerId       String?
   assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 }
 
 enum TaskPriority {
@@ -249,14 +253,11 @@ model Task {
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
 
-  clientId       String?
-  assignedClient Employee? @relation("AssignedTask", fields: [clientId], references: [id], onDelete: Cascade)
-
   employeeId String
-  createdBy  Employee @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
 
-  taskCollaboratorsId String?
-  taskCollaborators   Employee? @relation("TaskCollaborators", fields: [taskCollaboratorsId], references: [id], onDelete: Cascade)
+
+  taskCollaborators TaskCollaborator[]
 
   spaceId String?
   spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
@@ -270,8 +271,8 @@ model Task {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }
 
 model SubTask {
@@ -330,6 +331,32 @@ model TaskHistory {
 
   employeeId String?
   employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TaskCollaborator {
+  id String @id @default(cuid())
+
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectCollaborator {
+  id String @id @default(cuid())
+
+  projectId String
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -73,7 +73,7 @@ const updateTask = asyncHandler(async (req, res) => {
 
 // Delete task by ID
 const deleteTask = asyncHandler(async (req, res) => {
-  const { workspaceId: workspaceId } = req.params;
+  const { workspaceId, id  } = req.params;
   try {
     const task = await prisma.task.findFirst({
       where: {
