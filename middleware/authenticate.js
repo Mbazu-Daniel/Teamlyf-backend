@@ -27,7 +27,6 @@ const verifyLogin = (req, res, next) => {
       if (err) {
         res.status(403).json({ message: "Unauthorized" });
       } else {
-        // Set the user information on the request object
         req.user = decodedToken;
         next();
       }
@@ -41,24 +40,24 @@ const verifyUser = (req, res, next) => {
   verifyToken(req, res, (err) => {
     if (err) return next(err);
 
-    if (req.user.id === req.params.id || req.user.isAdmin) {
+    if (req.user.id === req.params.id || req.user.isAdmin || req.user.superAdmin) {
       next();
     } else {
-      return next(createError(403, "You are not authorized! User"));
+      res.status(403).json({ message: "You are not authorized! User" });
     }
   });
 };
 
-const verifyAdmin = (req, res, next) => {
+const verifySuperAdmin = (req, res, next) => {
   verifyToken(req, res, (err) => {
     if (err) return next(err);
 
-    if (req.user.isAdmin) {
+    if (req.user.superAdmin) {
       next();
     } else {
-      return next(createError(403, "You are not an Admin!"));
+      res.status(403).json({message: "You are not an administrator"});
     }
   });
 };
 
-export { verifyToken, verifyAdmin, verifyUser, verifyLogin };
+export { verifyToken, verifySuperAdmin, verifyUser, verifyLogin };
