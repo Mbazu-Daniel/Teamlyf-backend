@@ -31,8 +31,20 @@ const getSingleUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await prisma.user.findMany();
-    res.status(200).json(users);
+    const { 'user-role': userRole } = req.query;
+    
+    if (userRole) {
+      const filteredUsers = await prisma.user.findMany({
+        where: {
+          role: userRole.toUpperCase(), // Assuming roles are stored in uppercase
+        },
+      });
+
+      res.status(200).json(filteredUsers);
+    } else {
+      const allUsers = await prisma.user.findMany();
+      res.status(200).json(allUsers);
+    }
   } catch (err) {
     throw new Error(err);
   }

@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 // TODO: use checkTeamExist Middleware on routes
+// TODO: get all employees where their employee role is equal to owner 
 
 // Get all employees by workspace
 const getAllEmployees = asyncHandler(async (req, res) => {
