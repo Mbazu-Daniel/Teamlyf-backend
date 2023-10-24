@@ -11,7 +11,7 @@ const BASE_URL = `http://localhost:${process.env.PORT}`
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { email, password, isAdmin } = req.body;
+    const { email, password, role } = req.body;
 
     const lowercaseEmail = email.toLowerCase();
 
@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword, role: UserRole.USER},
+        data: { email: lowercaseEmail, password: hashedPassword, role},
       });
 
       return res.status(201).json({ message: "User registered successfully" });
@@ -136,7 +136,7 @@ const forgetPassword = asyncHandler(async(req, res) => {
 
 
   await prisma.user.update({
-    where: { id: userId },
+    where: { id: existingUser.id },
     data: {
       passwordResetToken: resetToken,
       passwordResetAt: new Date(Date.now() + 10 * 60 * 1000),
@@ -162,6 +162,7 @@ const forgetPassword = asyncHandler(async(req, res) => {
     res.status(500).json({ message: 'Password reset link sending failed' });
   }
 })
+
 const resetPassword = asyncHandler(async (req, res) => {
   try {
     const { resetToken, newPassword } = req.body;
@@ -187,8 +188,8 @@ const resetPassword = asyncHandler(async (req, res) => {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        passwordResetToken: null, // Clear the reset token after password reset
-        passwordResetAt: null, // Clear the reset timestamp
+        passwordResetToken: null, 
+        passwordResetAt: null, 
       },
     });
 
@@ -200,5 +201,43 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 
+const changePassword = asyncHandler(async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.id; // Assuming you have the user's ID in the request
 
-export { loginUser, logoutUser, registerUser , registerAdminUser,forgetPassword, resetPassword };
+    // Find the user by ID
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the old password is correct
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ error: 'Incorrect old password' });
+    }
+
+    // Hash the new password and update the user's password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Password change failed' });
+  }
+});
+
+
+
+export { loginUser, logoutUser, registerUser , registerAdminUser,forgetPassword, resetPassword ,changePassword};

@@ -1,5 +1,5 @@
 import { verifySuperAdmin,verifyLogin } from "../middleware/authenticate.js";
-import { registerUser, loginUser, logoutUser,registerAdminUser,forgetPassword, resetPassword } from "./auth.controllers.js";
+import { registerUser, loginUser, logoutUser,registerAdminUser,forgetPassword, resetPassword,changePassword } from "./auth.controllers.js";
 
 import express from "express";
 
@@ -11,5 +11,6 @@ authRouter.post("/logout", verifyLogin, logoutUser);
 authRouter.post("/register-admin",verifySuperAdmin, registerAdminUser);
 authRouter.post('/forget-password', verifyLogin,forgetPassword);
 authRouter.post('/reset-password', verifyLogin,resetPassword);
+authRouter.post('/change-password', verifyLogin, changePassword);
 
 export default authRouter;
