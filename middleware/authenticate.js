@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { createError } from "./errors.js";
 import { UserRole } from "@prisma/client";
 
 
