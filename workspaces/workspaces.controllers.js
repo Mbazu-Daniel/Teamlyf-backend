@@ -86,6 +86,8 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
   }
 });
 
+
+
 // Get an workspace by ID
 const getWorkspaceById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -166,10 +168,26 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
+
+const getWorkspaceOwners = asyncHandler(async (req, res) => {
+  try {
+    const employees = await prisma.employee.findMany({
+      where: {
+        role: EmployeeRole.OWNER, // Filter by the role "OWNER"
+      },
+    });
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   createWorkspace,
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspaceById,
   updateWorkspace,
+  getWorkspaceOwners
 };
