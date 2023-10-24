@@ -148,33 +148,59 @@ const deleteProject = asyncHandler(async (req, res) => {
 
 
 // Get all projects
-const getAllTasksInProjects = asyncHandler(async (req, res) => {
-  const { spaceId } = req.params;
+const getAllTasksInProject = asyncHandler(async (req, res) => {
+  const { spaceId, workspaceId, projectId  } = req.params;
   try {
-    const existingSpace = await prisma.space.findFirst({
+    const existingProject = await prisma.space.findFirst({
       where: {
-        id: spaceId,
+        workspaceId,
+        spaceId, 
+        id: projectId,
       },
     });
-    if (!existingSpace) {
-      return res.status(404).json({ message: `space  ${spaceId} not found` });
+    if (!existingProject) {
+      return res.status(404).json({ message: `space  ${projectId} not found` });
     }
 
     const tasks = await prisma.task.findMany({
       where: {
         projectId,
       },
-      include: {
-        tasks: {
-          select: {
-            id: true,
-          },
-        },
-        
+    });
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const getSingleTaskInProject = asyncHandler(async (req, res) => {
+  const { projectId, taskId } = req.params;
+  try {
+    const existingProject = await prisma.project.findFirst({
+      where: {
+        workspaceId,
+        spaceId, 
+        id: projectId,
+      },
+    });
+    if (!existingProject) {
+      return res.status(404).json({ message: `Project with ID ${projectId} not found` });
+    }
+
+    const task = await prisma.task.findFirst({
+      where: {
+        id: taskId,
+        projectId,
       },
     });
 
-    res.status(200).json(projects);
+    if (!task) {
+      return res.status(404).json({ message: `Task with ID ${taskId} not found in Project ${projectId}` });
+    }
+
+    res.status(200).json(task);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -188,4 +214,6 @@ export {
   getAllProjects,
   getProjectById,
   updateProject,
+  getAllTasksInProject,
+  getSingleTaskInProject
 };

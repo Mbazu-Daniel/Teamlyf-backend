@@ -6,6 +6,8 @@ import {
   getAllProjects,
   getProjectById,
   updateProject,
+  getAllTasksInProject,
+  getSingleTaskInProject
 } from "./projects.controllers.js";
 
 import {
@@ -34,4 +36,6 @@ projectRouter.delete(
   deleteProject
 );
 
+projectRouter.get('/:workspaceId/spaces/:spaceId/projects/:projectId/tasks', getAllTasksInProject);
+projectRouter.get('/:workspaceId/spaces/:spaceId/projects/:projectId/tasks/:taskId', getSingleTaskInProject);
 export default projectRouter;
