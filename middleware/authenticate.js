@@ -10,11 +10,13 @@ const verifyToken = (req, res, next) => {
   const token = cookiesToken || bearerToken;
 
   if (!token) {
-    return next(createError(401, "You are not authenticated!"));
+    return res.status(403).json({msg: "You must be logged in"})
+  
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-    if (err) return next(createError(403, "Token is not valid!"));
+    if (err) return res.status(403).json({msg: "Token is not valid"})
+    // next(createError(403, "Token is not valid!"));
     req.user = decodedToken;
     next();
   });
