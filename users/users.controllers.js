@@ -80,4 +80,21 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-export { deleteUser, getAllUsers, getSingleUser };
+const getUserByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.query;
+  try {
+    const user = await prisma.user.findFirst({
+      where: { email: email },
+    });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: `User with the specified ID ${email} was not found` });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+export { deleteUser, getAllUsers, getSingleUser,getUserByEmail };
