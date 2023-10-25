@@ -12,7 +12,9 @@ import {
   getTaskByIdSpace,
   updateTaskSpace,
   getAllTasksInWorkspace,
-  getTaskCountInWorkspace
+  getTaskCountInWorkspace,
+  addCollaboratorsToTask,
+  removeCollaboratorsFromTask
 } from "./tasks.controllers.js";
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
@@ -24,12 +26,10 @@ taskRouter.use(
   getCurrentWorkspace
 );
 
-
-
 taskRouter.get("/:workspaceId/tasks", getAllTasksInWorkspace);
 
 // Get task count in the workspace
-taskRouter.get('/:workspaceId/tasks-count', getTaskCountInWorkspace);
+taskRouter.get("/:workspaceId/tasks-count", getTaskCountInWorkspace);
 
 // Get all space related tasks
 taskRouter.post("/:workspaceId/spaces/:spaceId/tasks", createTaskSpace);
@@ -38,4 +38,14 @@ taskRouter.get("/:workspaceId/spaces/:spaceId/tasks/:id", getTaskByIdSpace);
 taskRouter.patch("/:workspaceId/spaces/:spaceId/tasks/:id", updateTaskSpace);
 taskRouter.delete("/:workspaceId/spaces/:spaceId/tasks/:id", deleteTaskSpace);
 
+
+
+taskRouter.post(
+  "/:workspaceId/spaces/:spaceId/tasks/:taskId/add-collaborators",
+  addCollaboratorsToTask
+);
+taskRouter.post(
+  "/:workspaceId/spaces/:spaceId/tasks/:taskId/remove-collaborators",
+  removeCollaboratorsFromTask
+);
 export default taskRouter;

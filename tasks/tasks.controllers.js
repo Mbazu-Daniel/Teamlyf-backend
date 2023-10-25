@@ -2,9 +2,6 @@ import { PrismaClient, TaskAction } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
-//TODO: get tasks by their priority
-//TODO: get tasks by their status
-// TODO: get all tasks in the work place
 // TODO: get tasks assigned to me
 
 // Create a new task
@@ -97,8 +94,8 @@ const getAllTasksSpace = asyncHandler(async (req, res) => {
     const tasks = await prisma.task.findMany({
       where: {
         spaceId,
-        priority: priorities ? { in: priorities.split(',') } : undefined,
-        status: statuses ? { in: statuses.split(',') } : undefined,
+        priority: priorities ? { in: priorities.split(",") } : undefined,
+        status: statuses ? { in: statuses.split(",") } : undefined,
       },
     });
     res.status(200).json(tasks);
@@ -258,6 +255,111 @@ const getTaskCountInWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
+// Add collaboarators to tasks
+const addCollaboratorsToTask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+  const { employeeIds } = req.body;
+
+  try {
+    const task = await prisma.task.findUnique({
+      where: {
+        id: taskId,
+      },
+    });
+
+    if (!task) {
+      return res.status(404).json({ message: `Task ${taskId} not found` });
+    }
+
+    // Check if employeeIds are valid and exist in the Employee table
+    const validEmployeeIds = await prisma.employee.findMany({
+      where: {
+        id: {
+          in: employeeIds,
+        },
+      },
+    });
+
+    if (validEmployeeIds.length !== employeeIds.length) {
+      return res.status(400).json({
+        message: "One or more employeeIds are invalid or do not exist.",
+      });
+    }
+
+    // Check if collaborators already exist for the specified task and employeeIds
+    const existingCollaborators = await prisma.taskCollaborator.findMany({
+      where: {
+        taskId,
+        employeeId: {
+          in: employeeIds,
+        },
+      },
+    });
+
+    if (existingCollaborators.length > 0) {
+      return res.status(400).json({
+        message: "One or more collaborators already exist for this task.",
+      });
+    }
+
+    // Create TaskCollaborator entries for each employee and connect them to the task
+    for (const employeeId of employeeIds) {
+      await prisma.taskCollaborator.create({
+        data: {
+          taskId,
+          employeeId,
+        },
+      });
+    }
+
+    res.status(200).json({ message: "Collaborators added to the task" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+// Remove collaborators from a task 
+const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+  const { employeeIds } = req.body;
+
+  try {
+    const task = await prisma.task.findUnique({
+      where: {
+        id: taskId,
+      },
+    });
+
+    if (!task) {
+      return res.status(404).json({ message: `Task ${taskId} not found` });
+    }
+
+    // Remove TaskCollaborator entries for each specified employee
+    const deleteResults = await prisma.taskCollaborator.deleteMany({
+      where: {
+        taskId: taskId,
+        employeeId: {
+          in: employeeIds,
+        },
+      },
+    });
+
+    if (deleteResults.count === 0) {
+      return res.status(404).json({
+        message: "No matching collaborators found for the specified task",
+      });
+    }
+
+    res.status(200).json({ message: "Collaborators removed from the task" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   createTaskSpace,
   deleteTaskSpace,
@@ -266,4 +368,6 @@ export {
   getTaskByIdSpace,
   getTaskCountInWorkspace,
   updateTaskSpace,
+  addCollaboratorsToTask,
+  removeCollaboratorsFromTask
 };
