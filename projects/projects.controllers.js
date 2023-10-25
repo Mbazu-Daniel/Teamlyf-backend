@@ -351,21 +351,19 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
     }
 
     // Remove ProjectCollaborator entries for each specified employee
-    for (const employeeId of employeeIds) {
-      const removedCollaborator = await prisma.projectCollaborator.delete({
-        where: {
-          projectId_employeeId: {
-            projectId: projectId,
-            employeeId: employeeId,
-          },
+    const deleteResults = await prisma.projectCollaborator.deleteMany({
+      where: {
+        projectId: projectId,
+        employeeId: {
+          in: employeeIds,
         },
-      });
+      },
+    });
 
-      if (!removedCollaborator) {
-        return res.status(404).json({
-          message: `Collaborator not found for employee ${employeeId}`,
-        });
-      }
+    if (deleteResults.count === 0) {
+      return res.status(404).json({
+        message: "No matching collaborators found for the specified project",
+      });
     }
 
     res.status(200).json({ message: "Collaborators removed from the project" });
@@ -374,6 +372,7 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 export {
   createProject,
