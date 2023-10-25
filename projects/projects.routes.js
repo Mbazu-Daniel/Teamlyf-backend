@@ -7,7 +7,9 @@ import {
   getProjectById,
   updateProject,
   getAllTasksInProject,
-  getSingleTaskInProject
+  getSingleTaskInProject,
+  addCollaboratorsToProject,
+  removeCollaboratorsFromProject,
 } from "./projects.controllers.js";
 
 import {
@@ -36,6 +38,21 @@ projectRouter.delete(
   deleteProject
 );
 
-projectRouter.get('/:workspaceId/spaces/:spaceId/projects/:projectId/tasks', getAllTasksInProject);
-projectRouter.get('/:workspaceId/spaces/:spaceId/projects/:projectId/tasks/:taskId', getSingleTaskInProject);
+projectRouter.post(
+  "/:workspaceId/spaces/:spaceId/projects/:projectId/add-collaborators",
+  addCollaboratorsToProject
+);
+projectRouter.post(
+  "/:workspaceId/spaces/:spaceId/projects/:projectId/remove-collaborators",
+  removeCollaboratorsFromProject
+);
+
+projectRouter.get(
+  "/:workspaceId/spaces/:spaceId/projects/:projectId/tasks",
+  getAllTasksInProject
+);
+projectRouter.get(
+  "/:workspaceId/spaces/:spaceId/projects/:projectId/tasks/:taskId",
+  getSingleTaskInProject
+);
 export default projectRouter;
