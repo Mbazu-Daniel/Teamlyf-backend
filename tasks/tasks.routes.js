@@ -4,12 +4,7 @@ import {
   getCurrentEmployee,
   getCurrentWorkspace,
 } from "../middleware/index.js";
-import {
-  
-  deleteTask,
-  getTaskById,
-  updateTask,
-} from "./tasks.controllers.js";
+
 import {
   createTaskSpace,
   deleteTaskSpace,
@@ -18,7 +13,7 @@ import {
   updateTaskSpace,
   getAllTasksInWorkspace,
   getTaskCountInWorkspace
-} from "./tasksSpace.controllers.js";
+} from "./tasks.controllers.js";
 // const taskRouter = express.Router();
 const taskRouter = express.Router({ mergeParams: true });
 
@@ -29,12 +24,6 @@ taskRouter.use(
   getCurrentWorkspace
 );
 
-// Get tasks
-
-
-// taskRouter.get("/:workspaceId/tasks/:id", getTaskById);
-// taskRouter.patch("/:workspaceId/tasks/:id", updateTask);
-// taskRouter.delete("/:workspaceId/tasks/:id", deleteTask);
 
 
 taskRouter.get("/:workspaceId/tasks", getAllTasksInWorkspace);
