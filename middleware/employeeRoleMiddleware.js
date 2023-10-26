@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, EmployeeRole } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
@@ -19,9 +19,9 @@ function employeeRoleBasedMiddleware(allowedRoles) {
       });
 
       if (!employee || !allowedRoles.includes(employee.role)) {
-        return res
-          .status(403)
-          .json({ error: "User does not have the required role in this workspace" });
+        return res.status(403).json({
+          error: "User does not have the required role in this workspace",
+        });
       }
 
       // Attach the employee object to the request for further use if needed
@@ -35,23 +35,31 @@ function employeeRoleBasedMiddleware(allowedRoles) {
 }
 
 // Specific role-based middleware functions
-export const employeeMember = employeeRoleBasedMiddleware(['MEMBER']);
-export const employeeAdmin = employeeRoleBasedMiddleware(['ADMIN']);
-export const employeeOwner = employeeRoleBasedMiddleware(['OWNER']);
-export const employeeGuest= employeeRoleBasedMiddleware(['GUEST']);
+export const employeeMember = employeeRoleBasedMiddleware([
+  EmployeeRole.MEMBER,
+]);
+export const employeeAdmin = employeeRoleBasedMiddleware([EmployeeRole.ADMIN]);
+export const employeeOwner = employeeRoleBasedMiddleware([EmployeeRole.OWNER]);
+export const employeeGuest = employeeRoleBasedMiddleware([EmployeeRole.GUEST]);
 
 // Middleware for Member or Admin roles
-export const employeeMemberAndAdmin = employeeRoleBasedMiddleware(['MEMBER', 'ADMIN']);
+export const adminAndOwnerRoles = employeeRoleBasedMiddleware([
+  EmployeeRole.OWNER,
+  EmployeeRole.ADMIN,
+]);
 
 // Middleware that includes all roles (MEMBER, ADMIN, OWNER)
-export const allEmployeeRoles = employeeRoleBasedMiddleware(['MEMBER', 'ADMIN', 'OWNER']);
+export const allEmployeeRoles = employeeRoleBasedMiddleware([
+  EmployeeRole.MEMBER,
+  EmployeeRole.ADMIN,
+  EmployeeRole.OWNER,
+]);
 
 export {
   employeeMember,
-employeeAdmin,
-employeeOwner,
-employeeGuest,
-employeeMemberAndAdmin,
-allEmployeeRoles
-  
-}
+  employeeAdmin,
+  employeeOwner,
+  employeeGuest,
+  adminAndOwnerRoles,
+  allEmployeeRoles,
+};
