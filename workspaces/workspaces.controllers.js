@@ -67,9 +67,7 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
       },
       include: {
         employees: {
-          select: {
-            email: true,
-          },
+          select: { id: true, email: true },
         },
       },
     });
@@ -86,8 +84,6 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
   }
 });
 
-
-
 // Get an workspace by ID
 const getWorkspaceById = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -97,9 +93,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
       where: { id },
       include: {
         employees: {
-          select: {
-            email: true,
-          },
+          select: { id: true, email: true },
         },
       },
     });
@@ -168,7 +162,6 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-
 const getWorkspaceOwners = asyncHandler(async (req, res) => {
   try {
     const employees = await prisma.employee.findMany({
@@ -183,13 +176,12 @@ const getWorkspaceOwners = asyncHandler(async (req, res) => {
   }
 });
 
-
 // Controller to transfer ownership
 const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
   try {
     const { newOwnerId } = req.body;
-    const currentOwnerId = req.employeeId ;
-    console.log("current owner", currentOwnerId)
+    const currentOwnerId = req.employeeId;
+    console.log("current owner", currentOwnerId);
 
     // Check if the current owner has permission to transfer ownership
 
@@ -204,7 +196,7 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
     await prisma.employee.update({
       where: { id: newOwnerId },
       data: {
-        role: EmployeeRole.OWNER, 
+        role: EmployeeRole.OWNER,
       },
     });
 
@@ -221,5 +213,5 @@ export {
   getWorkspaceById,
   updateWorkspace,
   getWorkspaceOwners,
-  transferWorkspaceOwnership
+  transferWorkspaceOwnership,
 };

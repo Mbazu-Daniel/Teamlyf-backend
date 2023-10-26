@@ -3,9 +3,9 @@ import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
 // TODO: get tasks assigned to me
-// TODO: get tasks for a particular user 
+// TODO: get tasks for a particular user
 // TODO: CRUD for TaskComments
-// TODO: CRUD for subTasks 
+// TODO: CRUD for subTasks
 // TODO: CRUD for TaskAttachments
 // TODO: get tasks history
 
@@ -50,6 +50,19 @@ const createTaskSpace = asyncHandler(async (req, res) => {
 
     const newTask = await prisma.task.create({
       data: taskData,
+
+      include: {
+        taskCollaborators: {
+          select: {
+            employee: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Log task addition in history using Prisma
@@ -72,17 +85,13 @@ const createTaskSpace = asyncHandler(async (req, res) => {
         });
       }
 
-      // Log collaborator additions in task history
-      for (const collaboratorId of taskCollaborators) {
-        await prisma.taskHistory.create({
-          data: {
-            tasks: { connect: { id: newTask.id } },
-            employee: { connect: { id: req.employeeId } },
-            action: TaskAction.TASKS_COLLABORATOR_ADDED,
-            details: `Collaborator ${collaboratorId} added to the task.`,
-          },
-        });
-      }
+      await prisma.taskHistory.create({
+        data: {
+          tasks: { connect: { id: newTask.id } },
+          employee: { connect: { id: req.employeeId } },
+          action: TaskAction.TASKS_COLLABORATOR_ADDED,
+        },
+      });
     }
 
     res.status(201).json(newTask);
@@ -91,7 +100,6 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // Get all tasks
 const getAllTasksSpace = asyncHandler(async (req, res) => {
@@ -114,6 +122,18 @@ const getAllTasksSpace = asyncHandler(async (req, res) => {
         spaceId,
         priority: priorities ? { in: priorities.split(",") } : undefined,
         status: statuses ? { in: statuses.split(",") } : undefined,
+      },
+      include: {
+        taskCollaborators: {
+          select: {
+            employee: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
     res.status(200).json(tasks);
@@ -142,6 +162,19 @@ const getTaskByIdSpace = asyncHandler(async (req, res) => {
       where: {
         id: id,
         spaceId,
+      },
+
+      include: {
+        taskCollaborators: {
+          select: {
+            employee: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
     if (!task) {
@@ -335,8 +368,7 @@ const addCollaboratorsToTask = asyncHandler(async (req, res) => {
           employee: { connect: { id: req.employeeId } },
           action: TaskAction.TASKS_COLLABORATOR_ADDED,
         },
-      })
-      
+      });
     }
 
     res.status(200).json({ message: "Collaborators added to the task" });
@@ -346,8 +378,7 @@ const addCollaboratorsToTask = asyncHandler(async (req, res) => {
   }
 });
 
-
-// Remove collaborators from a task 
+// Remove collaborators from a task
 const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
   const { taskId } = req.params;
   const { employeeIds } = req.body;
@@ -385,7 +416,7 @@ const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
         employee: { connect: { id: req.employeeId } },
         action: TaskAction.TASKS_COLLABORATOR_DELETED,
       },
-    })
+    });
 
     res.status(200).json({ message: "Collaborators removed from the task" });
   } catch (error) {
@@ -403,5 +434,5 @@ export {
   getTaskCountInWorkspace,
   updateTaskSpace,
   addCollaboratorsToTask,
-  removeCollaboratorsFromTask
+  removeCollaboratorsFromTask,
 };
