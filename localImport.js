@@ -9,6 +9,7 @@ import taskRouter from "./tasks/tasks.routes.js";
 import teamsRouter from "./teams/teams.routes.js";
 import userRouter from "./users/users.routes.js";
 import workspaceRouter from "./workspaces/workspaces.routes.js";
+import taskCommentRouter from "./tasksComments/tasksComments.routes.js";
 
 export {
   authRouter,
@@ -21,4 +22,5 @@ export {
   teamsRouter,
   userRouter,
   workspaceRouter,
+  taskCommentRouter,
 };
