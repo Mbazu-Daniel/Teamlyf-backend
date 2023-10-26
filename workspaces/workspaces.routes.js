@@ -6,7 +6,8 @@ import {
   getAllWorkspaces,
   getWorkspaceById,
   updateWorkspace,
-  getWorkspaceOwners
+  getWorkspaceOwners,
+  transferWorkspaceOwnership
 } from "./workspaces.controllers.js";
 const workspacesRouter = express.Router({ mergeParams: true });
 
@@ -17,6 +18,6 @@ workspacesRouter.get("/", getAllWorkspaces);
 workspacesRouter.get('/workspace-owners', getWorkspaceOwners);
 workspacesRouter.get("/:id", getWorkspaceById);
 workspacesRouter.patch("/:id", updateWorkspace);
-workspacesRouter.delete("/:id", deleteWorkspace);
+workspacesRouter.delete("/:id", deleteWorkspace);  
 
 export default workspacesRouter;

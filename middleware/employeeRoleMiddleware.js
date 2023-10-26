@@ -35,13 +35,23 @@ function employeeRoleBasedMiddleware(allowedRoles) {
 }
 
 // Specific role-based middleware functions
-export const managerMiddleware = employeeRoleBasedMiddleware(['MANAGER']);
-export const adminMiddleware = employeeRoleBasedMiddleware(['ADMIN']);
-export const ownerMiddleware = employeeRoleBasedMiddleware(['OWNER']);
-export const guestMiddleware = employeeRoleBasedMiddleware(['GUEST']);
+export const employeeMember = employeeRoleBasedMiddleware(['MEMBER']);
+export const employeeAdmin = employeeRoleBasedMiddleware(['ADMIN']);
+export const employeeOwner = employeeRoleBasedMiddleware(['OWNER']);
+export const employeeGuest= employeeRoleBasedMiddleware(['GUEST']);
 
-// Middleware for Manager or Admin roles
-export const managerAndAdminMiddleware = employeeRoleBasedMiddleware(['MANAGER', 'ADMIN']);
+// Middleware for Member or Admin roles
+export const employeeMemberAndAdmin = employeeRoleBasedMiddleware(['MEMBER', 'ADMIN']);
 
-// Middleware that includes all roles (MANAGER, ADMIN, OWNER)
-export const allRolesMiddleware = employeeRoleBasedMiddleware(['MANAGER', 'ADMIN', 'OWNER']);
+// Middleware that includes all roles (MEMBER, ADMIN, OWNER)
+export const allEmployeeRoles = employeeRoleBasedMiddleware(['MEMBER', 'ADMIN', 'OWNER']);
+
+export {
+  employeeMember,
+employeeAdmin,
+employeeOwner,
+employeeGuest,
+employeeMemberAndAdmin,
+allEmployeeRoles
+  
+}

@@ -4,10 +4,6 @@
 generator client {
   provider = "prisma-client-js"
 }
-
-// TODO: change from user to a better name
-// TODO: add permission level on the project side
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

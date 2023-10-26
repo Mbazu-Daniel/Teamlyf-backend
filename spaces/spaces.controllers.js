@@ -6,10 +6,8 @@ const prisma = new PrismaClient();
 // Create a new space
 const createSpace = asyncHandler(async (req, res) => {
   const { workspaceId: workspaceId } = req.params;
-  const { id: userId } = req.user;
   const { title, avatar } = req.body;
   try {
-    console.log("workspaceId", workspaceId);
     // check if the title exist in the workspace
     const existingSpace = await prisma.space.findFirst({
       where: { title, workspaceId },
@@ -22,8 +20,8 @@ const createSpace = asyncHandler(async (req, res) => {
       data: {
         title,
         avatar,
-        userId,
-        workspaceId,
+        workspace: {connect: {id: workspaceId}},
+        createdBy: {connect: {id: req.employeeId}},
       },
     });
 
@@ -45,13 +43,13 @@ const getAllSpaces = asyncHandler(async (req, res) => {
       include: {
         projects: {
           select: {
-            id: true,
+            title: true,
           },
         },
 
         tasks: {
           select: {
-            id: true,
+            title: true,
           },
         },
       },
@@ -76,13 +74,13 @@ const getSpaceById = asyncHandler(async (req, res) => {
       include: {
         projects: {
           select: {
-            id: true,
+            name: true,
           },
         },
 
         tasks: {
           select: {
-            id: true,
+            title: true,
           },
         },
       },

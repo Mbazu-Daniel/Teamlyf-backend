@@ -68,7 +68,7 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
       include: {
         employees: {
           select: {
-            id: true,
+            email: true,
           },
         },
       },
@@ -98,7 +98,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
       include: {
         employees: {
           select: {
-            id: true,
+            email: true,
           },
         },
       },
@@ -113,6 +113,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Update an workspace by ID
 const updateWorkspace = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -141,7 +142,6 @@ const updateWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-// TODO: handle delete error correctly
 // Delete an workspace by ID
 const deleteWorkspace = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -189,6 +189,7 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
   try {
     const { newOwnerId } = req.body;
     const currentOwnerId = req.employeeId ;
+    console.log("current owner", currentOwnerId)
 
     // Check if the current owner has permission to transfer ownership
 
@@ -219,5 +220,6 @@ export {
   getAllWorkspaces,
   getWorkspaceById,
   updateWorkspace,
-  getWorkspaceOwners
+  getWorkspaceOwners,
+  transferWorkspaceOwnership
 };

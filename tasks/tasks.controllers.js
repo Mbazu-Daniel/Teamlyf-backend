@@ -3,6 +3,11 @@ import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
 // TODO: get tasks assigned to me
+// TODO: get tasks for a particular user 
+// TODO: CRUD for TaskComments
+// TODO: CRUD for subTasks 
+// TODO: CRUD for TaskAttachments
+// TODO: get tasks history
 
 // Create a new task
 const createTaskSpace = asyncHandler(async (req, res) => {
@@ -26,7 +31,6 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     }
 
     const taskData = {
-      ...req.body,
       title,
       description,
       labels,
@@ -44,17 +48,6 @@ const createTaskSpace = asyncHandler(async (req, res) => {
       taskData.project = { connect: { id: project } };
     }
 
-    // todo:
-    if (taskCollaborators) {
-      // Create a list of taskCollaborators
-      const collaborators = taskCollaborators.map((id) => ({ id: id }));
-
-      // Connect the collaborators to the task
-      taskData.taskCollaborators = {
-        create: collaborators,
-      };
-    }
-
     const newTask = await prisma.task.create({
       data: taskData,
     });
@@ -68,12 +61,37 @@ const createTaskSpace = asyncHandler(async (req, res) => {
       },
     });
 
+    // Create TaskCollaborator entries for each collaborator and connect them to the task
+    if (taskCollaborators && taskCollaborators.length > 0) {
+      for (const collaboratorId of taskCollaborators) {
+        await prisma.taskCollaborator.create({
+          data: {
+            taskId: newTask.id,
+            employeeId: collaboratorId,
+          },
+        });
+      }
+
+      // Log collaborator additions in task history
+      for (const collaboratorId of taskCollaborators) {
+        await prisma.taskHistory.create({
+          data: {
+            tasks: { connect: { id: newTask.id } },
+            employee: { connect: { id: req.employeeId } },
+            action: TaskAction.TASKS_COLLABORATOR_ADDED,
+            details: `Collaborator ${collaboratorId} added to the task.`,
+          },
+        });
+      }
+    }
+
     res.status(201).json(newTask);
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // Get all tasks
 const getAllTasksSpace = asyncHandler(async (req, res) => {
@@ -310,6 +328,15 @@ const addCollaboratorsToTask = asyncHandler(async (req, res) => {
           employeeId,
         },
       });
+
+      await prisma.taskHistory.create({
+        data: {
+          tasks: { connect: { id: taskId } },
+          employee: { connect: { id: req.employeeId } },
+          action: TaskAction.TASKS_COLLABORATOR_ADDED,
+        },
+      })
+      
     }
 
     res.status(200).json({ message: "Collaborators added to the task" });
@@ -318,7 +345,6 @@ const addCollaboratorsToTask = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 
 // Remove collaborators from a task 
@@ -352,6 +378,14 @@ const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
         message: "No matching collaborators found for the specified task",
       });
     }
+
+    await prisma.taskHistory.create({
+      data: {
+        tasks: { connect: { id: taskId } },
+        employee: { connect: { id: req.employeeId } },
+        action: TaskAction.TASKS_COLLABORATOR_DELETED,
+      },
+    })
 
     res.status(200).json({ message: "Collaborators removed from the task" });
   } catch (error) {
