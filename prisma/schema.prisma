@@ -88,9 +88,9 @@ model Employee {
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
   ProjectHistory      ProjectHistory[]
-  
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
@@ -178,7 +178,6 @@ model Project {
 
   isFavourite Boolean @default(false)
 
-  status    TaskStatus   @default(TO_DO)
   priority  TaskPriority @default(NORMAL)
   startDate DateTime     @default(now())
   dueDate   DateTime?
@@ -189,16 +188,17 @@ model Project {
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
-  ProjectHistory ProjectHistory[]
+  ProjectHistory       ProjectHistory[]
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  // can create another model to handle this to allow multiple managers
   managerId       String?
   assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Task {
@@ -243,14 +243,13 @@ model SubTask {
   startDate DateTime
   endDate   DateTime
 
+  status TaskStatus @default(TO_DO)
+
   employeeId String?
   assignees  Employee? @relation(fields: [employeeId], references: [id])
 
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
-
-  status   TaskStatus   @default(TO_DO)
-  priority TaskPriority @default(NORMAL)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -336,6 +335,7 @@ enum TaskAction {
   DELETED_COMMENTS_TO_TASKS
   TASKS_COLLABORATOR_ADDED
   TASKS_COLLABORATOR_DELETED
+  ADDED_SUBTASKS
 }
 
 enum ProjectAction {
@@ -361,6 +361,7 @@ enum TaskPriority {
   MINOR
 }
 
+// get task status function for each of the  status
 enum TaskStatus {
   TO_DO
   IN_PROGRESS
