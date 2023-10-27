@@ -11,8 +11,8 @@ export const getCurrentEmployee = asyncHandler(async (req, res, next) => {
     // Query the database to check if the user has an associated employee within the workspace
     const employee = await prisma.employee.findFirst({
       where: {
-        userId, // Assuming user ID is available on the user object
-        workspaceId, // You may access the workspace ID from the request
+        userId, 
+        workspaceId,
       },
     });
     if (!employee) {

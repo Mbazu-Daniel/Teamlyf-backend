@@ -5,9 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// TODO: change from user to a better name
-// TODO: add permission level on the project side
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -16,15 +13,18 @@ datasource db {
 // Administration 
 
 model User {
-  id         String      @id @default(cuid())
-  email      String      @unique
-  password   String
-  workspaces Workspace[]
-  employees  Employee[]
-  teams      Team[]
-  spaces     Space[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id                 String      @id @default(cuid())
+  email              String      @unique
+  password           String
+  role               UserRole    @default(USER)
+  source             SourceType  @default(OTHER)
+  passwordResetToken String?
+  passwordResetAt    DateTime?
+  workspaces         Workspace[]
+  employees          Employee[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // workspace
@@ -50,13 +50,6 @@ model Workspace {
   @@index([userId, name])
 }
 
-enum EmployeeRole {
-  OWNER
-  ADMIN
-  MEMBER
-  GUEST
-}
-
 model Employee {
   id            String    @id @default(cuid())
   fullName      String?
@@ -78,41 +71,39 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  spaces       Space[]
   subtasks     SubTask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
+  teamCreator  Team[]
 
-  taskCreator       Task[] @relation("CreatedBy")
-  taskCollaborators Task[] @relation("TaskCollaborators")
-  tasksAssigned     Task[] @relation("AssignedTask")
+  taskCreator Task[] @relation("TaskCreator")
 
-  projectCreator       Project[] @relation("ProjectCreator")
-  projectCollaborators Project[] @relation("ProjectCollaborators")
-  assignedManager      Project[] @relation("AssignedManager")
+  projectCreator  Project[] @relation("ProjectCreator")
+  assignedManager Project[] @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  TaskCollaborator    TaskCollaborator[]
+  ProjectCollaborator ProjectCollaborator[]
+  ProjectHistory      ProjectHistory[]
+  
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
 
-enum TeamType {
-  TEXT
-  AUDIO
-  VIDEO
-}
-
 // Team or Department
 model Team {
-  id     String   @id @default(cuid())
-  name   String   @unique
-  alias  String?
-  type   TeamType @default(TEXT)
-  userId String
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id    String   @id @default(cuid())
+  name  String   @unique
+  alias String?
+  type  TeamType @default(TEXT)
+
+  employeeId  String
+  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -121,7 +112,7 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workspaceId, name])
+  @@index([employeeId, workspaceId, name])
 }
 
 model EmployeeTeam {
@@ -170,18 +161,14 @@ model Space {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  userId    String
-  createdBy User   @relation(fields: [userId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// Todo: Add Employee to model 
 // Todo: Add Team to this model ?
-// Todo: isFavourite boolean, start and Due date, thumbnails, attachments, priority
-
-// Todo: client representative, assign PM, assign members
 
 model Project {
   id          String  @id @default(cuid())
@@ -201,8 +188,8 @@ model Project {
   spaceId String
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  projectCollabaratorsId String?
-  projectCollaborators   Employee? @relation("ProjectCollaborators", fields: [projectCollabaratorsId], references: [id], onDelete: Cascade)
+  projectCollaborators ProjectCollaborator[]
+  ProjectHistory ProjectHistory[]
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
@@ -210,29 +197,8 @@ model Project {
   managerId       String?
   assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum TaskPriority {
-  HIGH
-  MEDIUM
-  LOW
-  CRITICAL
-  URGENT
-  NORMAL
-  MINOR
-}
-
-enum TaskStatus {
-  TO_DO
-  IN_PROGRESS
-  PENDING
-  COMPLETED
-  CANCELED
-  DEFERRED
-  ON_HOLD
-  IN_REVIEW
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 }
 
 model Task {
@@ -249,14 +215,10 @@ model Task {
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
 
-  clientId       String?
-  assignedClient Employee? @relation("AssignedTask", fields: [clientId], references: [id], onDelete: Cascade)
-
   employeeId String
-  createdBy  Employee @relation("CreatedBy", fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
 
-  taskCollaboratorsId String?
-  taskCollaborators   Employee? @relation("TaskCollaborators", fields: [taskCollaboratorsId], references: [id], onDelete: Cascade)
+  taskCollaborators TaskCollaborator[]
 
   spaceId String?
   spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
@@ -308,19 +270,6 @@ model TaskComment {
   employee   Employee @relation(fields: [employeeId], references: [id])
 }
 
-enum TaskAction {
-  ADDED_TASKS
-  UPDATED_TASKS
-  DELETED_TASKS
-  COMPLETED_TASKS
-  UNCOMPLETED_TASKS
-  ADDED_COMMENTS
-  UPDATED_COMMENTS
-  DELETED_COMMENTS
-  COLLABORATOR_ADDED
-  COLLABORATOR_DELETED
-}
-
 model TaskHistory {
   id     String     @id @default(cuid())
   action TaskAction
@@ -333,4 +282,120 @@ model TaskHistory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ProjectHistory {
+  id     String        @id @default(cuid())
+  action ProjectAction
+
+  projectId String?
+  projects  Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TaskCollaborator {
+  id String @id @default(cuid())
+
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProjectCollaborator {
+  id String @id @default(cuid())
+
+  projectId String
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ENUMS
+enum TaskAction {
+  ADDED_TASKS
+  UPDATED_TASKS
+  DELETED_TASKS
+  COMPLETED_TASKS
+  UNCOMPLETED_TASKS
+  ADDED_COMMENTS_TO_TASKS
+  UPDATED_COMMENTS_TO_TASKS
+  DELETED_COMMENTS_TO_TASKS
+  TASKS_COLLABORATOR_ADDED
+  TASKS_COLLABORATOR_DELETED
+}
+
+enum ProjectAction {
+  ADDED_PROJECTS
+  UPDATED_PROJECTS
+  DELETED_PROJECTS
+  COMPLETED_PROJECTS
+  UNCOMPLETED_PROJECTS
+  ADDED_COMMENTS_TO_PROJECTS
+  UPDATED_COMMENTS_TO_PROJECTS
+  DELETED_COMMENTS_TO_PROJECTS
+  PROJECTS_COLLABORATOR_ADDED
+  PROJECTS_COLLABORATOR_DELETED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+  CRITICAL
+  URGENT
+  NORMAL
+  MINOR
+}
+
+enum TaskStatus {
+  TO_DO
+  IN_PROGRESS
+  PENDING
+  COMPLETED
+  CANCELED
+  DEFERRED
+  ON_HOLD
+  IN_REVIEW
+}
+
+enum TeamType {
+  TEXT
+  AUDIO
+  VIDEO
+}
+
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum SourceType {
+  FACEBOOK
+  TWITTER
+  INSTAGRAM
+  LINKEDIN
+  GOOGLE
+  OTHER
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
 }

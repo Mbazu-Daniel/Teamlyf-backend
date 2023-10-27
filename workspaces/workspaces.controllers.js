@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import ShortUniqueId from "short-unique-id";
 
 const prisma = new PrismaClient();
+// TODO: transfer ownership of workspaces to employee within the organization
 
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
@@ -66,9 +67,7 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
       },
       include: {
         employees: {
-          select: {
-            id: true,
-          },
+          select: { id: true, email: true },
         },
       },
     });
@@ -94,9 +93,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
       where: { id },
       include: {
         employees: {
-          select: {
-            id: true,
-          },
+          select: { id: true, email: true },
         },
       },
     });
@@ -110,6 +107,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Update an workspace by ID
 const updateWorkspace = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -138,7 +136,6 @@ const updateWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-// TODO: handle delete error correctly
 // Delete an workspace by ID
 const deleteWorkspace = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -165,10 +162,56 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
+const getWorkspaceOwners = asyncHandler(async (req, res) => {
+  try {
+    const employees = await prisma.employee.findMany({
+      where: {
+        role: EmployeeRole.OWNER, // Filter by the role "OWNER"
+      },
+    });
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Controller to transfer ownership
+const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
+  try {
+    const { newOwnerId } = req.body;
+    const currentOwnerId = req.employeeId;
+    console.log("current owner", currentOwnerId);
+
+    // Check if the current owner has permission to transfer ownership
+
+    // Update the ownership in the database
+    await prisma.employee.update({
+      where: { id: currentOwnerId },
+      data: {
+        role: EmployeeRole.MEMBER,
+      },
+    });
+
+    await prisma.employee.update({
+      where: { id: newOwnerId },
+      data: {
+        role: EmployeeRole.OWNER,
+      },
+    });
+
+    res.status(200).json({ message: "Ownership transferred successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 export {
   createWorkspace,
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspaceById,
   updateWorkspace,
+  getWorkspaceOwners,
+  transferWorkspaceOwnership,
 };

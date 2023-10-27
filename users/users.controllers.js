@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 // TODO: user can undo their account deletion
 // TODO: the deletion can be a cronJob that will complete after 30days of requesting deletion
 
+
 const getSingleUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
@@ -29,8 +30,20 @@ const getSingleUser = asyncHandler(async (req, res) => {
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
-    const users = await prisma.user.findMany();
-    res.status(200).json(users);
+    const { 'user-role': userRole } = req.query;
+    
+    if (userRole) {
+      const filteredUsers = await prisma.user.findMany({
+        where: {
+          role: userRole.toUpperCase(), // Assuming roles are stored in uppercase
+        },
+      });
+
+      res.status(200).json(filteredUsers);
+    } else {
+      const allUsers = await prisma.user.findMany();
+      res.status(200).json(allUsers);
+    }
   } catch (err) {
     throw new Error(err);
   }
@@ -66,4 +79,21 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-export { deleteUser, getAllUsers, getSingleUser };
+const getUserByEmail = asyncHandler(async (req, res) => {
+  const { email } = req.query;
+  try {
+    const user = await prisma.user.findFirst({
+      where: { email: email },
+    });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ message: `User with the specified ID ${email} was not found` });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    throw new Error(err);
+  }
+});
+export { deleteUser, getAllUsers, getSingleUser,getUserByEmail };
