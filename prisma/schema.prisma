@@ -72,7 +72,7 @@ model Employee {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   spaces       Space[]
-  subtasks     SubTask[]
+  subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
   teamCreator  Team[]
@@ -88,6 +88,7 @@ model Employee {
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
   ProjectHistory      ProjectHistory[]
+  subtaskCollaborator SubtaskCollaborator[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -211,7 +212,7 @@ model Task {
   dueDate       DateTime?
   reminderDate  DateTime?
 
-  subtasks     SubTask[]
+  subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
 
@@ -232,21 +233,24 @@ model Task {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  subtaskCollaborator SubtaskCollaborator[]
 }
 
-model SubTask {
+model Subtask {
   id    String @id @default(cuid())
   title String
 
   startDate DateTime
+  // change to dueDate
   endDate   DateTime
 
-  status TaskStatus @default(TO_DO)
+  status              TaskStatus            @default(TO_DO)
+  subtaskCollaborator SubtaskCollaborator[]
 
   employeeId String?
-  assignees  Employee? @relation(fields: [employeeId], references: [id])
+  createdBy  Employee? @relation(fields: [employeeId], references: [id])
 
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
@@ -315,6 +319,22 @@ model ProjectCollaborator {
 
   projectId String
   projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SubtaskCollaborator {
+  id String @id @default(cuid())
+
+  subtaskId String
+  subtasks  Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
+
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])

@@ -1,8 +1,9 @@
-import { PrismaClient, TaskStatus, TaskPriority } from "@prisma/client";
+import { PrismaClient, TaskPriority, TaskStatus } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
-// TODO: create an analytics for project where projects tasks that are not equal to a default status will be calculated against a default task status and from there we can see the progreess bar of the projects
+// TODO: create an analytics for project where projects tasks that are not equal to a default status will be calculated against a default task status and from there we can see the progress bar of the projects
+// TODO: include progress bar in the project
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
   const { spaceId, workspaceId } = req.params;
@@ -406,13 +407,13 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
 });
 
 export {
+  addCollaboratorsToProject,
   createProject,
   deleteProject,
   getAllProjects,
-  getProjectById,
-  updateProject,
   getAllTasksInProject,
+  getProjectById,
   getSingleTaskInProject,
-  addCollaboratorsToProject,
   removeCollaboratorsFromProject,
+  updateProject,
 };

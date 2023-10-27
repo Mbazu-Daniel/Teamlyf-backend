@@ -9,12 +9,12 @@ import {
   inviteRouter,
   projectRouter,
   spaceRouter,
-  subTaskRouter,
+  subtaskRouter,
+  taskCommentRouter,
   taskRouter,
   teamsRouter,
   userRouter,
   workspaceRouter,
-  taskCommentRouter
 } from "./localImport.js";
 dotenv.config();
 
@@ -46,6 +46,6 @@ app.use(`${basePath}/workspace`, spaceRouter);
 app.use(`${basePath}/workspace`, projectRouter);
 app.use(`${basePath}/workspace`, taskRouter);
 app.use(`${basePath}/workspace`, taskCommentRouter);
-app.use(`${basePath}/subtasks`, subTaskRouter);
+app.use(`${basePath}/workspace`, subtaskRouter);
 
 export default app;
