@@ -11,6 +11,7 @@ import {
   spaceRouter,
   subtaskRouter,
   taskCommentRouter,
+  taskFileRouter,
   taskRouter,
   teamsRouter,
   userRouter,
@@ -47,5 +48,6 @@ app.use(`${basePath}/workspace`, projectRouter);
 app.use(`${basePath}/workspace`, taskRouter);
 app.use(`${basePath}/workspace`, taskCommentRouter);
 app.use(`${basePath}/workspace`, subtaskRouter);
+app.use(`${basePath}/workspace`, taskFileRouter);
 
 export default app;
