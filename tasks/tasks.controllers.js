@@ -4,8 +4,6 @@ const prisma = new PrismaClient();
 
 // TODO: get tasks assigned to me
 // TODO: get tasks for a particular user
-// TODO: CRUD for TaskComments
-// TODO: CRUD for subTasks
 // TODO: CRUD for TaskAttachments
 // TODO: get tasks history
 
