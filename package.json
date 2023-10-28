@@ -21,6 +21,7 @@
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.3",
+    "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.4",
     "resend": "^1.0.0",
     "short-unique-id": "^5.0.3",

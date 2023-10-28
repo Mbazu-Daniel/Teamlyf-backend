@@ -342,7 +342,6 @@ model TaskFile {
   name       String
   file_type  String
   file_size  Int
-  extension  String?
   employeeId String?
   uploadedBy Employee? @relation(fields: [employeeId], references: [id])
 
