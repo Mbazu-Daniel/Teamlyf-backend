@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // Create a new subtask
 const createSubtask = asyncHandler(async (req, res) => {
   const { taskId } = req.params;
-  const { title, startDate, endDate, status, collaboratorsId } = req.body;
+  const { title, startDate, dueDate, status, collaboratorsId } = req.body;
 
   try {
     if (!title) {
@@ -14,12 +14,16 @@ const createSubtask = asyncHandler(async (req, res) => {
 
     const subtaskData = {
       title,
-      startDate: startDate || Date.now(),
-
-      endDate: endDate || null,
-      status: status || TaskStatus.TODO,
+      startDate: startDate || new Date(),
+      dueDate: dueDate || null,
+      status: status || TaskStatus.TO_DO,
       tasks: { connect: { id: taskId } },
+      createdBy: { connect: { id: req.employeeId } },
     };
+
+    const newSubtask = await prisma.subtask.create({
+      data: subtaskData,
+    });
 
     if (collaboratorsId && collaboratorsId.length > 0) {
       for (const collaborator of collaboratorsId) {
@@ -30,13 +34,9 @@ const createSubtask = asyncHandler(async (req, res) => {
           },
         });
       }
-
-      const newSubtask = await prisma.subtask.create({
-        data: subtaskData,
-      });
-
-      res.status(201).json(newSubtask);
     }
+
+    res.status(201).json(newSubtask);
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: error.message });
