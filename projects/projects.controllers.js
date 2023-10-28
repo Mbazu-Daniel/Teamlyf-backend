@@ -54,14 +54,7 @@ const createProject = asyncHandler(async (req, res) => {
       },
     });
 
-    // Log project addition in history using Prisma
-    await prisma.projectHistory.create({
-      data: {
-        projects: { connect: { id: newProject.id } },
-        employee: { connect: { id: req.employeeId } },
-        action: ProjectAction.ADDED_PROJECTS,
-      },
-    });
+
     // Create ProjectCollaborator entries for each collaborator and connect them to the project
     if (collaboratorIds && collaboratorIds.length > 0) {
       for (const collaboratorId of collaboratorIds) {
@@ -72,14 +65,6 @@ const createProject = asyncHandler(async (req, res) => {
           },
         });
       }
-
-      await prisma.projectHistory.create({
-        data: {
-          projects: { connect: { id: newProject.id } },
-          employee: { connect: { id: req.employeeId } },
-          action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
-        },
-      });
     }
 
     res.status(201).json(project);
@@ -341,14 +326,6 @@ const addCollaboratorsToProject = asyncHandler(async (req, res) => {
           employeeId,
         },
       });
-
-      await prisma.projectHistory.create({
-        data: {
-          projects: { connect: { id: projectId } },
-          employee: { connect: { id: req.employeeId } },
-          action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
-        },
-      });
     }
 
     res.status(200).json({ message: "Collaborators added to the project" });
@@ -391,13 +368,7 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
       });
     }
 
-    await prisma.projectHistory.create({
-      data: {
-        projects: { connect: { id: projectId } },
-        employee: { connect: { id: req.employeeId } },
-        action: ProjectAction.PROJECTS_COLLABORATOR_DELETED,
-      },
-    });
+ 
 
     res.status(200).json({ message: "Collaborators removed from the project" });
   } catch (error) {

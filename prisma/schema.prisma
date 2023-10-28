@@ -87,7 +87,6 @@ model Employee {
 
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
-  ProjectHistory      ProjectHistory[]
   subtaskCollaborator SubtaskCollaborator[]
 
   createdAt DateTime @default(now())
@@ -194,7 +193,7 @@ model Project {
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
-  ProjectHistory       ProjectHistory[]
+  
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
@@ -286,20 +285,6 @@ model TaskHistory {
 
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model ProjectHistory {
-  id     String        @id @default(cuid())
-  action ProjectAction
-
-  projectId String?
-  projects  Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   employeeId String?
   employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
