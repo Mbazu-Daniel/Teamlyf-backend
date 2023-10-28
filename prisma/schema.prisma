@@ -77,10 +77,10 @@ model Employee {
   taskHistory  TaskHistory[]
   teamCreator  Team[]
 
-  taskCreator Task[] @relation("TaskCreator")
-
-  projectCreator  Project[] @relation("ProjectCreator")
-  assignedManager Project[] @relation("AssignedManager")
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -180,8 +180,12 @@ model Project {
 
   isFavourite Boolean @default(false)
 
-  priority  TaskPriority @default(NORMAL)
-  startDate DateTime     @default(now())
+  priority      TaskPriority @default(NORMAL)
+  priorityColor String?
+
+  projectProgress Int?
+
+  startDate DateTime  @default(now())
   dueDate   DateTime?
 
   tasks Task[]
@@ -228,15 +232,18 @@ model Task {
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  status   TaskStatus   @default(TO_DO)
-  priority TaskPriority @default(NORMAL)
+  status              TaskStatus            @default(TO_DO)
+  statusColor         String?
+  priority            TaskPriority          @default(NORMAL)
+  priorityColor       String?
+  subtaskCollaborator SubtaskCollaborator[]
+  taskFiles           TaskFile[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  subtaskCollaborator SubtaskCollaborator[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Subtask {
@@ -341,6 +348,21 @@ model SubtaskCollaborator {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// TODO: create, get all files, update file name, share file, delete file
+
+model TaskFile {
+  id         String    @id @default(cuid())
+  name       String
+  file_type  String
+  file_size  Int
+  extension  String?
+  employeeId String?
+  uploadedBy Employee? @relation(fields: [employeeId], references: [id])
+
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
 }
 
 // ENUMS
