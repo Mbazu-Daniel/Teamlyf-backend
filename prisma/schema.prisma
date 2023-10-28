@@ -72,25 +72,25 @@ model Employee {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   spaces       Space[]
-  subtasks     SubTask[]
+  subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
   teamCreator  Team[]
 
-  taskCreator Task[] @relation("TaskCreator")
-
-  projectCreator  Project[] @relation("ProjectCreator")
-  assignedManager Project[] @relation("AssignedManager")
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
 
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
-  ProjectHistory      ProjectHistory[]
-  
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  subtaskCollaborator SubtaskCollaborator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
@@ -173,14 +173,18 @@ model Space {
 model Project {
   id          String  @id @default(cuid())
   name        String
+  category    String?
   description String?
   thumbnail   String?
 
   isFavourite Boolean @default(false)
 
-  status    TaskStatus   @default(TO_DO)
-  priority  TaskPriority @default(NORMAL)
-  startDate DateTime     @default(now())
+  priority      TaskPriority @default(NORMAL)
+  priorityColor String?
+
+  projectProgress Int?
+
+  startDate DateTime  @default(now())
   dueDate   DateTime?
 
   tasks Task[]
@@ -189,16 +193,17 @@ model Project {
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
-  ProjectHistory ProjectHistory[]
+  
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  // can create another model to handle this to allow multiple managers
   managerId       String?
   assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Task {
@@ -211,7 +216,7 @@ model Task {
   dueDate       DateTime?
   reminderDate  DateTime?
 
-  subtasks     SubTask[]
+  subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
 
@@ -226,8 +231,12 @@ model Task {
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  status   TaskStatus   @default(TO_DO)
-  priority TaskPriority @default(NORMAL)
+  status              TaskStatus            @default(TO_DO)
+  statusColor         String?
+  priority            TaskPriority          @default(NORMAL)
+  priorityColor       String?
+  subtaskCollaborator SubtaskCollaborator[]
+  taskFiles           TaskFile[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
@@ -236,21 +245,21 @@ model Task {
   updatedAt DateTime @updatedAt
 }
 
-model SubTask {
+model Subtask {
   id    String @id @default(cuid())
   title String
 
   startDate DateTime
-  endDate   DateTime
+  dueDate   DateTime?
 
-  employeeId String?
-  assignees  Employee? @relation(fields: [employeeId], references: [id])
+  status              TaskStatus            @default(TO_DO)
+  subtaskCollaborator SubtaskCollaborator[]
+
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id])
 
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id])
-
-  status   TaskStatus   @default(TO_DO)
-  priority TaskPriority @default(NORMAL)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -276,20 +285,6 @@ model TaskHistory {
 
   taskId String?
   tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model ProjectHistory {
-  id     String        @id @default(cuid())
-  action ProjectAction
-
-  projectId String?
-  projects  Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   employeeId String?
   employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -324,6 +319,36 @@ model ProjectCollaborator {
   updatedAt DateTime @updatedAt
 }
 
+model SubtaskCollaborator {
+  id String @id @default(cuid())
+
+  subtaskId String
+  subtasks  Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
+
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// TODO: create, get all files, update file name, share file, delete file
+
+model TaskFile {
+  id         String    @id @default(cuid())
+  name       String
+  file_type  String
+  file_size  Int
+  employeeId String?
+  uploadedBy Employee? @relation(fields: [employeeId], references: [id])
+
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
+}
+
 // ENUMS
 enum TaskAction {
   ADDED_TASKS
@@ -336,6 +361,7 @@ enum TaskAction {
   DELETED_COMMENTS_TO_TASKS
   TASKS_COLLABORATOR_ADDED
   TASKS_COLLABORATOR_DELETED
+  ADDED_SUBTASKS
 }
 
 enum ProjectAction {
@@ -361,6 +387,7 @@ enum TaskPriority {
   MINOR
 }
 
+// get task status function for each of the  status
 enum TaskStatus {
   TO_DO
   IN_PROGRESS

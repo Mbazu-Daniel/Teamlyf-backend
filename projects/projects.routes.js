@@ -1,15 +1,16 @@
 import express from "express";
 import { verifyToken } from "../middleware/authenticate.js";
 import {
+  addCollaboratorsToProject,
   createProject,
   deleteProject,
   getAllProjects,
-  getProjectById,
-  updateProject,
   getAllTasksInProject,
+  getProjectById,
   getSingleTaskInProject,
-  addCollaboratorsToProject,
   removeCollaboratorsFromProject,
+  updateProject,
+  calculateProjectProgress
 } from "./projects.controllers.js";
 
 import {
@@ -54,5 +55,9 @@ projectRouter.get(
 projectRouter.get(
   "/:workspaceId/spaces/:spaceId/projects/:projectId/tasks/:taskId",
   getSingleTaskInProject
+);
+projectRouter.get(
+  "/:workspaceId/spaces/:spaceId/projects/:projectId/calculate-progress",
+  calculateProjectProgress
 );
 export default projectRouter;

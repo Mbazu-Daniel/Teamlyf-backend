@@ -1,73 +1,132 @@
+import { PrismaClient, TaskStatus } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
-// Create a new subTask
-const createSubTask = asyncHandler(async (req, res) => {
+const prisma = new PrismaClient();
+// Create a new subtask
+const createSubtask = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
+  const { title, startDate, dueDate, status, collaboratorsId } = req.body;
+
   try {
-    const subTask = await SubTask.create(req.body);
-    res.status(201).json(subTask);
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
+    const subtaskData = {
+      title,
+      startDate: startDate || new Date(),
+      dueDate: dueDate || null,
+      status: status || TaskStatus.TO_DO,
+      tasks: { connect: { id: taskId } },
+      createdBy: { connect: { id: req.employeeId } },
+    };
+
+    const newSubtask = await prisma.subtask.create({
+      data: subtaskData,
+    });
+
+    if (collaboratorsId && collaboratorsId.length > 0) {
+      for (const collaborator of collaboratorsId) {
+        await prisma.SubtaskCollaborator.create({
+          data: {
+            taskId: taskId,
+            employeeId: collaborator,
+          },
+        });
+      }
+    }
+
+    res.status(201).json(newSubtask);
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 });
 
-// Get all subTasks
-const getAllSubTasks = asyncHandler(async (req, res) => {
-  try {
-    const subTasks = await SubTask.find();
-    res.status(200).json(subTasks);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Get all subtasks for a task
+const getAllSubtasks = asyncHandler(async (req, res) => {
+  const { taskId } = req.params;
 
-// Get subTask by ID
-const getSubTaskById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
   try {
-    const subTask = await SubTask.findById(id);
-    if (!subTask) {
-      return res.status(404).json({ message: `SubTask  ${id} not found` });
-    }
-    res.status(200).json(subTask);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Update subTask by ID
-const updateSubTask = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  try {
-    const subTask = await SubTask.findByIdAndUpdate(id, req.body, {
-      new: true,
+    const subtasks = await prisma.subtask.findMany({
+      where: {
+        taskId,
+      },
     });
-    if (!subTask) {
-      return res.status(404).json({ message: `SubTask  ${id} not found` });
-    }
-    res.status(200).json(subTask);
+
+    res.status(200).json(subtasks);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Delete subTask by ID
-const deleteSubTask = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+// Update subtask by ID
+const updateSubtask = asyncHandler(async (req, res) => {
+  const { id, taskId } = req.params;
+
   try {
-    const subTask = await SubTask.findOneAndDelete(id);
-    if (!subTask) {
-      return res.status(404).json({ message: `SubTask  ${id} not found` });
+    const subtask = await prisma.subtask.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!subtask) {
+      return res.status(404).json({ message: `Subtask ${id} not found` });
     }
-    res.status(204).json();
+
+    if (subtask.taskId !== taskId) {
+      return res.status(404).json({
+        message: `Subtask ${id} does not belong to the specified task`,
+      });
+    }
+
+    const updatedSubtask = await prisma.subtask.update({
+      where: {
+        id,
+      },
+      data: req.body,
+    });
+
+    res.status(200).json(updatedSubtask);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-export {
-  createSubTask,
-  getAllSubTasks,
-  getSubTaskById,
-  deleteSubTask,
-  updateSubTask,
-};
+// Delete subtask by ID
+const deleteSubtask = asyncHandler(async (req, res) => {
+  const { id, taskId } = req.params;
+
+  try {
+    const subtask = await prisma.subtask.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!subtask) {
+      return res.status(404).json({ message: `Subtask ${id} not found` });
+    }
+
+    if (subtask.taskId !== taskId) {
+      return res.status(404).json({
+        message: `Subtask ${id} does not belong to the specified task`,
+      });
+    }
+
+    // Delete the subtask if it exists
+    await prisma.subtask.delete({
+      where: {
+        id,
+      },
+    });
+
+    res.status(204).json({ message: "Subtask deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export { createSubtask, deleteSubtask, getAllSubtasks, updateSubtask };

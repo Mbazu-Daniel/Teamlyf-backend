@@ -20,8 +20,8 @@ const createSpace = asyncHandler(async (req, res) => {
       data: {
         title,
         avatar,
-        workspace: {connect: {id: workspaceId}},
-        createdBy: {connect: {id: req.employeeId}},
+        workspace: { connect: { id: workspaceId } },
+        createdBy: { connect: { id: req.employeeId } },
       },
     });
 
@@ -42,13 +42,12 @@ const getAllSpaces = asyncHandler(async (req, res) => {
       },
       include: {
         projects: {
-          select: {  id:true,
-            title: true,
-          },
+          select: { id: true, name: true },
         },
 
         tasks: {
           select: {
+            id: true,
             title: true,
           },
         },
@@ -73,9 +72,7 @@ const getSpaceById = asyncHandler(async (req, res) => {
       },
       include: {
         projects: {
-          select: {  id:true,
-            name: true,
-          },
+          select: { id: true, name: true },
         },
 
         tasks: {

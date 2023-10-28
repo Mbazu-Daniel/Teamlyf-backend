@@ -1,11 +1,9 @@
-import { PrismaClient, TaskAction } from "@prisma/client";
+import { PrismaClient, TaskAction, TaskPriority,TaskStatus } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
 // TODO: get tasks assigned to me
 // TODO: get tasks for a particular user
-// TODO: CRUD for TaskComments
-// TODO: CRUD for subTasks
 // TODO: CRUD for TaskAttachments
 // TODO: get tasks history
 
@@ -29,16 +27,28 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     if (!title) {
       return res.status(400).json({ error: "Title is required" });
     }
+    
+    // Find the maximum position value for tasks in the same space
+    const maxPosition = await prisma.task.aggregate({
+      where: {
+        spaceId,
+      },
+      max: {
+        position: true,
+      },
+    });
 
     const taskData = {
       title,
       description,
       labels,
-      startDate,
+      startDate: startDate || new Date(),
       dueDate,
       reminderDate,
-      priority,
-      status,
+      version: 1,
+      priority: priority || TaskPriority.NORMAL,
+      status: status || TaskStatus.TO_DO,
+      position: maxPosition.max.position + 1,
       createdBy: { connect: { id: req.employeeId } },
       spaces: { connect: { id: spaceId } },
       workspace: { connect: { id: workspaceId } },
@@ -49,20 +59,7 @@ const createTaskSpace = asyncHandler(async (req, res) => {
     }
 
     const newTask = await prisma.task.create({
-      data: taskData,
-
-      include: {
-        taskCollaborators: {
-          select: {
-            employee: {
-              select: {
-                id: true,
-                email: true,
-              },
-            },
-          },
-        },
-      },
+      data: taskData
     });
 
     // Log task addition in history using Prisma
@@ -190,6 +187,7 @@ const getTaskByIdSpace = asyncHandler(async (req, res) => {
 // Update task by ID
 const updateTaskSpace = asyncHandler(async (req, res) => {
   const { id, spaceId, workspaceId: workspaceId } = req.params;
+
   try {
     // Check if the space specified exists
     const space = await prisma.space.findUnique({
@@ -208,22 +206,45 @@ const updateTaskSpace = asyncHandler(async (req, res) => {
         spaceId,
       },
     });
+
     if (!task) {
       return res.status(404).json({ message: `Task  ${id} not found` });
     }
 
+    // Ensure that the request contains a version field
+    if (!req.body.version) {
+      return res.status(400).json({ message: "Version is required in the request body" });
+    }
+
+    // Query the current version
+    const currentVersion = task.version;
+
+    // Validate that the provided version matches the current version
+    if (req.body.version !== currentVersion) {
+      return res.status(409).json({ message: "Version mismatch: The task has been updated by someone else." });
+    }
+
+    // Increment the version
+    const updatedVersion = currentVersion + 1;
+
+    // Update the task with the new version
     const updatedTask = await prisma.task.update({
       where: {
         id: id,
       },
-      data: req.body,
+      data: {
+        ...req.body, // Include other task data to update
+        version: updatedVersion, // Update the version
+      },
     });
 
     res.status(200).json(updatedTask);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Delete task by ID
 const deleteTaskSpace = asyncHandler(async (req, res) => {
@@ -306,7 +327,7 @@ const getTaskCountInWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-// Add collaboarators to tasks
+// Add collaborators to tasks
 const addCollaboratorsToTask = asyncHandler(async (req, res) => {
   const { taskId } = req.params;
   const { employeeIds } = req.body;
@@ -424,6 +445,36 @@ const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+const updateTaskOrder = asyncHandler(async (req, res) => {
+  const {taskId, workspaceId} = req.params
+  const { newPosition } = req.body;
+
+  try {
+    // Check if the task exists and belongs to the user or workspace
+    const task = await prisma.task.findFirst({
+      where: {
+        id: taskId,
+      },
+    });
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // Update the task's order in the database
+    const updatedTask = await prisma.task.update({
+      where: { id: taskId },
+      data: { position: newPosition },
+    });
+
+    res.status(200).json(updatedTask);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 export {
   createTaskSpace,

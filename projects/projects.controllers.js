@@ -1,8 +1,9 @@
-import { PrismaClient, TaskStatus, TaskPriority } from "@prisma/client";
+import { PrismaClient, TaskPriority, TaskStatus } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
-// TODO: create an analytics for project where projects tasks that are not equal to a default status will be calculated against a default task status and from there we can see the progreess bar of the projects
+// TODO: create an analytics for project where projects tasks that are not equal to a default status will be calculated against a default task status and from there we can see the progress bar of the projects
+// TODO: include progress bar in the project
 // Create a new project
 const createProject = asyncHandler(async (req, res) => {
   const { spaceId, workspaceId } = req.params;
@@ -53,14 +54,7 @@ const createProject = asyncHandler(async (req, res) => {
       },
     });
 
-    // Log project addition in history using Prisma
-    await prisma.projectHistory.create({
-      data: {
-        projects: { connect: { id: newProject.id } },
-        employee: { connect: { id: req.employeeId } },
-        action: ProjectAction.ADDED_PROJECTS,
-      },
-    });
+
     // Create ProjectCollaborator entries for each collaborator and connect them to the project
     if (collaboratorIds && collaboratorIds.length > 0) {
       for (const collaboratorId of collaboratorIds) {
@@ -71,14 +65,6 @@ const createProject = asyncHandler(async (req, res) => {
           },
         });
       }
-
-      await prisma.projectHistory.create({
-        data: {
-          projects: { connect: { id: newProject.id } },
-          employee: { connect: { id: req.employeeId } },
-          action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
-        },
-      });
     }
 
     res.status(201).json(project);
@@ -340,14 +326,6 @@ const addCollaboratorsToProject = asyncHandler(async (req, res) => {
           employeeId,
         },
       });
-
-      await prisma.projectHistory.create({
-        data: {
-          projects: { connect: { id: projectId } },
-          employee: { connect: { id: req.employeeId } },
-          action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
-        },
-      });
     }
 
     res.status(200).json({ message: "Collaborators added to the project" });
@@ -390,13 +368,7 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
       });
     }
 
-    await prisma.projectHistory.create({
-      data: {
-        projects: { connect: { id: projectId } },
-        employee: { connect: { id: req.employeeId } },
-        action: ProjectAction.PROJECTS_COLLABORATOR_DELETED,
-      },
-    });
+ 
 
     res.status(200).json({ message: "Collaborators removed from the project" });
   } catch (error) {
@@ -405,14 +377,54 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
   }
 });
 
+const calculateProjectProgress = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+  try {
+    const project = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+    });
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const totalTasks = project.tasks.length;
+    const completedTasks = project.tasks.filter(
+      (task) =>
+        task.status === TaskStatus.COMPLETED ||
+        task.status === TaskStatus.CANCELED
+    ).length;
+
+    // Calculate the project progress as a percentage
+    const projectProgress = (completedTasks / totalTasks) * 100;
+
+    // Update the project progress in the database
+    await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        projectProgress,
+      },
+    });
+
+    return res.status(200).json({ projectProgress });
+  } catch {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export {
+  addCollaboratorsToProject,
   createProject,
   deleteProject,
   getAllProjects,
-  getProjectById,
-  updateProject,
   getAllTasksInProject,
+  getProjectById,
   getSingleTaskInProject,
-  addCollaboratorsToProject,
   removeCollaboratorsFromProject,
+  updateProject,
+  calculateProjectProgress
 };
