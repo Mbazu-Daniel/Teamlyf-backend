@@ -406,6 +406,45 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
   }
 });
 
+const calculateProjectProgress = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+  try {
+    const project = await prisma.project.findUnique({
+      where: {
+        id: projectId,
+      },
+    });
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const totalTasks = project.tasks.length;
+    const completedTasks = project.tasks.filter(
+      (task) =>
+        task.status === TaskStatus.COMPLETED ||
+        task.status === TaskStatus.CANCELED
+    ).length;
+
+    // Calculate the project progress as a percentage
+    const projectProgress = (completedTasks / totalTasks) * 100;
+
+    // Update the project progress in the database
+    await prisma.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        projectProgress,
+      },
+    });
+
+    return res.status(200).json({ projectProgress });
+  } catch {
+    console.error(error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   addCollaboratorsToProject,
   createProject,
@@ -416,4 +455,5 @@ export {
   getSingleTaskInProject,
   removeCollaboratorsFromProject,
   updateProject,
+  calculateProjectProgress
 };
