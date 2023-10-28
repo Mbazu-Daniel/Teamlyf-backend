@@ -1,7 +1,21 @@
+import {
+  adminAndOwnerRoles,
+  allEmployeeRoles,
+  employeeAdmin,
+  employeeGuest,
+  employeeMember,
+  employeeOwner,
+} from "./employeeRoleMiddleware.js";
 import { getCurrentEmployee } from "./getCurrentEmployee.js";
 import { getCurrentWorkspace } from "./getCurrentWorkspace.js";
 
-
 export {
-    getCurrentEmployee, getCurrentWorkspace, 
-}
+  adminAndOwnerRoles,
+  allEmployeeRoles,
+  employeeAdmin,
+  employeeGuest,
+  employeeMember,
+  employeeOwner,
+  getCurrentEmployee,
+  getCurrentWorkspace,
+};

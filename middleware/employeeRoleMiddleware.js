@@ -1,4 +1,4 @@
-import { PrismaClient, EmployeeRole } from "@prisma/client";
+import { EmployeeRole, PrismaClient } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
@@ -20,7 +20,8 @@ function employeeRoleBasedMiddleware(allowedRoles) {
 
       if (!employee || !allowedRoles.includes(employee.role)) {
         return res.status(403).json({
-          error: "User does not have the required role in this workspace",
+          error:
+            "User does not have the required role or does not belong to this workspace",
         });
       }
 
@@ -35,31 +36,29 @@ function employeeRoleBasedMiddleware(allowedRoles) {
 }
 
 // Specific role-based middleware functions
-export const employeeMember = employeeRoleBasedMiddleware([
-  EmployeeRole.MEMBER,
-]);
-export const employeeAdmin = employeeRoleBasedMiddleware([EmployeeRole.ADMIN]);
-export const employeeOwner = employeeRoleBasedMiddleware([EmployeeRole.OWNER]);
-export const employeeGuest = employeeRoleBasedMiddleware([EmployeeRole.GUEST]);
+const employeeMember = employeeRoleBasedMiddleware([EmployeeRole.MEMBER]);
+const employeeAdmin = employeeRoleBasedMiddleware([EmployeeRole.ADMIN]);
+const employeeOwner = employeeRoleBasedMiddleware([EmployeeRole.OWNER]);
+const employeeGuest = employeeRoleBasedMiddleware([EmployeeRole.GUEST]);
 
 // Middleware for Member or Admin roles
-export const adminAndOwnerRoles = employeeRoleBasedMiddleware([
+const adminAndOwnerRoles = employeeRoleBasedMiddleware([
   EmployeeRole.OWNER,
   EmployeeRole.ADMIN,
 ]);
 
 // Middleware that includes all roles (MEMBER, ADMIN, OWNER)
-export const allEmployeeRoles = employeeRoleBasedMiddleware([
+const allEmployeeRoles = employeeRoleBasedMiddleware([
   EmployeeRole.MEMBER,
   EmployeeRole.ADMIN,
   EmployeeRole.OWNER,
 ]);
 
 export {
-  employeeMember,
-  employeeAdmin,
-  employeeOwner,
-  employeeGuest,
   adminAndOwnerRoles,
   allEmployeeRoles,
+  employeeAdmin,
+  employeeGuest,
+  employeeMember,
+  employeeOwner,
 };
