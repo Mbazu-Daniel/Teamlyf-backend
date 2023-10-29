@@ -1,0 +1,87 @@
+
+
+model Employee {
+  id            String    @id @default(cuid())
+  fullName      String?
+  displayName   String?
+  email         String?
+  birthDate     DateTime?
+  gender        String?
+  contactNumber String?
+  address       String?
+  image         String?
+  salary        Float?
+  dateJoined    DateTime?
+
+  role EmployeeRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  spaces       Space[]
+  subtasks     Subtask[]
+  taskComments TaskComment[]
+  taskHistory  TaskHistory[]
+  departmentCreator  Department[]
+
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
+
+  employeeDepartment EmployeeDepartment[]
+  invite       Invite[]
+
+  TaskCollaborator    TaskCollaborator[]
+  ProjectCollaborator ProjectCollaborator[]
+  subtaskCollaborator SubtaskCollaborator[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, workspaceId, fullName, email, gender])
+}
+
+
+model Department {
+  id    String   @id @default(cuid())
+  name  String   @unique
+  alias String?
+  type  DepartmentType @default(TEXT)
+
+  employeeId  String
+  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspaceId  String
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeDepartment EmployeeDepartment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, workspaceId, name])
+}
+
+model EmployeeDepartment {
+  id         String       @id @default(cuid())
+  employeeId String
+  departmentId     String
+  role       EmployeeRole @default(MEMBER)
+
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  department     Department     @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+enum DepartmentType {
+    TEXT
+    AUDIO
+    VIDEO
+}

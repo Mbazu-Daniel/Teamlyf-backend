@@ -1,17 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// Administration 
-
+//🧩Don't Edit this file.✨Generated in Sun Oct 29 2023 21:09:13 GMT+0100 (West Africa Standard Time)✨
 model User {
   id                 String      @id @default(cuid())
   email              String      @unique
@@ -27,7 +14,6 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-// workspace
 model Workspace {
   id         String  @id @default(cuid())
   name       String  @unique
@@ -38,16 +24,59 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees Employee[]
-  teams     Team[]
-  invite    Invite[]
-  spaces    Space[]
-  tasks     Task[]
+  employees   Employee[]
+  departments Department[]
+  invite      Invite[]
+  spaces      Space[]
+  tasks       Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId, name])
+}
+
+model Invite {
+  id             String       @id @default(cuid())
+  token          String
+  email          String
+  role           EmployeeRole @default(MEMBER)
+  expirationDate DateTime
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  invitedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("Invite")
+}
+
+enum SourceType {
+  FACEBOOK
+  TWITTER
+  INSTAGRAM
+  LINKEDIN
+  GOOGLE
+  OTHER
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Employee {
@@ -71,19 +100,19 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces       Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  teamCreator  Team[]
+  spaces            Space[]
+  subtasks          Subtask[]
+  taskComments      TaskComment[]
+  taskHistory       TaskHistory[]
+  departmentCreator Department[]
 
   taskCreator     Task[]     @relation("TaskCreator")
   taskFiles       TaskFile[]
   projectCreator  Project[]  @relation("ProjectCreator")
   assignedManager Project[]  @relation("AssignedManager")
 
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
+  employeeDepartment EmployeeDepartment[]
+  invite             Invite[]
 
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
@@ -95,19 +124,18 @@ model Employee {
   @@index([userId, workspaceId, fullName, email, gender])
 }
 
-// Team or Department
-model Team {
-  id    String   @id @default(cuid())
-  name  String   @unique
+model Department {
+  id    String         @id @default(cuid())
+  name  String         @unique
   alias String?
-  type  TeamType @default(TEXT)
+  type  DepartmentType @default(TEXT)
 
-  employeeId  String
-  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId        String
+  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  workspaceId  String
-  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeTeam EmployeeTeam[]
+  workspaceId        String
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeDepartment EmployeeDepartment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,37 +143,23 @@ model Team {
   @@index([employeeId, workspaceId, name])
 }
 
-model EmployeeTeam {
-  id         String       @id @default(cuid())
-  employeeId String
-  teamId     String
-  role       EmployeeRole @default(MEMBER)
+model EmployeeDepartment {
+  id           String       @id @default(cuid())
+  employeeId   String
+  departmentId String
+  role         EmployeeRole @default(MEMBER)
 
-  // Define the relationships with Employee and Team
-  employee Employee @relation(fields: [employeeId], references: [id])
-  team     Team     @relation(fields: [teamId], references: [id])
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Invite {
-  id             String       @id @default(cuid())
-  token          String
-  email          String
-  role           EmployeeRole @default(MEMBER)
-  expirationDate DateTime
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  employeeId String
-  invitedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("Invite")
+enum DepartmentType {
+  TEXT
+  AUDIO
+  VIDEO
 }
 
 // Project Management 
@@ -193,7 +207,6 @@ model Project {
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
-  
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
@@ -210,7 +223,6 @@ model Task {
   id            String    @id @default(cuid())
   title         String
   description   String?
-  labels        String[]
   notifications Boolean   @default(true)
   startDate     DateTime  @default(now())
   dueDate       DateTime?
@@ -219,6 +231,7 @@ model Task {
   subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
+  taskLabels   TaskLabel[]
 
   employeeId String
   createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -349,6 +362,15 @@ model TaskFile {
   taskId String?
 }
 
+model TaskLabel {
+  id String @id @default(cuid())
+
+  label String
+
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
+}
+
 // ENUMS
 enum TaskAction {
   ADDED_TASKS
@@ -399,30 +421,9 @@ enum TaskStatus {
   IN_REVIEW
 }
 
-enum TeamType {
-  TEXT
-  AUDIO
-  VIDEO
-}
-
 enum EmployeeRole {
   OWNER
   ADMIN
   MEMBER
   GUEST
-}
-
-enum SourceType {
-  FACEBOOK
-  TWITTER
-  INSTAGRAM
-  LINKEDIN
-  GOOGLE
-  OTHER
-}
-
-enum UserRole {
-  USER
-  ADMIN
-  SUPER_ADMIN
 }
