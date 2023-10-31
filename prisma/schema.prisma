@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sun Oct 29 2023 21:09:13 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Tue Oct 31 2023 16:36:50 GMT+0100 (West Africa Standard Time)✨
 model User {
   id                 String      @id @default(cuid())
   email              String      @unique
@@ -87,10 +87,18 @@ model Employee {
   birthDate     DateTime?
   gender        String?
   contactNumber String?
-  address       String?
+  // address
+  street        String?
+  city          String?
+  state         String?
+  zipCode       String?
+  country       String?
   image         String?
   salary        Float?
   dateJoined    DateTime?
+  leaveDate     DateTime?
+  bloodGroup    String?
+  isActive      Boolean   @default(true)
 
   role EmployeeRole @default(MEMBER)
 
@@ -118,17 +126,20 @@ model Employee {
   ProjectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  attendance Attendance[]
+  leave      Leave[]
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Education Education[]
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
 
 model Department {
-  id    String         @id @default(cuid())
-  name  String         @unique
+  id    String  @id @default(cuid())
+  name  String  @unique
   alias String?
-  type  DepartmentType @default(TEXT)
 
   employeeId        String
   departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -156,10 +167,69 @@ model EmployeeDepartment {
   updatedAt DateTime @updatedAt
 }
 
-enum DepartmentType {
-  TEXT
-  AUDIO
-  VIDEO
+model Attendance {
+  id            String    @id @default(cuid())
+  inTime        DateTime
+  outTime       DateTime?
+  ip            String?
+  comment       String?
+  punchBy       Int?
+  totalHour     Float?
+  inTimeStatus  String?
+  outTimeStatus String?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leave {
+  id String @id @default(cuid())
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  leaveType       String
+  leaveFrom       DateTime
+  leaveTo         DateTime
+  acceptLeaveFrom DateTime?
+  acceptLeaveTo   DateTime?
+  acceptLeaveBy   String? //add relationship with employeee
+  leaveDuration   Int?
+  reason          String?
+  reviewComment   String?
+  attachment      String?
+  status          LeaveStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LeaveStatus {
+  APPROVED
+  PENDING
+  CANCELED
+  DECLINED
 }
 
 // Project Management 

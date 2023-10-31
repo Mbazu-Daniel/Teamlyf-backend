@@ -1,5 +1,3 @@
-
-
 model Employee {
   id            String    @id @default(cuid())
   fullName      String?
@@ -8,10 +6,18 @@ model Employee {
   birthDate     DateTime?
   gender        String?
   contactNumber String?
-  address       String?
+  // address
+  street        String?
+  city          String?
+  state         String?
+  zipCode       String?
+  country       String?
   image         String?
   salary        Float?
   dateJoined    DateTime?
+  leaveDate     DateTime?
+  bloodGroup    String?
+  isActive      Boolean   @default(true)
 
   role EmployeeRole @default(MEMBER)
 
@@ -21,11 +27,11 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces       Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  departmentCreator  Department[]
+  spaces            Space[]
+  subtasks          Subtask[]
+  taskComments      TaskComment[]
+  taskHistory       TaskHistory[]
+  departmentCreator Department[]
 
   taskCreator     Task[]     @relation("TaskCreator")
   taskFiles       TaskFile[]
@@ -33,30 +39,32 @@ model Employee {
   assignedManager Project[]  @relation("AssignedManager")
 
   employeeDepartment EmployeeDepartment[]
-  invite       Invite[]
+  invite             Invite[]
 
   TaskCollaborator    TaskCollaborator[]
   ProjectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  attendance Attendance[]
+  leave      Leave[]
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Education Education[]
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
 
-
 model Department {
-  id    String   @id @default(cuid())
-  name  String   @unique
+  id    String  @id @default(cuid())
+  name  String  @unique
   alias String?
-  type  DepartmentType @default(TEXT)
 
-  employeeId  String
+  employeeId        String
   departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  workspaceId  String
-  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId        String
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   employeeDepartment EmployeeDepartment[]
 
   createdAt DateTime @default(now())
@@ -66,22 +74,79 @@ model Department {
 }
 
 model EmployeeDepartment {
-  id         String       @id @default(cuid())
-  employeeId String
-  departmentId     String
-  role       EmployeeRole @default(MEMBER)
+  id           String       @id @default(cuid())
+  employeeId   String
+  departmentId String
+  role         EmployeeRole @default(MEMBER)
 
-
-  employee Employee @relation(fields: [employeeId], references: [id])
-  department     Department     @relation(fields: [departmentId], references: [id])
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+model Attendance {
+  id            String    @id @default(cuid())
+  inTime        DateTime
+  outTime       DateTime?
+  ip            String?
+  comment       String?
+  punchBy       Int?
+  totalHour     Float?
+  inTimeStatus  String?
+  outTimeStatus String?
+  status        Boolean   @default(true)
 
-enum DepartmentType {
-    TEXT
-    AUDIO
-    VIDEO
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leave {
+  id String @id @default(cuid())
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  leaveType       String
+  leaveFrom       DateTime
+  leaveTo         DateTime
+  acceptLeaveFrom DateTime?
+  acceptLeaveTo   DateTime?
+  acceptLeaveBy   String? //add relationship with employeee
+  leaveDuration   Int?
+  reason          String?
+  reviewComment   String?
+  attachment      String?
+  status          LeaveStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum LeaveStatus {
+  APPROVED
+  PENDING
+  CANCELED
+  DECLINED
 }
