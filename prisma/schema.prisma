@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sun Nov 05 2023 07:55:10 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Sun Nov 05 2023 11:41:08 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider = "prisma-client-js"
@@ -80,6 +80,8 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+// TODO: APPRAISAL, JOB, AWARDS, PAYSLIP,  CONTRACT, EMPLOYEE DOCUMENT, COMPAINT, TRAINING
+
 model Employee {
   id            String    @id @default(cuid())
   fullName      String?
@@ -131,10 +133,12 @@ model Employee {
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  Payslip      Payslip[]
+  PaySlip      PaySlip[]
   LeaveComment LeaveComment[]
   LeaveType    LeaveType[]
   Job          Job[]
+  Timesheet    Timesheet[]
+  Payroll      Payroll[]
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
@@ -171,18 +175,18 @@ model EmployeeDepartment {
 }
 
 model Attendance {
-  id            String           @id @default(cuid())
-  punchInTime   DateTime
-  punchOutTime  DateTime?
-  ip            String?
-  comment       String?
-  punchBy       Int?
-  totalHour     Float?
-  inTimeStatus  String?
-  outTimeStatus String?
-  state         AttendanceStatus
-  employeeId    String
-  employee      Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -191,21 +195,21 @@ model Attendance {
 model Leave {
   id String @id @default(cuid())
 
-  employeeId String
-  acceptedBy Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
+  appliedDate   DateTime       @default(now())
   startDate     DateTime
   endDate       DateTime
-  appliedDate   DateTime?
   acceptedDate  DateTime?
-  leaveDuration Int?
+  duration      Int
   reason        String?
   leaveType     LeaveType[]
   reviewComment LeaveComment[]
-  attachment    String?
   status        LeaveStatus    @default(PENDING)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Education {
@@ -226,38 +230,26 @@ model Education {
   updatedAt DateTime @updatedAt
 }
 
-model Payslip {
-  id                String        @id @default(cuid())
-  salaryMonth       Int
-  salaryYear        Int
-  salary            Float
-  paidLeave         Int
-  unpaidLeave       Int
-  monthlyHoliday    Int
-  publicHoliday     Int
-  workDay           Int
-  shiftWiseWorkHour Float
-  monthlyWorkHour   Float
-  hourlySalary      Float
-  workingHour       Float
-  salaryPayable     Float
-  bonus             Float
-  bonusComment      String?
-  deduction         Float
-  deductionComment  String?
-  totalPayable      Float
-  paymentStatus     PaymentStatus @default(UNPAID)
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  @@unique([employeeId, salaryMonth, salaryYear])
+model PaySlip {
+  id                   String        @id @default(cuid())
+  netPayble            Float
+  basicSalary          Float
+  salaryMonth          String
+  status               PaymentStatus @default(UNPAID)
+  allowance            Float
+  commission           Float
+  loan                 Float
+  saturation_deduction Float
+  other_payment        Float
+  overtime             Float
+  created_by           String
+  employee_id          String
+  employee             Employee      @relation(fields: [employee_id], references: [id])
 }
 
 model LeaveComment {
-  id       String @id @default(cuid())
+  id String @id @default(cuid())
+
   comments String
 
   employeeId String
@@ -323,8 +315,97 @@ model Job {
   experience    String
   employee      Employee? @relation(fields: [employeeId], references: [id])
   employeeId    String?
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// PAYMENT
+
+model Payroll {
+  id          String       @id @default(cuid())
+  employeeId  String
+  salary      Float
+  payPeriod   String
+  paymentDate DateTime
+  deductions  Deduction[]
+  commissions Commission[]
+  bonuses     Bonus[]
+
+  creatorId String
+  createdBy Employee  @relation(fields: [creatorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Payslip   Payslip[]
+}
+
+model Deduction {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Commission {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Bonus {
+  id          String @id @default(cuid())
+  name        String
+  amount      Float
+  description String
+
+  payrollId String
+  payroll   Payroll  @relation(fields: [payrollId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId String?
+}
+
+model Payslip {
+  id            String       @id @default(cuid())
+  payroll       Payroll      @relation(fields: [payrollId], references: [id])
+  payrollId     String
+  payPeriod     String
+  paymentDate   DateTime
+  employeeName  String
+  employeeId    String
+  grossEarnings Float
+  netPay        Float
+  taxes         Float
+  deductions    Deduction[]
+  commissions   Commission[]
+  bonuses       Bonus[]
 }
 
 enum PaymentStatus {
