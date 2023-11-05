@@ -29,8 +29,8 @@ model Project {
 
     isFavourite Boolean @default(false)
 
-    priority      TaskPriority @default(NORMAL)
-    priorityColor String?
+    status      TaskStatus @default(TO_DO)
+    statusColor String?
 
     projectProgress Int?
 
@@ -80,16 +80,19 @@ model Task {
     projectId String?
     project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    status              TaskStatus            @default(TO_DO)
-    statusColor         String?
-    priority            TaskPriority          @default(NORMAL)
-    priorityColor       String?
+    status        TaskStatus   @default(TO_DO)
+    statusColor   String?
+    priority      TaskPriority @default(NORMAL)
+    priorityColor String?
+
     subtaskCollaborator SubtaskCollaborator[]
     taskFiles           TaskFile[]
 
     workspaceId String
     workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
+milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+  milestoneId String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
@@ -101,7 +104,8 @@ model Subtask {
     startDate DateTime
     dueDate   DateTime?
 
-    status              TaskStatus            @default(TO_DO)
+    status TaskStatus @default(TO_DO)
+
     subtaskCollaborator SubtaskCollaborator[]
 
     employeeId String
@@ -201,10 +205,43 @@ model TaskFile {
 model TaskLabel {
     id String @id @default(cuid())
 
-    label    String
+    label String
 
     tasks  Task?   @relation(fields: [taskId], references: [id])
     taskId String?
+}
+
+// model TaskStatus {
+//     id        String     @id @default(cuid())
+//     name      String
+//     color     String?
+//     status    Boolean @default(true)
+//     task      Task[]
+//     project Project[]
+//     subTask Subtask[]
+
+//     @@unique([name])
+// }
+
+// model TaskPriority {
+//     id     String     @id @default(cuid())
+//     name   String  @unique
+//     color String?
+//     status Boolean @default(true)
+//     task   Task[]
+// }
+
+model Milestone {
+    id          String   @id @default(cuid())
+    name        String
+    startDate   DateTime
+    endDate     DateTime
+    description String
+    status      TaskStatus   @default(PENDING) //progress, completed, or delayed.
+    task        Task[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 // ENUMS
@@ -256,8 +293,6 @@ enum TaskStatus {
     ON_HOLD
     IN_REVIEW
 }
-
-
 
 enum EmployeeRole {
     OWNER
