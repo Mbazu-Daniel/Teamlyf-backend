@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sun Nov 05 2023 11:41:08 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Sat Nov 25 2023 12:44:38 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider = "prisma-client-js"
@@ -22,6 +22,7 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Group     Group[]
 }
 
 model Workspace {
@@ -42,6 +43,7 @@ model Workspace {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Group     Group[]
 
   @@index([userId, name])
 }
@@ -79,354 +81,7 @@ enum UserRole {
   ADMIN
   SUPER_ADMIN
 }
-
-// TODO: APPRAISAL, JOB, AWARDS, PAYSLIP,  CONTRACT, EMPLOYEE DOCUMENT, COMPAINT, TRAINING
-
-model Employee {
-  id            String    @id @default(cuid())
-  fullName      String?
-  displayName   String?
-  email         String?
-  birthDate     DateTime?
-  gender        String?
-  contactNumber String?
-  address       Json?
-
-  image         String?
-  salary        Float?
-  dateJoined    DateTime?
-  leaveDate     DateTime?
-  bloodGroup    String?
-  ethnicRace    String?
-  maritalStatus String?
-  isActive      Boolean   @default(true)
-
-  role EmployeeRole @default(MEMBER)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  spaces            Space[]
-  subtasks          Subtask[]
-  taskComments      TaskComment[]
-  taskHistory       TaskHistory[]
-  departmentCreator Department[]
-
-  taskCreator     Task[]     @relation("TaskCreator")
-  taskFiles       TaskFile[]
-  projectCreator  Project[]  @relation("ProjectCreator")
-  assignedManager Project[]  @relation("AssignedManager")
-
-  employeeDepartment EmployeeDepartment[]
-  invite             Invite[]
-
-  TaskCollaborator    TaskCollaborator[]
-  ProjectCollaborator ProjectCollaborator[]
-  subtaskCollaborator SubtaskCollaborator[]
-
-  attendance Attendance[]
-  leave      Leave[]
-  Education  Education[]
-
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  PaySlip      PaySlip[]
-  LeaveComment LeaveComment[]
-  LeaveType    LeaveType[]
-  Job          Job[]
-  Timesheet    Timesheet[]
-  Payroll      Payroll[]
-
-  @@index([userId, workspaceId, fullName, email, gender])
-}
-
-model Department {
-  id    String  @id @default(cuid())
-  name  String  @unique
-  alias String?
-
-  employeeId        String
-  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  workspaceId        String
-  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeDepartment EmployeeDepartment[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId, workspaceId, name])
-}
-
-model EmployeeDepartment {
-  id           String       @id @default(cuid())
-  employeeId   String
-  departmentId String
-  role         EmployeeRole @default(MEMBER)
-
-  employee   Employee   @relation(fields: [employeeId], references: [id])
-  department Department @relation(fields: [departmentId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Attendance {
-  id           String           @id @default(cuid())
-  clockIn      DateTime
-  clockOut     DateTime?
-  totalHour    Float?
-  late         Float?
-  earlyLeaving Float?
-  overtime     Float?
-  break        Float?
-  state        AttendanceStatus
-
-  employeeId String
-  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Leave {
-  id String @id @default(cuid())
-
-  appliedDate   DateTime       @default(now())
-  startDate     DateTime
-  endDate       DateTime
-  acceptedDate  DateTime?
-  duration      Int
-  reason        String?
-  leaveType     LeaveType[]
-  reviewComment LeaveComment[]
-  status        LeaveStatus    @default(PENDING)
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Education {
-  id String @id @default(cuid())
-
-  institution   String?
-  courseOfStudy String?
-  result        String?
-  degree        String?
-  startDate     DateTime?
-  endDate       DateTime?
-  status        Boolean   @default(true)
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PaySlip {
-  id                   String        @id @default(cuid())
-  netPayble            Float
-  basicSalary          Float
-  salaryMonth          String
-  status               PaymentStatus @default(UNPAID)
-  allowance            Float
-  commission           Float
-  loan                 Float
-  saturation_deduction Float
-  other_payment        Float
-  overtime             Float
-  created_by           String
-  employee_id          String
-  employee             Employee      @relation(fields: [employee_id], references: [id])
-}
-
-model LeaveComment {
-  id String @id @default(cuid())
-
-  comments String
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  leave   Leave?  @relation(fields: [leaveId], references: [id])
-  leaveId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model LeaveType {
-  id    String @id @default(cuid())
-  title String
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  leave   Leave?  @relation(fields: [leaveId], references: [id])
-  leaveId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model PerformanceAppraisal {
-  id String @id @default(cuid())
-
-  appraisalDate      DateTime
-  rating             Float
-  comments           String
-  goals              String
-  achievements       String
-  managerComments    String
-  appraisalQuestions Json
-  AppraisalResponse  AppraisalResponse[]
-}
-
-model AppraisalResponse {
-  id String @id @default(cuid())
-
-  appraisalId          String
-  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
-
-  question String
-  response String
-}
-
-// Job Board 
-model Job {
-  id            String    @id @default(cuid())
-  title         String
-  description   String
-  email         String
-  address       String
-  salaryRange   Int
-  noOfPositions Int
-  company       String
-  types         String
-  education     String
-  industry      String
-  experience    String
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  employeeId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// PAYMENT
-
-model Payroll {
-  id          String       @id @default(cuid())
-  employeeId  String
-  salary      Float
-  payPeriod   String
-  paymentDate DateTime
-  deductions  Deduction[]
-  commissions Commission[]
-  bonuses     Bonus[]
-
-  creatorId String
-  createdBy Employee  @relation(fields: [creatorId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Payslip   Payslip[]
-}
-
-model Deduction {
-  id          String   @id @default(cuid())
-  payroll     Payroll  @relation(fields: [payrollId], references: [id])
-  payrollId   String
-  name        String
-  amount      Float
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
-  payslipId   String?
-}
-
-model Commission {
-  id          String   @id @default(cuid())
-  payroll     Payroll  @relation(fields: [payrollId], references: [id])
-  payrollId   String
-  name        String
-  amount      Float
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
-  payslipId   String?
-}
-
-model Bonus {
-  id          String @id @default(cuid())
-  name        String
-  amount      Float
-  description String
-
-  payrollId String
-  payroll   Payroll  @relation(fields: [payrollId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
-  payslipId String?
-}
-
-model Payslip {
-  id            String       @id @default(cuid())
-  payroll       Payroll      @relation(fields: [payrollId], references: [id])
-  payrollId     String
-  payPeriod     String
-  paymentDate   DateTime
-  employeeName  String
-  employeeId    String
-  grossEarnings Float
-  netPay        Float
-  taxes         Float
-  deductions    Deduction[]
-  commissions   Commission[]
-  bonuses       Bonus[]
-}
-
-enum PaymentStatus {
-  UNPAID
-  PAID
-}
-
-enum AttendanceStatus {
-  PUNCHED_IN
-  PUNCHED_OUT
-}
-
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 // Project Management 
-
-// subspace
 model Space {
   id    String @id @default(cuid())
   title String
@@ -493,7 +148,7 @@ model Task {
   subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
-  taskLabels   TaskLabel[]
+  labels       String?
 
   employeeId String
   createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -628,15 +283,6 @@ model TaskFile {
   taskId String?
 }
 
-model TaskLabel {
-  id String @id @default(cuid())
-
-  label String
-
-  tasks  Task?   @relation(fields: [taskId], references: [id])
-  taskId String?
-}
-
 // model TaskStatus {
 //     id        String     @id @default(cuid())
 //     name      String
@@ -725,4 +371,416 @@ enum EmployeeRole {
   ADMIN
   MEMBER
   GUEST
+}
+
+// TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+
+model Employee {
+  id            String    @id @default(cuid())
+  fullName      String?
+  displayName   String?
+  email         String?
+  birthDate     DateTime?
+  gender        String?
+  contactNumber String?
+  address       Json?
+  image         String?
+  salary        Float?
+  dateJoined    DateTime?
+  leaveDate     DateTime?
+  bloodGroup    String?
+  ethnicRace    String?
+  maritalStatus String?
+  isActive      Boolean   @default(true)
+
+  role EmployeeRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  spaces            Space[]
+  subtasks          Subtask[]
+  taskComments      TaskComment[]
+  taskHistory       TaskHistory[]
+  departmentCreator Department[]
+
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
+
+  employeeDepartment EmployeeDepartment[]
+  invite             Invite[]
+
+  taskCollaborator    TaskCollaborator[]
+  projectCollaborator ProjectCollaborator[]
+  subtaskCollaborator SubtaskCollaborator[]
+
+  attendance   Attendance[]
+  leave        Leave[]
+  education    Education[]
+  leaveComment LeaveComment[]
+  leaveType    LeaveType[]
+  job          Job[]
+  timesheet    Timesheet[]
+  payroll      Payroll[]
+
+  messages               Message[]
+  conversationsInitiated Conversation[]  @relation("EmployeeOne")
+  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  directMessages         DirectMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, workspaceId, fullName, email, gender])
+}
+
+model Department {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  alias String?
+
+  employeeId        String
+  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspaceId        String
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeDepartment EmployeeDepartment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, workspaceId, name])
+}
+
+model EmployeeDepartment {
+  id           String       @id @default(cuid())
+  employeeId   String
+  departmentId String
+  role         EmployeeRole @default(MEMBER)
+
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leave {
+  id String @id @default(cuid())
+
+  appliedDate   DateTime       @default(now())
+  startDate     DateTime
+  endDate       DateTime
+  acceptedDate  DateTime?
+  duration      Int
+  reason        String?
+  leaveType     LeaveType[]
+  reviewComment LeaveComment[]
+  status        LeaveStatus    @default(PENDING)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveComment {
+  id String @id @default(cuid())
+
+  comments String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveType {
+  id    String @id @default(cuid())
+  title String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  AppraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+}
+
+// PAYMENT
+
+model Payroll {
+  id          String       @id @default(cuid())
+  employeeId  String
+  salary      Float
+  payPeriod   String
+  paymentDate DateTime
+  deductions  Deduction[]
+  commissions Commission[]
+  bonuses     Bonus[]
+
+  creatorId String
+  createdBy Employee  @relation(fields: [creatorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Payslip   Payslip[]
+}
+
+model Deduction {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Commission {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Bonus {
+  id          String @id @default(cuid())
+  name        String
+  amount      Float
+  description String
+
+  payrollId String
+  payroll   Payroll  @relation(fields: [payrollId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId String?
+}
+
+model Payslip {
+  id            String       @id @default(cuid())
+  payroll       Payroll      @relation(fields: [payrollId], references: [id])
+  payrollId     String
+  payPeriod     String
+  paymentDate   DateTime
+  employeeName  String
+  employeeId    String
+  grossEarnings Float
+  netPay        Float
+  taxes         Float
+  deductions    Deduction[]
+  commissions   Commission[]
+  bonuses       Bonus[]
+}
+model Job {
+  id            String    @id @default(cuid())
+  title         String
+  category      String?
+  requirement   String
+  branch        String?
+  email         String
+  address       String
+  
+  salaryRange   Int
+  noOfPositions Int
+  company       String
+  types         String
+  education     String
+  industry      String
+  experience    String
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  employeeId    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum AttendanceStatus {
+  PUNCHED_IN
+  PUNCHED_OUT
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Group {
+  id   String    @id @default(cuid())
+  name String
+  type GroupType @default(TEXT)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Message {
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  fileUrl String? @db.Text
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([groupId])
+  @@index([employeeId])
+}
+
+model Conversation {
+  id String @id @default(cuid())
+
+  employeeOneId String
+  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+
+  employeeTwoId String
+  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+
+  directMessages DirectMessage[]
+
+  @@unique([employeeOneId, employeeTwoId])
+  @@index([employeeTwoId, employeeOneId])
+}
+
+model DirectMessage {
+  id      String  @id @default(cuid())
+  content String  @db.Text
+  fileUrl String? @db.Text
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, conversationId])
+}
+
+enum GroupType {
+  TEXT
+  AUDIO
+  VIDEO
 }

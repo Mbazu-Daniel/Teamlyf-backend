@@ -1,6 +1,5 @@
 // Project Management 
 
-// subspace
 model Space {
     id    String @id @default(cuid())
     title String
@@ -67,7 +66,7 @@ model Task {
     subtasks     Subtask[]
     taskComments TaskComment[]
     taskHistory  TaskHistory[]
-    taskLabels   TaskLabel[]
+    labels   String?
 
     employeeId String
     createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -197,15 +196,6 @@ model TaskFile {
     file_size  Int
     employeeId String?
     uploadedBy Employee? @relation(fields: [employeeId], references: [id])
-
-    tasks  Task?   @relation(fields: [taskId], references: [id])
-    taskId String?
-}
-
-model TaskLabel {
-    id String @id @default(cuid())
-
-    label String
 
     tasks  Task?   @relation(fields: [taskId], references: [id])
     taskId String?

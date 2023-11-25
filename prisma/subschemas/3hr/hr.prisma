@@ -1,4 +1,4 @@
-// TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPAINT, TRAINING
+// TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
 
 model Employee {
   id            String    @id @default(cuid())
@@ -9,7 +9,6 @@ model Employee {
   gender        String?
   contactNumber String?
   address       Json?
-
   image         String?
   salary        Float?
   dateJoined    DateTime?
@@ -41,16 +40,27 @@ model Employee {
   employeeDepartment EmployeeDepartment[]
   invite             Invite[]
 
-  TaskCollaborator    TaskCollaborator[]
-  ProjectCollaborator ProjectCollaborator[]
+  taskCollaborator    TaskCollaborator[]
+  projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  attendance Attendance[]
-  leave      Leave[]
-  Education  Education[]
+  attendance   Attendance[]
+  leave        Leave[]
+  education    Education[]
+  leaveComment LeaveComment[]
+  leaveType    LeaveType[]
+  job          Job[]
+  timesheet    Timesheet[]
+  payroll      Payroll[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  messages       Message[]
+  conversationsInitiated Conversation[] @relation("EmployeeOne")
+  conversationsReceived Conversation[] @relation("EmployeeTwo")
+  directMessages DirectMessage[]
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([userId, workspaceId, fullName, email, gender])
 }
@@ -104,6 +114,20 @@ model Attendance {
   updatedAt DateTime @updatedAt
 }
 
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Leave {
   id String @id @default(cuid())
 
@@ -141,24 +165,6 @@ model Education {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-model PaySlip {
-  id                   String        @id @default(cuid())
-  netPayble            Float
-  basicSalary          Float
-  salaryMonth          String
-  status               PaymentStatus @default(UNPAID)
-  allowance            Float
-  commission           Float
-  loan                 Float
-  saturation_deduction Float
-  other_payment        Float
-  overtime             Float
-  created_by           String
-  employee_id          String
-  employee             Employee      @relation(fields: [employee_id], references: [id])
-}
-
 model LeaveComment {
   id String @id @default(cuid())
 
@@ -210,39 +216,9 @@ model AppraisalResponse {
   response String
 }
 
-// Job Board 
-model Job {
-  id            String    @id @default(cuid())
-  title         String
-  description   String
-  email         String
-  address       String
-  salaryRange   Int
-  noOfPositions Int
-  company       String
-  types         String
-  education     String
-  industry      String
-  experience    String
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  employeeId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
 
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
 
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
 
 // PAYMENT
 
@@ -310,6 +286,28 @@ model Payslip {
   deductions    Deduction[]
   commissions   Commission[]
   bonuses       Bonus[]
+}
+
+// Job Board 
+model Job {
+  id            String    @id @default(cuid())
+  title         String
+  category String?
+  requirement   String
+  branch  String?
+  email         String
+  address       String
+  salaryRange   Int
+  noOfPositions Int
+  company       String
+  types         String
+  education     String
+  industry      String
+  experience    String
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  employeeId    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 enum PaymentStatus {
