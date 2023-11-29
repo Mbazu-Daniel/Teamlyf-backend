@@ -1,7 +1,10 @@
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import helmet from "helmet";
+import morgan from "morgan";
 
 import {
   authRouter,
@@ -21,11 +24,24 @@ dotenv.config();
 
 const app = express();
 
-
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: ["*"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+// Helmet for setting secure HTTP headers
+app.use(helmet());
+
+// Morgan for HTTP request logging
+app.use(morgan("dev"));
 
 // ENDPOINTS
 app.get("/", (req, res) => {
