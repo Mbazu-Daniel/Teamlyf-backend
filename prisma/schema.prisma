@@ -2,39 +2,12 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  // binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator joi {
-  provider = "prisma-joi-generator"
-  output   = "./generated-joi-schemas"
-}
-
-generator markdown {
-  provider = "prisma-markdown"
-  output   = "./ERD.md"
-  title    = "TeamLyf ERD"
-}
-
-generator dbml {
-  provider   = "prisma-dbml-generator"
-  output     = "./dbml"
-  outputName = "teamlyf.dbml"
-}
-
-generator erd {
-  provider                  = "prisma-erd-generator"
-  includeRelationFromFields = true
-  disableEmoji              = true
-  ignoreEnums               = true
-  tableOnly                 = true
-  erdDebug                  = true
-  output                    = "./ERD.svg"
 }
 
 model User {
