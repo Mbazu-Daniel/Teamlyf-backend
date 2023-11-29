@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "npx supervisor server.js",
+    "start": "pm2 start server.js",
     "watch": "node --watch server.js"
   },
   "dependencies": {
