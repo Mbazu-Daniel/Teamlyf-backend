@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "pm2 start server.js",
-    "watch": "node --watch server.js"
+    "start": "node --watch server.js",
+    "watch": "pm2 start server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.4.2",
