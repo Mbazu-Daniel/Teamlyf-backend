@@ -1,12 +1,40 @@
 //🧩Don't Edit this file.✨Generated in Sat Nov 25 2023 12:44:38 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+generator joi {
+  provider = "prisma-joi-generator"
+  output   = "./generated-joi-schemas"
+}
+
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "./ERD.md"
+  title    = "TeamLyf ERD"
+}
+
+generator dbml {
+  provider   = "prisma-dbml-generator"
+  output     = "./dbml"
+  outputName = "teamlyf.dbml"
+}
+
+generator erd {
+  provider                  = "prisma-erd-generator"
+  includeRelationFromFields = true
+  disableEmoji              = true
+  ignoreEnums               = true
+  tableOnly                 = true
+  erdDebug                  = true
+  output                    = "./ERD.svg"
 }
 
 model User {
@@ -81,6 +109,7 @@ enum UserRole {
   ADMIN
   SUPER_ADMIN
 }
+
 // Project Management 
 model Space {
   id    String @id @default(cuid())
@@ -666,15 +695,16 @@ model Payslip {
   commissions   Commission[]
   bonuses       Bonus[]
 }
+
 model Job {
-  id            String    @id @default(cuid())
-  title         String
-  category      String?
-  requirement   String
-  branch        String?
-  email         String
-  address       String
-  
+  id          String  @id @default(cuid())
+  title       String
+  category    String?
+  requirement String
+  branch      String?
+  email       String
+  address     String
+
   salaryRange   Int
   noOfPositions Int
   company       String
