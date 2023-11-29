@@ -7,7 +7,7 @@ import spaceRouter from "./spaces/spaces.routes.js";
 import subtaskRouter from "./subTasks/subTasks.routes.js";
 import taskRouter from "./tasks/tasks.routes.js";
 import taskCommentRouter from "./tasksComments/tasksComments.routes.js";
-import taskFileRouter from "./tasksFile/tasksfile.routes.js";
+import taskFileRouter from "./tasksFile/tasksFile.routes.js";
 import teamsRouter from "./teams/teams.routes.js";
 import userRouter from "./users/users.routes.js";
 import workspaceRouter from "./workspaces/workspaces.routes.js";
