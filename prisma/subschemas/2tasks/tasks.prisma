@@ -15,6 +15,8 @@ model Space {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@index([title, workspaceId, employeeId])
 }
 
 // Todo: Add Team to this model ?
@@ -66,7 +68,7 @@ model Task {
     subtasks     Subtask[]
     taskComments TaskComment[]
     taskHistory  TaskHistory[]
-    labels   String?
+    labels       String?
 
     employeeId String
     createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -90,10 +92,10 @@ model Task {
     workspaceId String
     workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-milestone   Milestone? @relation(fields: [milestoneId], references: [id])
-  milestoneId String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+    milestoneId String?
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
 }
 
 model Subtask {
@@ -222,12 +224,12 @@ model TaskFile {
 // }
 
 model Milestone {
-    id          String   @id @default(cuid())
+    id          String     @id @default(cuid())
     name        String
     startDate   DateTime
     endDate     DateTime
     description String
-    status      TaskStatus   @default(PENDING) //progress, completed, or delayed.
+    status      TaskStatus @default(PENDING) //progress, completed, or delayed.
     task        Task[]
 
     createdAt DateTime @default(now())

@@ -6,6 +6,13 @@ import sendMail from "../services/sendMail.js";
 
 const prisma = new PrismaClient();
 
+// TODO: Update this code to send template
+// TODO: fix the bug on this code with the one on Ovasite
+// TODO: new users and employee to be added to the platform or organization through the workspace invite code
+// TODO: function to regenerate workspace inviteCode
+
+// TODO: function to leave a workspace (this should not CASCADE delete, the user information should still be available)
+
 const url = "http://localhost:8000/api/v1";
 
 const generateInviteLink = asyncHandler(async (req, res) => {
