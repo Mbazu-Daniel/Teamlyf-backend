@@ -194,8 +194,10 @@ model SubtaskCollaborator {
 model TaskFile {
     id         String    @id @default(cuid())
     name       String
-    file_type  String
-    file_size  Int
+    fileType   String
+    fileSize   Int
+    fileFormat String
+    fileUrl    String
     employeeId String?
     uploadedBy Employee? @relation(fields: [employeeId], references: [id])
 

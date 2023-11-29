@@ -12,7 +12,12 @@
 //generator client {
 //  provider = "prisma-client-js"
 //}
+// generator joi {
+//   provider   = "prisma-joi-generator"
+//   output     = "./generated-joi-schemas"
+// }
 //datasource db {
 //  provider = "postgresql"
 //  url      = env("DATABASE_URL")
+//  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 //}
