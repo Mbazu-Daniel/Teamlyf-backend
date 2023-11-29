@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 // TODO: Update this code to send template
 // TODO: fix the bug on this code with the one on Ovasite
-// TODO: new users and employee to be added to the platform or organization through the workspace invite code
+// TODO: new users and employee to be added to the platform or workspace through the workspace invite code
 // TODO: function to regenerate workspace inviteCode
 
 // TODO: function to leave a workspace (this should not CASCADE delete, the user information should still be available)
@@ -56,7 +56,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
         role,
         expirationDate: expireDate,
         workspace: { connect: { id: workspaceId } },
-        invitedBy: { connect: {id: req.employeeId  } },
+        invitedBy: { connect: { id: req.employeeId } },
       },
     });
 
@@ -86,8 +86,6 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
 const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
-  const { fullName, email, password } = req.body;
-  const lowercasedEmail = email.toLowerCase();
 
   try {
     // Find the invite link in the database using Prisma
@@ -101,16 +99,6 @@ const joinWorkspace = asyncHandler(async (req, res) => {
         .json({ error: "Invite link not found or expired" });
     }
 
-    // Check if the provided email matches the one associated with the invite link
-    if (lowercasedEmail !== invite.email) {
-      return res.status(400).json({ error: "Invalid email address" });
-    }
-
-    // Check if the user already exists with this email
-    let existingUser = await prisma.user.findUnique({
-      where: { email: lowercasedEmail },
-    });
-
     // Check if the workspace exists
     const workspace = await prisma.workspace.findUnique({
       where: { id: invite.workspaceId },
@@ -120,57 +108,71 @@ const joinWorkspace = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: "workspace not found" });
     }
 
-    // Hash the user's password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const invitedEmail = invite.email.toLowerCase();
 
-    // If the user doesn't exist, create a new user
-    if (!existingUser) {
-      existingUser = await prisma.user.create({
+    let existingUser = await prisma.user.findUnique({
+      where: { email: invitedEmail },
+    });
+
+    // If the user doesn't exist, prompt user to provide details
+    if (existingUser) {
+      // Create a new employee record
+      const newEmployee = await prisma.employee.create({
         data: {
-          email: lowercasedEmail,
-          password: hashedPassword,
-          workspaces: { connect: { id: invite.workspaceId } },
+          email: invitedEmail,
+          workspace: { connect: { id: workspace.id } },
+          role: invite.role,
+          user: { connect: { id: existingUser.id } },
         },
       });
-    } else {
-      // If the user already exists, add the workspace to their workspaces array
-      existingUser = await prisma.user.update({
-        where: { email: lowercasedEmail },
-        data: {
-          workspaces: {
-            connect: { id: invite.workspaceId },
-          },
-        },
+      const toDeleteInvite = await prisma.invite.findFirst({
+        where: { token: inviteToken },
       });
+      await prisma.invite.delete({
+        where: { id: toDeleteInvite.id, token: inviteToken },
+      });
+      return res.status(200).json(newEmployee);
     }
 
-    // Create a new employee record
+    let { fullName, email, password } = req.body;
+    if (!fullName || email || !password ) {
+      return res
+        .status(400)
+        .json({ error: "Full name, email and password are required" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await prisma.user.create({
+      data: {
+        email: email.toLowerCase(),
+        password: hashedPassword,
+      },
+    });
+
     const newEmployee = await prisma.employee.create({
       data: {
         fullName,
-        email: lowercasedEmail,
+        email: email.toLowerCase(),
         workspace: { connect: { id: workspace.id } },
         role: invite.role,
-        user: { connect: { id: existingUser.id } },
+        user: { connect: { id: newUser.id } },
       },
     });
 
-    // Add the new employee to the workspace's employee array
-    await prisma.workspace.update({
-      where: { id: workspace.id },
-      data: {
-        employees: { connect: { id: newEmployee.id } },
-      },
-    });
-
-    // Delete the invite link as it has been used
-    await prisma.invite.deleteMany({
+    const toDeleteInvite = await prisma.invite.findFirst({
       where: { token: inviteToken },
     });
 
-    res.status(200).json( newEmployee );
+    await prisma.invite.delete({
+      where: {
+        id: toDeleteInvite.id,
+        token: inviteToken,
+      },
+    });
+
+    res.status(200).json(newEmployee);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
