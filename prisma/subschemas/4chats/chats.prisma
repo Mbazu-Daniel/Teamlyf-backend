@@ -1,7 +1,7 @@
 model Group {
   id String @id @default(cuid())
   name String
-  type GroupType @default(TEXT)
+  type MessageType @default(TEXT)
 
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -14,8 +14,7 @@ model Group {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([workspaceId])
+  @@index([userId,workspaceId, name])
 }
 
 model Message {
@@ -35,8 +34,7 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([groupId])
-  @@index([employeeId])
+  @@index([groupId,employeeId])
 }
 
 model Conversation {
@@ -51,7 +49,6 @@ model Conversation {
   directMessages DirectMessage[]
 
   @@index([employeeTwoId,employeeOneId])
-
   @@unique([employeeOneId, employeeTwoId])
 }
 
@@ -75,8 +72,14 @@ model DirectMessage {
 
 }
 
-enum GroupType {
+enum MessageType {
   TEXT
   AUDIO
   VIDEO
+}
+
+enum MessageStatus {
+  READ
+  DELIVERED
+  SENT
 }
