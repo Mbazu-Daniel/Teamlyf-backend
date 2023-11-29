@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "npx supervisor server.js",
-    "watch": "node --watch server.js"
+    "start": "npx prisma db push && node --watch server.js",
+    "watch": "pm2 start server.js"
   },
   "dependencies": {
     "@prisma/client": "^5.4.2",
@@ -23,11 +23,15 @@
     "mongoose": "^7.4.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.4",
+    "pm2": "^5.3.0",
+    "prisma-multischema": "^1.1.4",
     "resend": "^1.0.0",
     "short-unique-id": "^5.0.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+ 
     "prisma": "^5.4.1"
+    
   }
 }

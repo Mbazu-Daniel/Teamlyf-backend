@@ -1,0 +1,327 @@
+// TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+
+model Employee {
+  id            String    @id @default(cuid())
+  fullName      String?
+  displayName   String?
+  email         String?
+  birthDate     DateTime?
+  gender        String?
+  contactNumber String?
+  address       Json?
+  image         String?
+  salary        Float?
+  dateJoined    DateTime?
+  leaveDate     DateTime?
+  bloodGroup    String?
+  ethnicRace    String?
+  maritalStatus String?
+  isActive      Boolean   @default(true)
+
+  role EmployeeRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  spaces            Space[]
+  subtasks          Subtask[]
+  taskComments      TaskComment[]
+  taskHistory       TaskHistory[]
+  departmentCreator Department[]
+
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
+
+  employeeDepartment EmployeeDepartment[]
+  invite             Invite[]
+
+  taskCollaborator    TaskCollaborator[]
+  projectCollaborator ProjectCollaborator[]
+  subtaskCollaborator SubtaskCollaborator[]
+
+  attendance   Attendance[]
+  leave        Leave[]
+  education    Education[]
+  leaveComment LeaveComment[]
+  leaveType    LeaveType[]
+  job          Job[]
+  timesheet    Timesheet[]
+  payroll      Payroll[]
+
+
+  messages       Message[]
+  conversationsInitiated Conversation[] @relation("EmployeeOne")
+  conversationsReceived Conversation[] @relation("EmployeeTwo")
+  directMessages DirectMessage[]
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([userId, workspaceId, fullName, email, gender])
+}
+
+model Department {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  alias String?
+
+  employeeId        String
+  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspaceId        String
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeDepartment EmployeeDepartment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, workspaceId, name])
+}
+
+model EmployeeDepartment {
+  id           String       @id @default(cuid())
+  employeeId   String
+  departmentId String
+  role         EmployeeRole @default(MEMBER)
+
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leave {
+  id String @id @default(cuid())
+
+  appliedDate   DateTime       @default(now())
+  startDate     DateTime
+  endDate       DateTime
+  acceptedDate  DateTime?
+  duration      Int
+  reason        String?
+  leaveType     LeaveType[]
+  reviewComment LeaveComment[]
+  status        LeaveStatus    @default(PENDING)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model LeaveComment {
+  id String @id @default(cuid())
+
+  comments String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveType {
+  id    String @id @default(cuid())
+  title String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+}
+
+
+
+
+
+// PAYMENT
+
+model Payroll {
+  id          String       @id @default(cuid())
+  employeeId  String
+  salary      Float
+  payPeriod   String
+  paymentDate DateTime
+  deductions  Deduction[]
+  commissions Commission[]
+  bonuses     Bonus[]
+
+  creatorId String
+  createdBy Employee @relation(fields: [creatorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Deduction {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Commission {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Bonus {
+  id          String @id @default(cuid())
+  name        String
+  amount      Float
+  description String
+
+  payrollId String
+  payroll   Payroll  @relation(fields: [payrollId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payslip {
+  id            String       @id @default(cuid())
+  payroll       Payroll      @relation(fields: [payrollId], references: [id])
+  payrollId     String
+  payPeriod     String
+  paymentDate   DateTime
+  employeeName  String
+  employeeId    String
+  grossEarnings Float
+  netPay        Float
+  taxes         Float
+  deductions    Deduction[]
+  commissions   Commission[]
+  bonuses       Bonus[]
+}
+
+// Job Board 
+model Job {
+  id            String    @id @default(cuid())
+  title         String
+  category String?
+  requirement   String
+  branch  String?
+  email         String
+  address       String
+  salaryRange   Int
+  noOfPositions Int
+  company       String
+  types         String
+  education     String
+  industry      String
+  experience    String
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  employeeId    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum AttendanceStatus {
+  PUNCHED_IN
+  PUNCHED_OUT
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

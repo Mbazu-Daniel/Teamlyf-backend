@@ -1,0 +1,85 @@
+model Group {
+  id   String      @id @default(cuid())
+  name String
+  type MessageType @default(TEXT)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, workspaceId, name])
+}
+
+model Message {
+  id   String @id @default(cuid())
+  text String @db.Text
+
+  fileUrl String? @db.Text
+
+  deleted Boolean @default(false)
+  read  Boolean @default(false)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([groupId, employeeId])
+}
+
+model Conversation {
+  id String @id @default(cuid())
+
+  employeeOneId String
+  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+
+  employeeTwoId String
+  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+
+  directMessages DirectMessage[]
+
+  @@unique([employeeOneId, employeeTwoId])
+  @@index([employeeTwoId, employeeOneId])
+}
+
+model DirectMessage {
+  id      String  @id @default(cuid())
+  content String  @db.Text
+  fileUrl String? @db.Text
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, conversationId])
+}
+
+enum MessageType {
+  TEXT
+  AUDIO
+  VIDEO
+}
+
+enum MessageStatus {
+  READ
+  DELIVERED
+  SENT
+}

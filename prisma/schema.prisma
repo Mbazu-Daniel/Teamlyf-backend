@@ -1,8 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//🧩Don't Edit this file.✨Generated in Sat Nov 25 2023 12:44:38 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -10,7 +10,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Administration 
+generator joi {
+  provider = "prisma-joi-generator"
+  output   = "./generated-joi-schemas"
+}
+
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "./ERD.md"
+  title    = "TeamLyf ERD"
+}
+
+generator dbml {
+  provider   = "prisma-dbml-generator"
+  output     = "./dbml"
+  outputName = "teamlyf.dbml"
+}
+
+generator erd {
+  provider                  = "prisma-erd-generator"
+  includeRelationFromFields = true
+  disableEmoji              = true
+  ignoreEnums               = true
+  tableOnly                 = true
+  erdDebug                  = true
+  output                    = "./ERD.svg"
+}
 
 model User {
   id                 String      @id @default(cuid())
@@ -25,9 +50,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Group     Group[]
 }
 
-// workspace
 model Workspace {
   id         String  @id @default(cuid())
   name       String  @unique
@@ -38,95 +63,17 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees Employee[]
-  teams     Team[]
-  invite    Invite[]
-  spaces    Space[]
-  tasks     Task[]
+  employees   Employee[]
+  departments Department[]
+  invite      Invite[]
+  spaces      Space[]
+  tasks       Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Group     Group[]
 
   @@index([userId, name])
-}
-
-model Employee {
-  id            String    @id @default(cuid())
-  fullName      String?
-  displayName   String?
-  email         String?
-  birthDate     DateTime?
-  gender        String?
-  contactNumber String?
-  address       String?
-  image         String?
-  salary        Float?
-  dateJoined    DateTime?
-
-  role EmployeeRole @default(MEMBER)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  spaces       Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  teamCreator  Team[]
-
-  taskCreator     Task[]     @relation("TaskCreator")
-  taskFiles       TaskFile[]
-  projectCreator  Project[]  @relation("ProjectCreator")
-  assignedManager Project[]  @relation("AssignedManager")
-
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
-
-  TaskCollaborator    TaskCollaborator[]
-  ProjectCollaborator ProjectCollaborator[]
-  subtaskCollaborator SubtaskCollaborator[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId, workspaceId, fullName, email, gender])
-}
-
-// Team or Department
-model Team {
-  id    String   @id @default(cuid())
-  name  String   @unique
-  alias String?
-  type  TeamType @default(TEXT)
-
-  employeeId  String
-  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  workspaceId  String
-  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeTeam EmployeeTeam[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId, workspaceId, name])
-}
-
-model EmployeeTeam {
-  id         String       @id @default(cuid())
-  employeeId String
-  teamId     String
-  role       EmployeeRole @default(MEMBER)
-
-  // Define the relationships with Employee and Team
-  employee Employee @relation(fields: [employeeId], references: [id])
-  team     Team     @relation(fields: [teamId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Invite {
@@ -148,9 +95,22 @@ model Invite {
   @@map("Invite")
 }
 
-// Project Management 
+enum SourceType {
+  FACEBOOK
+  TWITTER
+  INSTAGRAM
+  LINKEDIN
+  GOOGLE
+  OTHER
+}
 
-// subspace
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Project Management 
 model Space {
   id    String @id @default(cuid())
   title String
@@ -179,8 +139,8 @@ model Project {
 
   isFavourite Boolean @default(false)
 
-  priority      TaskPriority @default(NORMAL)
-  priorityColor String?
+  status      TaskStatus @default(TO_DO)
+  statusColor String?
 
   projectProgress Int?
 
@@ -193,7 +153,6 @@ model Project {
   spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
-  
 
   projectCreatorId String?
   projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
@@ -210,7 +169,6 @@ model Task {
   id            String    @id @default(cuid())
   title         String
   description   String?
-  labels        String[]
   notifications Boolean   @default(true)
   startDate     DateTime  @default(now())
   dueDate       DateTime?
@@ -219,6 +177,7 @@ model Task {
   subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
+  labels       String?
 
   employeeId String
   createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -231,18 +190,21 @@ model Task {
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  status              TaskStatus            @default(TO_DO)
-  statusColor         String?
-  priority            TaskPriority          @default(NORMAL)
-  priorityColor       String?
+  status        TaskStatus   @default(TO_DO)
+  statusColor   String?
+  priority      TaskPriority @default(NORMAL)
+  priorityColor String?
+
   subtaskCollaborator SubtaskCollaborator[]
   taskFiles           TaskFile[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+  milestoneId String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Subtask {
@@ -252,7 +214,8 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  status              TaskStatus            @default(TO_DO)
+  status TaskStatus @default(TO_DO)
+
   subtaskCollaborator SubtaskCollaborator[]
 
   employeeId String
@@ -349,6 +312,39 @@ model TaskFile {
   taskId String?
 }
 
+// model TaskStatus {
+//     id        String     @id @default(cuid())
+//     name      String
+//     color     String?
+//     status    Boolean @default(true)
+//     task      Task[]
+//     project Project[]
+//     subTask Subtask[]
+
+//     @@unique([name])
+// }
+
+// model TaskPriority {
+//     id     String     @id @default(cuid())
+//     name   String  @unique
+//     color String?
+//     status Boolean @default(true)
+//     task   Task[]
+// }
+
+model Milestone {
+  id          String     @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String
+  status      TaskStatus @default(PENDING) //progress, completed, or delayed.
+  task        Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ENUMS
 enum TaskAction {
   ADDED_TASKS
@@ -399,12 +395,6 @@ enum TaskStatus {
   IN_REVIEW
 }
 
-enum TeamType {
-  TEXT
-  AUDIO
-  VIDEO
-}
-
 enum EmployeeRole {
   OWNER
   ADMIN
@@ -412,17 +402,415 @@ enum EmployeeRole {
   GUEST
 }
 
-enum SourceType {
-  FACEBOOK
-  TWITTER
-  INSTAGRAM
-  LINKEDIN
-  GOOGLE
-  OTHER
+// TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+
+model Employee {
+  id            String    @id @default(cuid())
+  fullName      String?
+  displayName   String?
+  email         String?
+  birthDate     DateTime?
+  gender        String?
+  contactNumber String?
+  address       Json?
+  image         String?
+  salary        Float?
+  dateJoined    DateTime?
+  leaveDate     DateTime?
+  bloodGroup    String?
+  ethnicRace    String?
+  maritalStatus String?
+  isActive      Boolean   @default(true)
+
+  role EmployeeRole @default(MEMBER)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  spaces            Space[]
+  subtasks          Subtask[]
+  taskComments      TaskComment[]
+  taskHistory       TaskHistory[]
+  departmentCreator Department[]
+
+  taskCreator     Task[]     @relation("TaskCreator")
+  taskFiles       TaskFile[]
+  projectCreator  Project[]  @relation("ProjectCreator")
+  assignedManager Project[]  @relation("AssignedManager")
+
+  employeeDepartment EmployeeDepartment[]
+  invite             Invite[]
+
+  taskCollaborator    TaskCollaborator[]
+  projectCollaborator ProjectCollaborator[]
+  subtaskCollaborator SubtaskCollaborator[]
+
+  attendance   Attendance[]
+  leave        Leave[]
+  education    Education[]
+  leaveComment LeaveComment[]
+  leaveType    LeaveType[]
+  job          Job[]
+  timesheet    Timesheet[]
+  payroll      Payroll[]
+
+  messages               Message[]
+  conversationsInitiated Conversation[]  @relation("EmployeeOne")
+  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  directMessages         DirectMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, workspaceId, fullName, email, gender])
 }
 
-enum UserRole {
-  USER
-  ADMIN
-  SUPER_ADMIN
+model Department {
+  id    String  @id @default(cuid())
+  name  String  @unique
+  alias String?
+
+  employeeId        String
+  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspaceId        String
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeDepartment EmployeeDepartment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, workspaceId, name])
+}
+
+model EmployeeDepartment {
+  id           String       @id @default(cuid())
+  employeeId   String
+  departmentId String
+  role         EmployeeRole @default(MEMBER)
+
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  department Department @relation(fields: [departmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Leave {
+  id String @id @default(cuid())
+
+  appliedDate   DateTime       @default(now())
+  startDate     DateTime
+  endDate       DateTime
+  acceptedDate  DateTime?
+  duration      Int
+  reason        String?
+  leaveType     LeaveType[]
+  reviewComment LeaveComment[]
+  status        LeaveStatus    @default(PENDING)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveComment {
+  id String @id @default(cuid())
+
+  comments String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LeaveType {
+  id    String @id @default(cuid())
+  title String
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  leave   Leave?  @relation(fields: [leaveId], references: [id])
+  leaveId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  AppraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+}
+
+// PAYMENT
+
+model Payroll {
+  id          String       @id @default(cuid())
+  employeeId  String
+  salary      Float
+  payPeriod   String
+  paymentDate DateTime
+  deductions  Deduction[]
+  commissions Commission[]
+  bonuses     Bonus[]
+
+  creatorId String
+  createdBy Employee  @relation(fields: [creatorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Payslip   Payslip[]
+}
+
+model Deduction {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Commission {
+  id          String   @id @default(cuid())
+  payroll     Payroll  @relation(fields: [payrollId], references: [id])
+  payrollId   String
+  name        String
+  amount      Float
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
+}
+
+model Bonus {
+  id          String @id @default(cuid())
+  name        String
+  amount      Float
+  description String
+
+  payrollId String
+  payroll   Payroll  @relation(fields: [payrollId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId String?
+}
+
+model Payslip {
+  id            String       @id @default(cuid())
+  payroll       Payroll      @relation(fields: [payrollId], references: [id])
+  payrollId     String
+  payPeriod     String
+  paymentDate   DateTime
+  employeeName  String
+  employeeId    String
+  grossEarnings Float
+  netPay        Float
+  taxes         Float
+  deductions    Deduction[]
+  commissions   Commission[]
+  bonuses       Bonus[]
+}
+
+model Job {
+  id          String  @id @default(cuid())
+  title       String
+  category    String?
+  requirement String
+  branch      String?
+  email       String
+  address     String
+
+  salaryRange   Int
+  noOfPositions Int
+  company       String
+  types         String
+  education     String
+  industry      String
+  experience    String
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  employeeId    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum AttendanceStatus {
+  PUNCHED_IN
+  PUNCHED_OUT
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Group {
+  id   String    @id @default(cuid())
+  name String
+  type GroupType @default(TEXT)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model Message {
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  fileUrl String? @db.Text
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([groupId])
+  @@index([employeeId])
+}
+
+model Conversation {
+  id String @id @default(cuid())
+
+  employeeOneId String
+  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+
+  employeeTwoId String
+  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+
+  directMessages DirectMessage[]
+
+  @@unique([employeeOneId, employeeTwoId])
+  @@index([employeeTwoId, employeeOneId])
+}
+
+model DirectMessage {
+  id      String  @id @default(cuid())
+  content String  @db.Text
+  fileUrl String? @db.Text
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  deleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, conversationId])
+}
+
+enum GroupType {
+  TEXT
+  AUDIO
+  VIDEO
 }
