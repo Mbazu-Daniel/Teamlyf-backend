@@ -65,11 +65,6 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
       where: {
         OR: [{ userId: id }, { employees: { some: { email } } }],
       },
-      include: {
-        employees: {
-          select: { id: true, email: true },
-        },
-      },
     });
 
     // Check if the user is not part of any workspaces
@@ -211,7 +206,7 @@ export {
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspaceById,
-  updateWorkspace,
   getWorkspaceOwners,
   transferWorkspaceOwnership,
+  updateWorkspace,
 };
