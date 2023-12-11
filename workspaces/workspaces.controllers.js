@@ -3,7 +3,6 @@ import asyncHandler from "express-async-handler";
 import ShortUniqueId from "short-unique-id";
 
 const prisma = new PrismaClient();
-// TODO: transfer ownership of workspaces to employee within the organization
 
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
@@ -201,12 +200,69 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Controller to leave a workspace
+const leaveWorkspace = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.user;
+
+  try {
+    // Check if the user is an owner of the workspace
+    const isOwner = await prisma.employee.findFirst({
+      where: {
+        userId,
+        workspaceId: id,
+        role: EmployeeRole.OWNER,
+      },
+    });
+
+    if (isOwner) {
+      return res
+        .status(400)
+        .json({
+          error: "Owners cannot leave the workspace. Transfer ownership first.",
+        });
+    }
+
+    // Check if the user is a member of the workspace
+    const isMember = await prisma.employee.findFirst({
+      where: {
+        userId,
+        workspaceId: id,
+        role: EmployeeRole.MEMBER || EmployeeRole.ADMIN || EmployeeRole.GUEST,
+      },
+    });
+
+    if (!isMember) {
+      return res
+        .status(404)
+        .json({ error: "You're not a member of this workspace." });
+    }
+
+    // Remove the user from the workspace
+    await prisma.employee.delete({
+      where: {
+        userId,
+        workspaceId: id,
+      },
+    });
+
+    res
+      .status(200)
+      .json({ message: "You have left the workspace successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   createWorkspace,
   deleteWorkspace,
   getAllWorkspaces,
   getWorkspaceById,
   getWorkspaceOwners,
+  leaveWorkspace,
   transferWorkspaceOwnership,
   updateWorkspace,
 };
