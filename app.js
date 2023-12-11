@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import compression from "compression";
 
 import {
   authRouter,
@@ -36,6 +37,9 @@ app.use(
     credentials: true,
   })
 );
+
+// compress using gzip
+app.use(compression());
 
 // Helmet for setting secure HTTP headers
 app.use(helmet());
