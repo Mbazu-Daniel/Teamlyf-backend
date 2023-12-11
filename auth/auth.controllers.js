@@ -99,7 +99,7 @@ const loginUser = asyncHandler(async (req, res) => {
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "10000h",
     });
     res
       .cookie("access_token", token, {

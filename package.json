@@ -6,10 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node --watch server.js",
-    "watch": "pm2 start server.js",
+    "pm2": "pm2 start server.js --watch",
     "dev": "npx supervisor server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.465.0",
     "@prisma/client": "^5.4.2",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
