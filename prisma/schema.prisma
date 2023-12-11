@@ -3,10 +3,11 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  relationMode  = "prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -438,7 +439,8 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workspaceId, fullName, email, gender])
+  @@index([userId, workspaceId])
+  @@index([fullName, email, gender])
 }
 
 model Department {
