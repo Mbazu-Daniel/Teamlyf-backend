@@ -34,7 +34,9 @@ model Workspace {
   updatedAt DateTime @updatedAt
   Group     Group[]
 
-  @@index([userId, name])
+  @@index([userId])
+  @@index([name])
+  
 }
 
 model Invite {

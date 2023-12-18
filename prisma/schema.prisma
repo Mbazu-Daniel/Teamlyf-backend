@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Mon Dec 18 2023 07:57:26 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Mon Dec 18 2023 09:37:45 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -47,7 +47,8 @@ model Workspace {
   updatedAt DateTime @updatedAt
   Group     Group[]
 
-  @@index([userId, name])
+  @@index([userId])
+  @@index([name])
 }
 
 model Invite {
@@ -473,6 +474,8 @@ model Employee {
 
   @@index([userId])
   @@index([workspaceId])
+  @@index([id])
+  @@index([role])
 }
 
 model Team {
@@ -652,6 +655,7 @@ model AppraisalResponse {
 
 model Payroll {
   id          String       @id @default(cuid())
+  employeeId  String
   salary      Float
   payPeriod   String
   paymentDate DateTime
@@ -659,12 +663,11 @@ model Payroll {
   commissions Commission[]
   bonuses     Bonus[]
 
-  employeeId String
-  createdBy Employee  @relation(fields: [employeeId], references: [id])
+  creatorId String
+  createdBy Employee  @relation(fields: [creatorId], references: [id])
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   Payslip   Payslip[]
-  
 }
 
 model Deduction {

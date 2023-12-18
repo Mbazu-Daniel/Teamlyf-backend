@@ -1,6 +1,6 @@
 
 // Project Management 
-
+// TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 model Space {
   id    String @id @default(cuid())
   title String

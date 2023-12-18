@@ -61,12 +61,16 @@ model Employee {
 
   @@index([userId])
   @@index([workspaceId])
+  @@index([id])
+  @@index([role])
 }
 
 model Team {
   id    String  @id @default(cuid())
   name  String  @unique
   alias String?
+
+  role TeamRole @default(MEMBER)
 
   employeeId String
 
