@@ -1,208 +1,243 @@
+
 // Project Management 
 
 model Space {
-    id    String @id @default(cuid())
-    title String
+  id    String @id @default(cuid())
+  title String
 
-    tasks    Task[]
-    projects Project[]
+  tasks    Task[]
+  projects Project[]
 
-    workspaceId String
-    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    createdBy  Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([title, workspaceId, employeeId])
+  @@unique([title])
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // Todo: Add Team to this model ?
 
 model Project {
-    id          String  @id @default(cuid())
-    name        String
-    category    String?
-    description String?
-    thumbnail   String?
+  id          String  @id @default(cuid())
+  name        String
+  category    String?
+  description String?
+  thumbnail   String?
 
-    isFavourite Boolean @default(false)
+  isFavourite Boolean @default(false)
 
-    status      TaskStatus @default(TO_DO)
-    statusColor String?
+  status      TaskStatus @default(TO_DO)
+  statusColor String?
 
-    projectProgress Int?
+  projectProgress Int?
 
-    startDate DateTime  @default(now())
-    dueDate   DateTime?
+  startDate DateTime  @default(now())
+  dueDate   DateTime?
 
-    tasks Task[]
+  tasks Task[]
 
-    spaceId String
-    spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId String
+  spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-    projectCollaborators ProjectCollaborator[]
+  projectCollaborators ProjectCollaborator[]
 
-    projectCreatorId String?
-    projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
+  projectCreatorId String?
+  projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
-    // can create another model to handle this to allow multiple managers
-    managerId       String?
-    assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
+  // can create another model to handle this to allow multiple managers
+  managerId       String?
+  assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectCreatorId])
+  @@index([managerId])
+  @@index([spaceId])
 }
 
 model Task {
-    id            String    @id @default(cuid())
-    title         String
-    description   String?
-    notifications Boolean   @default(true)
-    startDate     DateTime  @default(now())
-    dueDate       DateTime?
-    reminderDate  DateTime?
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  notifications Boolean   @default(true)
+  startDate     DateTime  @default(now())
+  dueDate       DateTime?
+  reminderDate  DateTime?
 
-    subtasks     Subtask[]
-    taskComments TaskComment[]
-    taskHistory  TaskHistory[]
-    labels       String?
+  subtasks     Subtask[]
+  taskComments TaskComment[]
+  taskHistory  TaskHistory[]
+  labels       String
 
-    employeeId String
-    createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
 
-    taskCollaborators TaskCollaborator[]
+  taskCollaborators TaskCollaborator[]
 
-    spaceId String?
-    spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  spaceId String?
+  spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-    projectId String?
-    project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    status        TaskStatus   @default(TO_DO)
-    statusColor   String?
-    priority      TaskPriority @default(NORMAL)
-    priorityColor String?
+  status        TaskStatus   @default(TO_DO)
+  statusColor   String?
+  priority      TaskPriority @default(NORMAL)
+  priorityColor String?
 
-    subtaskCollaborator SubtaskCollaborator[]
-    taskFiles           TaskFile[]
+  subtaskCollaborator SubtaskCollaborator[]
+  taskFiles           TaskFile[]
 
-    workspaceId String
-    workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
-    milestone   Milestone? @relation(fields: [milestoneId], references: [id])
-    milestoneId String?
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+  milestoneId String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([spaceId])
+  @@index([employeeId])
+  @@index([projectId])
+  @@index([workspaceId])
+  @@index([milestoneId])
 }
 
 model Subtask {
-    id    String @id @default(cuid())
-    title String
+  id    String @id @default(cuid())
+  title String
 
-    startDate DateTime
-    dueDate   DateTime?
+  startDate DateTime
+  dueDate   DateTime?
 
-    status TaskStatus @default(TO_DO)
+  status TaskStatus @default(TO_DO)
 
-    subtaskCollaborator SubtaskCollaborator[]
+  subtaskCollaborator SubtaskCollaborator[]
 
-    employeeId String
-    createdBy  Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id])
 
-    taskId String?
-    tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
+  tasks  Task?   @relation(fields: [taskId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([taskId])
 }
 
 model TaskComment {
-    id   String @id @default(cuid())
-    text String
+  id   String @id @default(cuid())
+  text String
 
-    taskId String
-    tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    employeeId String
-    employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model TaskHistory {
-    id     String     @id @default(cuid())
-    action TaskAction
+  id     String     @id @default(cuid())
+  action TaskAction
 
-    taskId String?
-    tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String?
+  tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-    employeeId String?
-    employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model TaskCollaborator {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    taskId String
-    tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model ProjectCollaborator {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    projectId String
-    projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([employeeId])
 }
 
 model SubtaskCollaborator {
-    id String @id @default(cuid())
+  id String @id @default(cuid())
 
-    subtaskId String
-    subtasks  Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
+  subtaskId String
+  subtasks  Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
 
-    taskId String
-    tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([subtaskId])
+  @@index([employeeId])
 }
 
 // TODO: create, get all files, update file name, share file, delete file
 
 model TaskFile {
-    id         String    @id @default(cuid())
-    name       String
-    fileType   String
-    fileSize   Int
-    fileFormat String
-    fileUrl    String
-    employeeId String?
-    uploadedBy Employee? @relation(fields: [employeeId], references: [id])
+  id         String    @id @default(cuid())
+  name       String
+  fileType   String
+  fileSize   Int
+  fileFormat String
+  fileUrl    String
+  employeeId String?
+  uploadedBy Employee? @relation(fields: [employeeId], references: [id])
 
-    tasks  Task?   @relation(fields: [taskId], references: [id])
-    taskId String?
+  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String?
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 // model TaskStatus {
@@ -226,71 +261,64 @@ model TaskFile {
 // }
 
 model Milestone {
-    id          String     @id @default(cuid())
-    name        String
-    startDate   DateTime
-    endDate     DateTime
-    description String
-    status      TaskStatus @default(PENDING) //progress, completed, or delayed.
-    task        Task[]
+  id          String     @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String
+  status      TaskStatus @default(PENDING) //progress, completed, or delayed.
+  task        Task[]
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ENUMS
 enum TaskAction {
-    ADDED_TASKS
-    UPDATED_TASKS
-    DELETED_TASKS
-    COMPLETED_TASKS
-    UNCOMPLETED_TASKS
-    ADDED_COMMENTS_TO_TASKS
-    UPDATED_COMMENTS_TO_TASKS
-    DELETED_COMMENTS_TO_TASKS
-    TASKS_COLLABORATOR_ADDED
-    TASKS_COLLABORATOR_DELETED
-    ADDED_SUBTASKS
+  ADDED_TASKS
+  UPDATED_TASKS
+  DELETED_TASKS
+  COMPLETED_TASKS
+  UNCOMPLETED_TASKS
+  ADDED_COMMENTS_TO_TASKS
+  UPDATED_COMMENTS_TO_TASKS
+  DELETED_COMMENTS_TO_TASKS
+  TASKS_COLLABORATOR_ADDED
+  TASKS_COLLABORATOR_DELETED
+  ADDED_SUBTASKS
 }
 
 enum ProjectAction {
-    ADDED_PROJECTS
-    UPDATED_PROJECTS
-    DELETED_PROJECTS
-    COMPLETED_PROJECTS
-    UNCOMPLETED_PROJECTS
-    ADDED_COMMENTS_TO_PROJECTS
-    UPDATED_COMMENTS_TO_PROJECTS
-    DELETED_COMMENTS_TO_PROJECTS
-    PROJECTS_COLLABORATOR_ADDED
-    PROJECTS_COLLABORATOR_DELETED
+  ADDED_PROJECTS
+  UPDATED_PROJECTS
+  DELETED_PROJECTS
+  COMPLETED_PROJECTS
+  UNCOMPLETED_PROJECTS
+  ADDED_COMMENTS_TO_PROJECTS
+  UPDATED_COMMENTS_TO_PROJECTS
+  DELETED_COMMENTS_TO_PROJECTS
+  PROJECTS_COLLABORATOR_ADDED
+  PROJECTS_COLLABORATOR_DELETED
 }
 
 enum TaskPriority {
-    HIGH
-    MEDIUM
-    LOW
-    CRITICAL
-    URGENT
-    NORMAL
-    MINOR
+  HIGH
+  MEDIUM
+  LOW
+  CRITICAL
+  URGENT
+  NORMAL
+  MINOR
 }
 
 // get task status function for each of the  status
 enum TaskStatus {
-    TO_DO
-    IN_PROGRESS
-    PENDING
-    COMPLETED
-    CANCELED
-    DEFERRED
-    ON_HOLD
-    IN_REVIEW
-}
-
-enum EmployeeRole {
-    OWNER
-    ADMIN
-    MEMBER
-    GUEST
+  TO_DO
+  IN_PROGRESS
+  PENDING
+  COMPLETED
+  CANCELED
+  DEFERRED
+  ON_HOLD
+  IN_REVIEW
 }

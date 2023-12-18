@@ -1,110 +1,110 @@
-// File model
-model File {
-  fileId          Int      @id @default(autoincrement())
-  employeeId          Int
-  folderId        Int?
-  filename         String
-  filetype         String
-  size             Int
-  is_deleted       Boolean @default(false)
-  version_number   Int
-  file_content_type String
-  file_content     String
-  thumbnail_url    String
-  download_count   Int
-  tags             String[]
-  access_control_type String
-  created_at       DateTime @default(now())
-  updated_at       DateTime
-  metadata         Json
-  owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-  folder           Folder?  @relation(fields: [folderId], references: [folderId])
-  permissions      Permission[]
-}
+// // File model
+// model File {
+//   fileId          Int      @id @default(autoincrement())
+//   employeeId          Int
+//   folderId        Int?
+//   filename         String
+//   filetype         String
+//   size             Int
+//   is_deleted       Boolean @default(false)
+//   version_number   Int
+//   file_content_type String
+//   file_content     String
+//   thumbnail_url    String
+//   download_count   Int
+//   tags             String[]
+//   access_control_type String
+//   created_at       DateTime @default(now())
+//   updated_at       DateTime
+//   metadata         Json
+//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
+//   folder           Folder?  @relation(fields: [folderId], references: [folderId])
+//   permissions      Permission[]
+// }
 
-// Folder model
-model Folder {
-  folderId        Int      @id @default(autoincrement())
-  employeeId          Int
-  parent_folderId Int?
-  folder_name      String
-  created_at       DateTime @default(now())
-  updated_at       DateTime
-  is_deleted       Boolean @default(false)
-  access_control_type String
-  metadata         Json
-  owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-  parentFolder     Folder?  @relation("ParentFolder", fields: [parent_folderId], references: [folderId])
-  subFolders       Folder[] @relation("SubFolders")
-  files            File[]
-  permissions      Permission[]
-}
+// // Folder model
+// model Folder {
+//   folderId        Int      @id @default(autoincrement())
+//   employeeId          Int
+//   parent_folderId Int?
+//   folder_name      String
+//   created_at       DateTime @default(now())
+//   updated_at       DateTime
+//   is_deleted       Boolean @default(false)
+//   access_control_type String
+//   metadata         Json
+//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
+//   parentFolder     Folder?  @relation("ParentFolder", fields: [parent_folderId], references: [folderId])
+//   subFolders       Folder[] @relation("SubFolders")
+//   files            File[]
+//   permissions      Permission[]
+// }
 
-// Permission model
-model Permission {
-  permissionId    Int      @id @default(autoincrement())
-  employeeId          Int
-  targetId        Int
-  target_type      String
-  role             String
-  employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-  file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-  folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-}
+// // Permission model
+// model Permission {
+//   permissionId    Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   role             String
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
 
-// Activity Log model
-model ActivityLog {
-  logId           Int      @id @default(autoincrement())
-  employeeId          Int
-  action_type      String
-  targetId        Int
-  target_type      String
-  timestamp        DateTime @default(now())
-  employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-  file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-  folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-}
+// // Activity Log model
+// model ActivityLog {
+//   logId           Int      @id @default(autoincrement())
+//   employeeId          Int
+//   action_type      String
+//   targetId        Int
+//   target_type      String
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
 
-// SharedLink model
-model SharedLink {
-  linkId          Int      @id @default(autoincrement())
-  employeeId          Int
-  targetId        Int
-  target_type      String
-  link_url         String
-  expiration_date  DateTime
-  password_protected Boolean
-  access_count     Int
-  employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-  file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-  folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-}
+// // SharedLink model
+// model SharedLink {
+//   linkId          Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   link_url         String
+//   expiration_date  DateTime
+//   password_protected Boolean
+//   access_count     Int
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
 
-// Notification model
-model Notification {
-  notificationId  Int      @id @default(autoincrement())
-  employeeId          Int
-  senderId        Int
-  notification_type String
-  targetId        Int
-  target_type      String
-  is_read          Boolean
-  timestamp        DateTime @default(now())
-  employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-  sender           Employee     @relation("Sender", fields: [senderId], references: [employeeId])
-  file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-  folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-}
+// // Notification model
+// model Notification {
+//   notificationId  Int      @id @default(autoincrement())
+//   employeeId          Int
+//   senderId        Int
+//   notification_type String
+//   targetId        Int
+//   target_type      String
+//   is_read          Boolean
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   sender           Employee     @relation("Sender", fields: [senderId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
 
-// Comment model
-model Comment {
-  commentId       Int      @id @default(autoincrement())
-  employeeId          Int
-  targetId        Int
-  target_type      String
-  comment_text     String
-  timestamp        DateTime @default(now())
-  employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-  file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-  folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-}
+// // Comment model
+// model Comment {
+//   commentId       Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   comment_text     String
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }

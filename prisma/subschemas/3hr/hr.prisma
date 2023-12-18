@@ -26,19 +26,17 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces            Space[]
-  subtasks          Subtask[]
-  taskComments      TaskComment[]
-  taskHistory       TaskHistory[]
-  departmentCreator Department[]
-
-  taskCreator     Task[]     @relation("TaskCreator")
+  spaces          Space[]
+  subtasks        Subtask[]
+  taskComments    TaskComment[]
+  taskHistory     TaskHistory[]
+  taskCreator     Task[]        @relation("TaskCreator")
   taskFiles       TaskFile[]
-  projectCreator  Project[]  @relation("ProjectCreator")
-  assignedManager Project[]  @relation("AssignedManager")
+  projectCreator  Project[]     @relation("ProjectCreator")
+  assignedManager Project[]     @relation("AssignedManager")
 
-  employeeDepartment EmployeeDepartment[]
-  invite             Invite[]
+  employeeTeam EmployeeTeam[]
+  invite       Invite[]
 
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
@@ -53,47 +51,50 @@ model Employee {
   timesheet    Timesheet[]
   payroll      Payroll[]
 
+  messages               Message[]
+  conversationsInitiated Conversation[]  @relation("EmployeeOne")
+  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  directMessages         DirectMessage[]
 
-  messages       Message[]
-  conversationsInitiated Conversation[] @relation("EmployeeOne")
-  conversationsReceived Conversation[] @relation("EmployeeTwo")
-  directMessages DirectMessage[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-
-  @@index([userId, workspaceId, fullName, email, gender])
+  @@index([userId])
+  @@index([workspaceId])
 }
 
-model Department {
+model Team {
   id    String  @id @default(cuid())
   name  String  @unique
   alias String?
 
-  employeeId        String
-  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
 
-  workspaceId        String
-  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeDepartment EmployeeDepartment[]
+  workspaceId  String
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeTeam EmployeeTeam[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId, workspaceId, name])
+  @@index([employeeId])
+  @@index([workspaceId])
 }
 
-model EmployeeDepartment {
-  id           String       @id @default(cuid())
-  employeeId   String
-  departmentId String
-  role         EmployeeRole @default(MEMBER)
+model EmployeeTeam {
+  employeeId String
+  teamId     String
+  role       TeamRole @default(MEMBER)
 
-  employee   Employee   @relation(fields: [employeeId], references: [id])
-  department Department @relation(fields: [departmentId], references: [id])
+  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([employeeId, teamId])
+  @@index([employeeId])
+  @@index([teamId])
 }
 
 model Attendance {
@@ -108,10 +109,12 @@ model Attendance {
   state        AttendanceStatus
 
   employeeId String
-  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Timesheet {
@@ -126,6 +129,8 @@ model Timesheet {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Leave {
@@ -146,6 +151,8 @@ model Leave {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Education {
@@ -164,7 +171,10 @@ model Education {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
+
 model LeaveComment {
   id String @id @default(cuid())
 
@@ -178,6 +188,9 @@ model LeaveComment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([leaveId])
 }
 
 model LeaveType {
@@ -192,6 +205,9 @@ model LeaveType {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([leaveId])
 }
 
 model PerformanceAppraisal {
@@ -204,6 +220,7 @@ model PerformanceAppraisal {
   achievements       String
   managerComments    String
   appraisalQuestions Json
+  appraisalResponse  AppraisalResponse[]
 }
 
 model AppraisalResponse {
@@ -214,11 +231,10 @@ model AppraisalResponse {
 
   question String
   response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
 }
-
-
-
-
 
 // PAYMENT
 
@@ -233,9 +249,12 @@ model Payroll {
   bonuses     Bonus[]
 
   creatorId String
-  createdBy Employee @relation(fields: [creatorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdBy Employee  @relation(fields: [creatorId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Payslip   Payslip[]
+
+
 }
 
 model Deduction {
@@ -247,6 +266,8 @@ model Deduction {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
 }
 
 model Commission {
@@ -258,6 +279,8 @@ model Commission {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Payslip     Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId   String?
 }
 
 model Bonus {
@@ -270,6 +293,8 @@ model Bonus {
   payroll   Payroll  @relation(fields: [payrollId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Payslip   Payslip? @relation(fields: [payslipId], references: [id])
+  payslipId String?
 }
 
 model Payslip {
@@ -292,9 +317,9 @@ model Payslip {
 model Job {
   id            String    @id @default(cuid())
   title         String
-  category String?
+  category      String?
   requirement   String
-  branch  String?
+  branch        String?
   email         String
   address       String
   salaryRange   Int
@@ -324,4 +349,18 @@ enum LeaveStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum TeamRole {
+  LEAD
+  MEMBER
+  CONTRIBUTOR
+  OBSERVER
 }
