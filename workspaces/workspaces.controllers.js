@@ -3,7 +3,8 @@ import asyncHandler from "express-async-handler";
 import ShortUniqueId from "short-unique-id";
 
 const prisma = new PrismaClient();
-
+// TODO: total count of workspace in the platform
+// TODO: set permission for update and delete workspace to only employee with Admin and owner role
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 // Create a new workspace
@@ -28,6 +29,13 @@ const createWorkspace = asyncHandler(async (req, res) => {
       where: { email },
     });
 
+    if (!existingUser) {
+      return res
+        .status(400)
+        .json({ error: `User does not exist with email: ${email}` });
+    }
+
+
     // Create a new workspace with the provided data
     const newWorkspace = await prisma.workspace.create({
       data: {
@@ -40,7 +48,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
     });
 
     // Create a new employee associated with the user who created the workspace
-    const newEmployee = await prisma.employee.create({
+   await prisma.employee.create({
       data: {
         email: email,
         role: EmployeeRole.OWNER,
@@ -57,7 +65,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
 });
 
 // Get all workspaces
-const getAllWorkspaces = asyncHandler(async (req, res) => {
+const getUserWorkspaces = asyncHandler(async (req, res) => {
   const { email, id } = req.user;
   try {
     const workspaces = await prisma.workspace.findMany({
@@ -80,11 +88,11 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
 
 // Get an workspace by ID
 const getWorkspaceById = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { workspaceId } = req.params;
 
   try {
     const workspace = await prisma.workspace.findUnique({
-      where: { id },
+      where: { id:workspaceId },
       include: {
         employees: {
           select: { id: true, email: true },
@@ -98,59 +106,44 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
 
     res.status(200).json(workspace);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Update an workspace by ID
 const updateWorkspace = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { workspaceId } = req.params;
+  const {name} = req.body
 
   try {
-    // Check if the workspace with the specified ID exists
-    const existingWorkspace = await prisma.workspace.findUnique({
-      where: { id },
-    });
-
-    if (!existingWorkspace) {
-      return res
-        .status(404)
-        .json({ error: `workspace with ID ${id} not found.` });
-    }
 
     // Update the workspace data
     const updatedWorkspace = await prisma.workspace.update({
-      where: { id },
-      data: req.body,
+      where: { id: workspaceId },
+      data: {
+        name
+      },
     });
 
     res.status(202).json(updatedWorkspace);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Delete an workspace by ID
 const deleteWorkspace = asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const { workspaceId } = req.params;
 
   try {
-    // Check if the workspace with the specified ID exists
-    const existingWorkspace = await prisma.workspace.findUnique({
-      where: { id },
-    });
-
-    if (!existingWorkspace) {
-      return res
-        .status(404)
-        .json({ error: `workspace with ID ${id} not found.` });
-    }
-
+  
     await prisma.workspace.delete({
-      where: { id },
+      where: { id: workspaceId },
     });
 
-    res.status(204).json(`workspace ${id} deleted`);
+    res.status(204).json(`workspace ${workspaceId} deleted`);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -200,63 +193,61 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
 
 // Controller to leave a workspace
 const leaveWorkspace = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const { employeeId } = req.employeeId;
-
+  const { workspaceId } = req.params;
+  console.log("🚀 ~ file: workspaces.controllers.js:204 ~ leaveWorkspace ~ id:", workspaceId)
+  
   try {
-    // Check if the user is an owner of the workspace
-    const isOwner = await prisma.employee.findFirst({
+
+    const user = await prisma.employee.findFirst({
       where: {
-        employeeId,
-        workspaceId: id,
-        role: EmployeeRole.OWNER,
+        workspaceId,
+        id: req.employeeId,
+        role: {
+          in: [EmployeeRole.OWNER,EmployeeRole.MEMBER, EmployeeRole.ADMIN, EmployeeRole.GUEST],
+        },
       },
     });
-
-    if (isOwner) {
+    console.log("🚀 ~ file: workspaces.controllers.js:216 ~ leaveWorkspace ~ user:", user)
+    console.log("🚀 ~ file: workspaces.controllers.js:215 ~ leaveWorkspace ~ req.employeeId:", req.employeeId)
+    
+    
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: "You're not a member of this workspace." });
+    }
+    
+    if (user.role === EmployeeRole.OWNER) {
       return res
         .status(400)
         .json({
           error: "Owners cannot leave the workspace. Transfer ownership first.",
         });
     }
-
-    // Check if the user is a member of the workspace
-    const isMember = await prisma.employee.findFirst({
-      where: {
-        employeeId,
-        workspaceId: id,
-        role: EmployeeRole.MEMBER || EmployeeRole.ADMIN || EmployeeRole.GUEST,
-      },
-    });
-
-    if (!isMember) {
-      return res
-        .status(404)
-        .json({ error: "You're not a member of this workspace." });
-    }
-
-    // Remove the user from the workspace
+    
+    // Continue with removing the user from the workspace
     await prisma.employee.delete({
       where: {
-        employeeId,
+        id: employeeId,
         workspaceId: id,
       },
     });
-
+    
     res
       .status(200)
       .json({ message: "You have left the workspace successfully." });
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
+
 export {
   createWorkspace,
   deleteWorkspace,
-  getAllWorkspaces,
+  getUserWorkspaces,
   getWorkspaceById,
   getWorkspaceOwners,
   leaveWorkspace,
