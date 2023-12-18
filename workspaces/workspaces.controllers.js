@@ -160,7 +160,7 @@ const getWorkspaceOwners = asyncHandler(async (req, res) => {
   try {
     const employees = await prisma.employee.findMany({
       where: {
-        role: EmployeeRole.OWNER, // Filter by the role "OWNER"
+        role: EmployeeRole.OWNER, 
       },
     });
     res.status(200).json(employees);
@@ -175,9 +175,6 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
   try {
     const { newOwnerId } = req.body;
     const currentOwnerId = req.employeeId;
-    console.log("current owner", currentOwnerId);
-
-    // Check if the current owner has permission to transfer ownership
 
     // Update the ownership in the database
     await prisma.employee.update({
@@ -204,13 +201,13 @@ const transferWorkspaceOwnership = asyncHandler(async (req, res) => {
 // Controller to leave a workspace
 const leaveWorkspace = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { userId } = req.user;
+  const { employeeId } = req.employeeId;
 
   try {
     // Check if the user is an owner of the workspace
     const isOwner = await prisma.employee.findFirst({
       where: {
-        userId,
+        employeeId,
         workspaceId: id,
         role: EmployeeRole.OWNER,
       },
@@ -227,7 +224,7 @@ const leaveWorkspace = asyncHandler(async (req, res) => {
     // Check if the user is a member of the workspace
     const isMember = await prisma.employee.findFirst({
       where: {
-        userId,
+        employeeId,
         workspaceId: id,
         role: EmployeeRole.MEMBER || EmployeeRole.ADMIN || EmployeeRole.GUEST,
       },
@@ -242,7 +239,7 @@ const leaveWorkspace = asyncHandler(async (req, res) => {
     // Remove the user from the workspace
     await prisma.employee.delete({
       where: {
-        userId,
+        employeeId,
         workspaceId: id,
       },
     });

@@ -1,6 +1,6 @@
 import express from "express";
 import { verifyToken } from "../middleware/authenticate.js";
-import { checkWorkspaceExists } from "../workspaces/workspaces.middleware.js";
+import { getCurrentWorkspace } from "../middleware/getCurrentWorkspace.js";
 import {
   createSpace,
   deleteSpace,
@@ -12,7 +12,7 @@ import {
 // const spaceRouter = express.Router();
 const spaceRouter = express.Router({ mergeParams: true });
 
-spaceRouter.use("/:workspaceId", checkWorkspaceExists);
+spaceRouter.use("/:workspaceId", getCurrentWorkspace);
 
 spaceRouter.post("/:workspaceId/spaces", verifyToken, createSpace);
 spaceRouter.get("/:workspaceId/spaces", getAllSpaces);
