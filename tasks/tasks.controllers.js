@@ -71,6 +71,24 @@ const createTaskSpace = asyncHandler(async (req, res) => {
       },
     });
 
+    ```
+    This has a better performance than the previous
+    
+    // Create TaskCollaborator entries for each collaborator and connect them to the task
+    if (taskCollaborators && taskCollaborators.length > 0) {
+      await Promise.all(
+        taskCollaborators.map(async (collaboratorId) => {
+          await prisma.taskCollaborator.create({
+            data: {
+              taskId: newTask.id,
+              employeeId: collaboratorId,
+            },
+          });
+        })
+      );
+    }
+    ```
+
     // Create TaskCollaborator entries for each collaborator and connect them to the task
     if (taskCollaborators && taskCollaborators.length > 0) {
       for (const collaboratorId of taskCollaborators) {

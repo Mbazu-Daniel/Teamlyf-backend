@@ -1,14 +1,14 @@
-//🧩Don't Edit this file.✨Generated in Sat Nov 25 2023 12:44:38 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Mon Dec 18 2023 09:37:45 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
-  relationMode  = "prisma"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model User {
@@ -37,17 +37,18 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees   Employee[]
-  departments Department[]
-  invite      Invite[]
-  spaces      Space[]
-  tasks       Task[]
+  employees Employee[]
+  teams     Team[]
+  invite    Invite[]
+  spaces    Space[]
+  tasks     Task[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Group     Group[]
 
-  @@index([userId, name])
+  @@index([userId])
+  @@index([name])
 }
 
 model Invite {
@@ -66,6 +67,8 @@ model Invite {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([employeeId])
+  @@index([workspaceId])
   @@map("Invite")
 }
 
@@ -85,6 +88,7 @@ enum UserRole {
 }
 
 // Project Management 
+
 model Space {
   id    String @id @default(cuid())
   title String
@@ -100,6 +104,10 @@ model Space {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([title])
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // Todo: Add Team to this model ?
@@ -137,6 +145,10 @@ model Project {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([projectCreatorId])
+  @@index([managerId])
+  @@index([spaceId])
 }
 
 model Task {
@@ -151,7 +163,7 @@ model Task {
   subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
-  labels       String?
+  labels       String
 
   employeeId String
   createdBy  Employee @relation("TaskCreator", fields: [employeeId], references: [id], onDelete: Cascade)
@@ -179,6 +191,12 @@ model Task {
   milestoneId String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@index([spaceId])
+  @@index([employeeId])
+  @@index([projectId])
+  @@index([workspaceId])
+  @@index([milestoneId])
 }
 
 model Subtask {
@@ -200,6 +218,9 @@ model Subtask {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([taskId])
 }
 
 model TaskComment {
@@ -214,6 +235,9 @@ model TaskComment {
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model TaskHistory {
@@ -228,6 +252,9 @@ model TaskHistory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model TaskCollaborator {
@@ -241,6 +268,9 @@ model TaskCollaborator {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 model ProjectCollaborator {
@@ -254,6 +284,9 @@ model ProjectCollaborator {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([employeeId])
 }
 
 model SubtaskCollaborator {
@@ -270,6 +303,10 @@ model SubtaskCollaborator {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([taskId])
+  @@index([subtaskId])
+  @@index([employeeId])
 }
 
 // TODO: create, get all files, update file name, share file, delete file
@@ -277,13 +314,18 @@ model SubtaskCollaborator {
 model TaskFile {
   id         String    @id @default(cuid())
   name       String
-  file_type  String
-  file_size  Int
+  fileType   String
+  fileSize   Int
+  fileFormat String
+  fileUrl    String
   employeeId String?
   uploadedBy Employee? @relation(fields: [employeeId], references: [id])
 
   tasks  Task?   @relation(fields: [taskId], references: [id])
   taskId String?
+
+  @@index([taskId])
+  @@index([employeeId])
 }
 
 // model TaskStatus {
@@ -369,13 +411,6 @@ enum TaskStatus {
   IN_REVIEW
 }
 
-enum EmployeeRole {
-  OWNER
-  ADMIN
-  MEMBER
-  GUEST
-}
-
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
 
 model Employee {
@@ -404,19 +439,17 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces            Space[]
-  subtasks          Subtask[]
-  taskComments      TaskComment[]
-  taskHistory       TaskHistory[]
-  departmentCreator Department[]
-
-  taskCreator     Task[]     @relation("TaskCreator")
+  spaces          Space[]
+  subtasks        Subtask[]
+  taskComments    TaskComment[]
+  taskHistory     TaskHistory[]
+  taskCreator     Task[]        @relation("TaskCreator")
   taskFiles       TaskFile[]
-  projectCreator  Project[]  @relation("ProjectCreator")
-  assignedManager Project[]  @relation("AssignedManager")
+  projectCreator  Project[]     @relation("ProjectCreator")
+  assignedManager Project[]     @relation("AssignedManager")
 
-  employeeDepartment EmployeeDepartment[]
-  invite             Invite[]
+  employeeTeam EmployeeTeam[]
+  invite       Invite[]
 
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
@@ -439,39 +472,44 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId, workspaceId])
-  @@index([fullName, email, gender])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([id])
+  @@index([role])
 }
 
-model Department {
+model Team {
   id    String  @id @default(cuid())
   name  String  @unique
   alias String?
 
-  employeeId        String
-  departmentCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
 
-  workspaceId        String
-  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeDepartment EmployeeDepartment[]
+  workspaceId  String
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeTeam EmployeeTeam[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId, workspaceId, name])
+  @@index([employeeId])
+  @@index([workspaceId])
 }
 
-model EmployeeDepartment {
-  id           String       @id @default(cuid())
-  employeeId   String
-  departmentId String
-  role         EmployeeRole @default(MEMBER)
+model EmployeeTeam {
+  employeeId String
+  teamId     String
+  role       TeamRole @default(MEMBER)
 
-  employee   Employee   @relation(fields: [employeeId], references: [id])
-  department Department @relation(fields: [departmentId], references: [id])
+  teamCreator Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  team        Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([employeeId, teamId])
+  @@index([employeeId])
+  @@index([teamId])
 }
 
 model Attendance {
@@ -486,10 +524,12 @@ model Attendance {
   state        AttendanceStatus
 
   employeeId String
-  punchBy    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Timesheet {
@@ -504,6 +544,8 @@ model Timesheet {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Leave {
@@ -524,6 +566,8 @@ model Leave {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model Education {
@@ -542,6 +586,8 @@ model Education {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 model LeaveComment {
@@ -557,6 +603,9 @@ model LeaveComment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([leaveId])
 }
 
 model LeaveType {
@@ -571,6 +620,9 @@ model LeaveType {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([leaveId])
 }
 
 model PerformanceAppraisal {
@@ -583,7 +635,7 @@ model PerformanceAppraisal {
   achievements       String
   managerComments    String
   appraisalQuestions Json
-  AppraisalResponse  AppraisalResponse[]
+  appraisalResponse  AppraisalResponse[]
 }
 
 model AppraisalResponse {
@@ -594,6 +646,9 @@ model AppraisalResponse {
 
   question String
   response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
 }
 
 // PAYMENT
@@ -671,15 +726,15 @@ model Payslip {
   bonuses       Bonus[]
 }
 
+// Job Board 
 model Job {
-  id          String  @id @default(cuid())
-  title       String
-  category    String?
-  requirement String
-  branch      String?
-  email       String
-  address     String
-
+  id            String    @id @default(cuid())
+  title         String
+  category      String?
+  requirement   String
+  branch        String?
+  email         String
+  address       String
   salaryRange   Int
   noOfPositions Int
   company       String
@@ -709,10 +764,25 @@ enum LeaveStatus {
   REJECTED
 }
 
+enum EmployeeRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+enum TeamRole {
+  LEAD
+  MEMBER
+  CONTRIBUTOR
+  OBSERVER
+}
+
+// Chat communication model 
 model Group {
-  id   String    @id @default(cuid())
+  id   String      @id @default(cuid())
   name String
-  type GroupType @default(TEXT)
+  type MessageType @default(TEXT)
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -725,15 +795,17 @@ model Group {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([workspaceId])
+  @@index([userId, workspaceId, name])
 }
 
 model Message {
-  id      String @id @default(cuid())
-  content String @db.Text
+  id   String @id @default(cuid())
+  text String @db.Text
 
   fileUrl String? @db.Text
+
+  deleted Boolean @default(false)
+  read    Boolean @default(false)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -741,13 +813,10 @@ model Message {
   groupId String
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  deleted Boolean @default(false)
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([groupId])
-  @@index([employeeId])
+  @@index([groupId, employeeId])
 }
 
 model Conversation {
@@ -784,8 +853,125 @@ model DirectMessage {
   @@index([employeeId, conversationId])
 }
 
-enum GroupType {
+enum MessageType {
   TEXT
   AUDIO
   VIDEO
 }
+
+enum MessageStatus {
+  READ
+  DELIVERED
+  SENT
+}
+
+// // File model
+// model File {
+//   fileId          Int      @id @default(autoincrement())
+//   employeeId          Int
+//   folderId        Int?
+//   filename         String
+//   filetype         String
+//   size             Int
+//   is_deleted       Boolean @default(false)
+//   version_number   Int
+//   file_content_type String
+//   file_content     String
+//   thumbnail_url    String
+//   download_count   Int
+//   tags             String[]
+//   access_control_type String
+//   created_at       DateTime @default(now())
+//   updated_at       DateTime
+//   metadata         Json
+//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
+//   folder           Folder?  @relation(fields: [folderId], references: [folderId])
+//   permissions      Permission[]
+// }
+
+// // Folder model
+// model Folder {
+//   folderId        Int      @id @default(autoincrement())
+//   employeeId          Int
+//   parent_folderId Int?
+//   folder_name      String
+//   created_at       DateTime @default(now())
+//   updated_at       DateTime
+//   is_deleted       Boolean @default(false)
+//   access_control_type String
+//   metadata         Json
+//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
+//   parentFolder     Folder?  @relation("ParentFolder", fields: [parent_folderId], references: [folderId])
+//   subFolders       Folder[] @relation("SubFolders")
+//   files            File[]
+//   permissions      Permission[]
+// }
+
+// // Permission model
+// model Permission {
+//   permissionId    Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   role             String
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
+
+// // Activity Log model
+// model ActivityLog {
+//   logId           Int      @id @default(autoincrement())
+//   employeeId          Int
+//   action_type      String
+//   targetId        Int
+//   target_type      String
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
+
+// // SharedLink model
+// model SharedLink {
+//   linkId          Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   link_url         String
+//   expiration_date  DateTime
+//   password_protected Boolean
+//   access_count     Int
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
+
+// // Notification model
+// model Notification {
+//   notificationId  Int      @id @default(autoincrement())
+//   employeeId          Int
+//   senderId        Int
+//   notification_type String
+//   targetId        Int
+//   target_type      String
+//   is_read          Boolean
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   sender           Employee     @relation("Sender", fields: [senderId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }
+
+// // Comment model
+// model Comment {
+//   commentId       Int      @id @default(autoincrement())
+//   employeeId          Int
+//   targetId        Int
+//   target_type      String
+//   comment_text     String
+//   timestamp        DateTime @default(now())
+//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
+//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
+//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+// }

@@ -3,7 +3,8 @@ import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
 import sendMail from "../services/sendMail.js";
-
+import dotenv from "dotenv";
+dotenv.config()
 const prisma = new PrismaClient();
 
 // TODO: Update this code to send template
@@ -13,34 +14,14 @@ const prisma = new PrismaClient();
 
 // TODO: function to leave a workspace (this should not CASCADE delete, the user information should still be available)
 
-const url = "http://localhost:8000/api/v1";
+const url = process.env.FRONTEND_URL
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
-  const { workspaceId: workspaceId } = req.params;
+  const { workspaceId } = req.params;
   email = email.toLowerCase();
 
   try {
-    // Check if the workspace exists
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: workspaceId },
-    });
-
-    if (!workspace) {
-      return res.status(404).json({ error: "workspace not found" });
-    }
-
-    // Check if the email already exists in the workspace
-    const existingEmployee = await prisma.employee.findFirst({
-      where: { email, workspaceId },
-    });
-
-    if (existingEmployee) {
-      return res
-        .status(400)
-        .json({ error: "Email already exists in the workspace" });
-    }
-
     // Generate unique token
     const inviteToken = uuidv4();
 
@@ -86,7 +67,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
 const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
-
+  let { fullName, email, password } = req.body;
   try {
     // Find the invite link in the database using Prisma
     const invite = await prisma.invite.findFirst({
@@ -99,17 +80,8 @@ const joinWorkspace = asyncHandler(async (req, res) => {
         .json({ error: "Invite link not found or expired" });
     }
 
-    // Check if the workspace exists
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: invite.workspaceId },
-    });
-
-    if (!workspace) {
-      return res.status(404).json({ error: "workspace not found" });
-    }
-
     const invitedEmail = invite.email.toLowerCase();
-
+    
     let existingUser = await prisma.user.findUnique({
       where: { email: invitedEmail },
     });
@@ -119,6 +91,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
       // Create a new employee record
       const newEmployee = await prisma.employee.create({
         data: {
+          fullName: fullName || null,
           email: invitedEmail,
           workspace: { connect: { id: workspace.id } },
           role: invite.role,
@@ -134,7 +107,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
       return res.status(200).json(newEmployee);
     }
 
-    let { fullName, email, password } = req.body;
+    
     if (!fullName || email || !password ) {
       return res
         .status(400)
@@ -145,7 +118,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 
     const newUser = await prisma.user.create({
       data: {
-        email: email.toLowerCase(),
+        email: invitedEmail,
         password: hashedPassword,
       },
     });
@@ -153,7 +126,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
     const newEmployee = await prisma.employee.create({
       data: {
         fullName,
-        email: email.toLowerCase(),
+        email: invitedEmail,
         workspace: { connect: { id: workspace.id } },
         role: invite.role,
         user: { connect: { id: newUser.id } },
@@ -173,6 +146,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 
     res.status(200).json(newEmployee);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
