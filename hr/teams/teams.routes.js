@@ -11,12 +11,12 @@ import {
   updateTeamDetails,
   updateEmployeeRoles
 } from "./teams.controllers.js";
-import { verifyToken } from "../middleware/authenticate.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
 import {
   getCurrentWorkspace,
   getCurrentEmployee,
   checkTeamExists,
-} from "../middleware/index.js";
+} from "../../helper/middleware/index.js";;
 
 const teamsRouter = express.Router({ mergeParams: true });
 

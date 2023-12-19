@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../middleware/authenticate.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -13,7 +13,7 @@ import {
 import {
   getCurrentEmployee,
   getCurrentWorkspace,
-} from "../middleware/index.js";
+} from "../../helper/middleware/index.js";
 const workspacesRouter = express.Router({ mergeParams: true });
 
 workspacesRouter.use("/", verifyToken);

@@ -1,4 +1,4 @@
-import { verifySuperAdmin,verifyLogin } from "../middleware/authenticate.js";
+import { verifySuperAdmin,verifyLogin } from "../../helper/middleware/authenticate.js";
 import { registerUser, loginUser, logoutUser,registerAdminUser,forgetPassword, resetPassword,changePassword } from "./auth.controllers.js";
 
 import express from "express";

@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 
+// TODO: search employee in a team by email
 // Create a new team within an workspace
 const createTeam = asyncHandler(async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 import express from "express";
-import { verifyToken } from "../middleware/authenticate.js";
-import { allEmployeeRoles, getCurrentWorkspace } from "../middleware/index.js";
-import upload from "../services/multerConfig.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
+import { allEmployeeRoles, getCurrentWorkspace } from "../../helper/middleware/index.js";;
+import upload from "../../helper/services/multerConfig.js";
 
 import {
   calculateTotalFileSizeInWorkspace,

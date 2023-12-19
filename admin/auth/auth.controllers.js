@@ -2,8 +2,8 @@ import { PrismaClient,UserRole } from "@prisma/client";
 import bcrypt from "bcrypt";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
-import generateResetToken from "../services/generateResetToken.js";
-import sendMail from "../services/sendMail.js";
+import generateResetToken from "../../helper/services/generateResetToken.js";
+import sendMail from "../../helper/services/sendMail.js";
 
 const prisma = new PrismaClient();
 
