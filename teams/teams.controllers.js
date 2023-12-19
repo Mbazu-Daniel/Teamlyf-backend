@@ -103,14 +103,6 @@ const deleteTeam = asyncHandler(async (req, res) => {
   const { workspaceId, teamId } = req.params;
 
   try {
-    const team = await prisma.team.findFirst({
-      where: { id: teamId, workspaceId },
-    });
-
-    if (!team) {
-      return res.status(404).json(`Team ${teamId} not found`);
-    }
-
     await prisma.team.delete({
       where: { id: teamId },
     });
@@ -121,26 +113,142 @@ const deleteTeam = asyncHandler(async (req, res) => {
   }
 });
 
-// Update a team by ID within an workspace
 const updateTeam = asyncHandler(async (req, res) => {
-  const { workspaceId, teamId } = req.params;
-
+  const { teamId, workspaceId } = req.params;
+  // Handle associated team
+  const { name, alias } = req.body;
   try {
+    // Check if the team exists
     const team = await prisma.team.findFirst({
       where: { id: teamId, workspaceId },
+      include: { employeeTeam: true },
     });
 
     if (!team) {
       return res.status(404).json(`Team ${teamId} not found`);
     }
 
+    const teamCreatorId = req.employeeId;
+
+    // Update the team details
     const updatedTeam = await prisma.team.update({
       where: { id: teamId },
-      data: req.body,
+      data: { name, alias },
+    });
+
+    // Handle associated employee-team relationships
+    const { employeeIds, roles, teamCreatorRole } = req.body;
+
+    if (employeeIds && employeeIds.length > 0) {
+      // Update or create the teamCreator's role
+      await prisma.employeeTeam.upsert({
+        where: {
+          employeeId_teamId: { employeeId: teamCreatorId, teamId },
+        },
+        create: {
+          teamId,
+          employeeId: teamCreatorId,
+          role: TeamRole.LEAD || teamCreatorRole,
+        },
+        update: {
+          role: TeamRole.LEAD || teamCreatorRole,
+        },
+      });
+
+      // Create or update roles for other team members
+      await prisma.employeeTeam.createMany({
+        data: employeeIds.map((employeeId, index) => ({
+          teamId,
+          employeeId,
+          role: roles && roles[index] ? roles[index] : TeamRole.MEMBER,
+        })),
+        onConflict: {
+          target: ["teamId", "employeeId"],
+          action: {
+            update: {
+              role: (_, options) =>
+                roles && roles[options.index]
+                  ? roles[options.index]
+                  : TeamRole.MEMBER,
+            },
+          },
+        },
+      });
+    }
+
+    res.status(202).json(updatedTeam);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const updateTeamDetails = asyncHandler(async (req, res) => {
+  const { teamId } = req.params;
+  const { name, alias } = req.body;
+
+  try {
+    const updatedTeam = await prisma.team.update({
+      where: { id: teamId },
+      data: { name, alias },
     });
 
     res.status(202).json(updatedTeam);
   } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const updateEmployeeRoles = asyncHandler(async (req, res) => {
+  const { teamId, workspaceId } = req.params;
+  const { employeeIds, roles, teamCreatorRole } = req.body;
+
+  try {
+    const teamCreatorId = req.employeeId;
+
+    // Update or create the teamCreator's role
+    await prisma.employeeTeam.upsert({
+      where: {
+        employeeId_teamId: { employeeId: teamCreatorId, teamId },
+      },
+      create: {
+        teamId,
+        employeeId: teamCreatorId,
+        role: TeamRole.LEAD || teamCreatorRole,
+      },
+      update: {
+        role: TeamRole.LEAD || teamCreatorRole,
+      },
+    });
+
+    // Create or update roles for other team members
+    for (let index = 0; index < employeeIds.length; index++) {
+      const employeeId = employeeIds[index];
+      const role = roles && roles[index] ? roles[index] : TeamRole.MEMBER;
+
+      await prisma.employeeTeam.upsert({
+        where: {
+          employeeId_teamId: { employeeId, teamId },
+        },
+        create: {
+          teamId,
+          employeeId,
+          role,
+        },
+        update: {
+          role,
+        },
+      });
+    }
+    // Fetch the updated team details
+    const updatedTeam = await prisma.team.findUnique({
+      where: { id: teamId },
+      include: { employeeTeam: { select: { employeeId: true, role: true } } },
+    });
+    res.status(202).json(updatedTeam);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -285,4 +393,6 @@ export {
   getTeamEmployees,
   removeEmployeeFromTeam,
   updateTeam,
+  updateTeamDetails,
+  updateEmployeeRoles,
 };
