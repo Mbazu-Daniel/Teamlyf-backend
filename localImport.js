@@ -1,16 +1,16 @@
 // local imports
-import authRouter from "./auth/auth.routes.js";
-import employeeRouter from "./employees/employees.routes.js";
-import inviteRouter from "./invites/invites.routes.js";
-import projectRouter from "./projects/projects.routes.js";
-import spaceRouter from "./spaces/spaces.routes.js";
-import subtaskRouter from "./subTasks/subTasks.routes.js";
-import taskRouter from "./tasks/tasks.routes.js";
-import taskCommentRouter from "./tasksComments/tasksComments.routes.js";
-import taskFileRouter from "./tasksFile/tasksFile.routes.js";
-import teamsRouter from "./teams/teams.routes.js";
-import userRouter from "./users/users.routes.js";
-import workspaceRouter from "./workspaces/workspaces.routes.js";
+import authRouter from "./admin/auth/auth.routes.js";
+import employeeRouter from "./hr/employees/employees.routes.js";
+import inviteRouter from "./admin/invites/invites.routes.js";
+import projectRouter from "./pm/projects/projects.routes.js";
+import spaceRouter from "./pm/spaces/spaces.routes.js";
+import subtaskRouter from "./pm/subTasks/subTasks.routes.js";
+import taskRouter from "./pm/tasks/tasks.routes.js";
+import taskCommentRouter from "./pm/tasksComments/tasksComments.routes.js";
+import taskFileRouter from "./pm/tasksFile/tasksFile.routes.js";
+import teamsRouter from "./hr/teams/teams.routes.js";
+import userRouter from "./admin/users/users.routes.js";
+import workspaceRouter from "./admin/workspaces/workspaces.routes.js";
 
 export {
   authRouter,

@@ -1,6 +1,9 @@
 import express from "express";
-import { verifyToken } from "../middleware/authenticate.js";
-import { getCurrentWorkspace } from "../middleware/getCurrentWorkspace.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
+import {
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../../helper/middleware/index.js";
 import {
   createSpace,
   deleteSpace,

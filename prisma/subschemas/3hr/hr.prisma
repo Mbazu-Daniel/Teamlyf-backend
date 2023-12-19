@@ -72,7 +72,6 @@ model Team {
 
   role TeamRole @default(MEMBER)
 
-  employeeId String
 
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -81,7 +80,6 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId])
   @@index([workspaceId])
 }
 
@@ -136,46 +134,40 @@ model Timesheet {
 
   @@index([employeeId])
 }
-
 model Leave {
   id String @id @default(cuid())
 
   appliedDate   DateTime       @default(now())
-  startDate     DateTime
-  endDate       DateTime
-  acceptedDate  DateTime?
+  startDate     DateTime       @db.Date
+  endDate       DateTime       @db.Date
   duration      Int
-  reason        String?
-  leaveType     LeaveType[]
+  reason        String
+  leaveTypeId String
+  leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
   reviewComment LeaveComment[]
   status        LeaveStatus    @default(PENDING)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([employeeId])
+  @@index([leaveTypeId])
+
 }
 
-model Education {
-  id String @id @default(cuid())
+model LeaveType {
+  id   String @id @default(cuid())
+  name String
 
-  institution   String?
-  courseOfStudy String?
-  result        String?
-  degree        String?
-  startDate     DateTime?
-  endDate       DateTime?
-  status        Boolean   @default(true)
+  leaves Leave[]
 
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   @@index([employeeId])
 }
 
@@ -197,22 +189,28 @@ model LeaveComment {
   @@index([leaveId])
 }
 
-model LeaveType {
-  id    String @id @default(cuid())
-  title String
+
+model Education {
+  id String @id @default(cuid())
+
+  institution   String?
+  courseOfStudy String?
+  result        String?
+  degree        String?
+  startDate     DateTime?
+  endDate       DateTime?
+  status        Boolean   @default(true)
 
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  leave   Leave?  @relation(fields: [leaveId], references: [id])
-  leaveId String?
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId])
-  @@index([leaveId])
 }
+
+
 
 model PerformanceAppraisal {
   id String @id @default(cuid())

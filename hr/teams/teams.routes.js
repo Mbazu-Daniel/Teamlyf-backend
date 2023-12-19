@@ -1,22 +1,22 @@
 import express from "express";
 import {
-  addEmployeeToTeam,
+  addEmployeesToTeam,
   createTeam,
   deleteTeam,
   getAllTeams,
   getTeamById,
-  getTeamEmployees,
-  removeEmployeeFromTeam,
+  getEmployeesInTeam,
+  removeEmployeesFromTeam,
   updateTeam,
   updateTeamDetails,
   updateEmployeeRoles
 } from "./teams.controllers.js";
-import { verifyToken } from "../middleware/authenticate.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
 import {
   getCurrentWorkspace,
   getCurrentEmployee,
   checkTeamExists,
-} from "../middleware/index.js";
+} from "../../helper/middleware/index.js";;
 
 const teamsRouter = express.Router({ mergeParams: true });
 
@@ -45,17 +45,17 @@ teamsRouter.delete("/:workspaceId/teams/:teamId", checkTeamExists, deleteTeam);
 teamsRouter.post(
   "/:workspaceId/teams/:teamId/add-employee",
   checkTeamExists,
-  addEmployeeToTeam
+  addEmployeesToTeam
 );
-teamsRouter.post(
+teamsRouter.delete(
   "/:workspaceId/teams/:teamId/remove-employee",
   checkTeamExists,
-  removeEmployeeFromTeam
+  removeEmployeesFromTeam
 );
 teamsRouter.get(
   "/:workspaceId/teams/:teamId/employees",
   checkTeamExists,
-  getTeamEmployees
+  getEmployeesInTeam
 );
 
 export default teamsRouter;
