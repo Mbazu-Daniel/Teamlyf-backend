@@ -1,5 +1,4 @@
 import express from "express";
-import { verifyToken } from "../middleware/authenticate.js";
 import {
   addCollaboratorsToProject,
   createProject,
@@ -16,7 +15,8 @@ import {
 import {
   getCurrentEmployee,
   getCurrentWorkspace,
-} from "../middleware/index.js";
+} from "../../helper/middleware/index.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
 
 // const projectRouter = express.Router();
 const projectRouter = express.Router({ mergeParams: true });

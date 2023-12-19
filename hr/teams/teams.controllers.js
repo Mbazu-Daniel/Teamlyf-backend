@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
 
+// TODO: search employee in a team by email
 // Create a new team within an workspace
 const createTeam = asyncHandler(async (req, res) => {
   try {
@@ -201,7 +202,7 @@ const updateTeamDetails = asyncHandler(async (req, res) => {
 });
 
 const updateEmployeeRoles = asyncHandler(async (req, res) => {
-  const { teamId, workspaceId } = req.params;
+  const { teamId } = req.params;
   const { employeeIds, roles, teamCreatorRole } = req.body;
 
   try {
@@ -215,10 +216,10 @@ const updateEmployeeRoles = asyncHandler(async (req, res) => {
       create: {
         teamId,
         employeeId: teamCreatorId,
-        role: TeamRole.LEAD || teamCreatorRole,
+        role: teamCreatorRole || TeamRole.LEAD,
       },
       update: {
-        role: TeamRole.LEAD || teamCreatorRole,
+        role: teamCreatorRole || TeamRole.LEAD,
       },
     });
 
@@ -253,145 +254,114 @@ const updateEmployeeRoles = asyncHandler(async (req, res) => {
   }
 });
 
-// Add an employee to a team
-const addEmployeeToTeam = asyncHandler(async (req, res) => {
+// Add employees to a team with dynamic roles
+const addEmployeesToTeam = asyncHandler(async (req, res) => {
   const { workspaceId, teamId } = req.params;
-  const { email } = req.body;
+  const { employeeData } = req.body;
 
   try {
-    // Find the team and verify it exists
-    const team = await prisma.team.findUnique({
+    const existingRelationships = await prisma.employeeTeam.findMany({
       where: {
-        id: teamId,
-      },
-      include: {
-        employees: true,
+        teamId,
+        employeeId: { in: employeeData.map((data) => data.employeeId) },
       },
     });
 
-    if (!team) {
-      return res.status(404).json({ error: "Team not found" });
-    }
+    const existingEmployeeIds = existingRelationships.map((rel) => rel.employeeId);
+    const newEmployeeData = employeeData.filter((data) => !existingEmployeeIds.includes(data.employeeId));
 
-    // Find the employee based on their email address and workspace
-    const employee = await prisma.employee.findFirst({
-      where: {
-        email,
-        workspaceId,
-      },
+
+    // If all employees already exist, respond with an error
+    if (newEmployeeData.length === 0) {
+      return res.status(400).json({ error: "All employees are already in the team" });
+    }
+    const createdEmployees = await prisma.employeeTeam.createMany({
+      data: newEmployeeData.map((data) => ({
+        teamId,
+        employeeId: data.employeeId,
+        role: data.role || TeamRole.MEMBER,
+      })),
+      skipDuplicates: true,
     });
 
-    if (!employee) {
-      return res
-        .status(404)
-        .json({ error: "Employee not found in the workspace" });
-    }
-
-    // Check if the employee is already in the team
-    if (team.employees.find((e) => e.id === employee.id)) {
-      return res.status(400).json({ error: "Employee is already in the team" });
-    }
-
-    // Add the employee to the team's employees array
-    await prisma.team.update({
-      where: {
-        id: teamId,
-      },
-      data: {
-        employees: {
-          connect: {
-            id: employee.id,
-          },
-        },
-      },
+    // Fetch the updated team details
+    const updatedTeam = await prisma.team.findUnique({
+      where: { id: teamId },
+      include: { employeeTeam: { select: { employeeId: true, role: true } } },
     });
-
-    res.status(201).json({ message: "Employee added to the team" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Remove an employee from a team
-const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
-  const { workspaceId, teamId } = req.params;
-  const { email } = req.body;
-
-  try {
-    // Find the team based on its ID and workspace
-    const team = await prisma.team.findFirst({
-      teamId,
-      workspaceId,
-    });
-
-    if (!team) {
-      return res.status(404).json({ error: "Team not found in the workspace" });
-    }
-
-    // Find the employee based on their email address and workspace
-    const employee = await Employee.findOne({
-      email,
-      workspace: workspaceId,
-    });
-
-    if (!employee) {
-      return res
-        .status(404)
-        .json({ error: "Employee not found in the workspace" });
-    }
-
-    // Check if the employee is in the team
-    if (!team.employees.includes(employee._id)) {
-      return res.status(400).json({ error: "Employee is not in the team" });
-    }
-
-    // Remove the employee from the team
-    team.employees.pull(employee._id);
-    await team.save();
-
-    // Remove the team from the employee's teams array
-    employee.teams.pull(team._id);
-    await employee.save();
 
     res
-      .status(200)
-      .json({ message: "Employee removed from the team successfully" });
+      .status(201)
+      .json({ message: "Employees added to the team", updatedTeam });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get a list of employees in a team
-const getTeamEmployees = asyncHandler(async (req, res) => {
-  const { workspaceId, teamId } = req.params;
+// Remove employees from a team
+const removeEmployeesFromTeam = asyncHandler(async (req, res) => {
+  const {  teamId } = req.params;
+  const { employeeIds } = req.body;
 
   try {
-    const team = await prisma.team.findFirst({
-      where: { id: teamId, workspaceId },
+    // Check if the employees are in the team
+    const existingRelationships = await prisma.employeeTeam.findMany({
+      where: {
+        employeeId: { in: employeeIds },
+        teamId,
+      },
     });
 
-    if (!team) {
-      return res.status(404).json(`Team ${teamId} not found`);
+    const missingEmployees = employeeIds.filter(
+      (id) => !existingRelationships.some((rel) => rel.employeeId === id)
+    );
+
+    if (missingEmployees.length > 0) {
+      return res
+        .status(400)
+        .json({ error: `Employees (${missingEmployees.join(', ')}) are not in the team` });
     }
 
-    const employees = await prisma.employee.findMany({
-      where: { id: { in: team.employees } },
+    // Remove the employees from the team
+    await prisma.employeeTeam.deleteMany({
+      where: {
+        employeeId: { in: employeeIds },
+        teamId,
+      },
     });
 
-    res.status(200).json(employees);
+    res.status(204).json({ message: "Employees removed from the team successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const getEmployeesInTeam = asyncHandler(async (req, res) => {
+  const {  teamId } = req.params;
+
+  try {
+    const teamMembers = await prisma.employeeTeam.findMany({
+      where: { teamId }, select: { employeeId: true, role: true }
+    });
+
+  
+    res.status(200).json({teamMembers: teamMembers});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+
 export {
-  addEmployeeToTeam,
+  addEmployeesToTeam,
   createTeam,
   deleteTeam,
   getAllTeams,
   getTeamById,
-  getTeamEmployees,
-  removeEmployeeFromTeam,
+  getEmployeesInTeam,
+  removeEmployeesFromTeam,
   updateTeam,
   updateTeamDetails,
   updateEmployeeRoles,

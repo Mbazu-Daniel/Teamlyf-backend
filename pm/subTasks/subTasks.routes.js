@@ -6,12 +6,12 @@ import {
   updateSubtask,
 } from "./subTasks.controllers.js";
 
-import { verifyToken } from "../middleware/authenticate.js";
+import { verifyToken } from "../../helper/middleware/authenticate.js";
 
 import {
   getCurrentEmployee,
   getCurrentWorkspace,
-} from "../middleware/index.js";
+} from "../../helper/middleware/index.js";
 
 const subtaskRouter = express.Router({ mergeParams: true });
 
