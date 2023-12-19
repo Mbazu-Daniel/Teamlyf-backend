@@ -44,30 +44,6 @@ const getEmployeeById = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-// Get employee by email
-const getEmployeeByEmail = asyncHandler(async (req, res) => {
-  const { workspaceId } = req.params;
-  const { email } = req.query; // Use a query parameter for the email
-
-  try {
-    const employee = await prisma.employee.findFirst({
-      where: {
-        workspaceId: workspaceId,
-        email: email, // Email to search for
-      },
-    });
-
-    if (!employee) {
-      return res.status(404).json({
-        message: `Employee with email ${email} not found in the workspace`,
-      });
-    }
-
-    res.status(200).json(employee);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Update employee by ID by workspace
 const updateEmployee = asyncHandler(async (req, res) => {
@@ -107,6 +83,32 @@ const deleteEmployee = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Get employee by email
+const getEmployeeByEmail = asyncHandler(async (req, res) => {
+  const { workspaceId } = req.params;
+  const { email } = req.query; // Use a query parameter for the email
+
+  try {
+    const employee = await prisma.employee.findFirst({
+      where: {
+        workspaceId: workspaceId,
+        email: email, // Email to search for
+      },
+    });
+
+    if (!employee) {
+      return res.status(404).json({
+        message: `Employee with email ${email} not found in the workspace`,
+      });
+    }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 // Get a list of teams that an employee is a member of in the workspace
 const getTeamsByEmployee = asyncHandler(async (req, res) => {

@@ -1,3 +1,4 @@
+// Chat communication model 
 model Group {
   id   String      @id @default(cuid())
   name String
@@ -24,7 +25,7 @@ model Message {
   fileUrl String? @db.Text
 
   deleted Boolean @default(false)
-  read  Boolean @default(false)
+  read    Boolean @default(false)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)

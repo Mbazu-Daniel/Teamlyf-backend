@@ -12,11 +12,8 @@ export const getCurrentWorkspace = async (req, res, next) => {
     if (!workspace) {
       return res
         .status(404)
-        .json({ error: `workspace ${workspaceId} not found` });
+        .json({ error: `Workspace ${workspaceId} not found` });
     }
-
-    // Attach the workspace object to the request
-    req.workspaces = workspace;
 
     next();
   } catch (error) {
