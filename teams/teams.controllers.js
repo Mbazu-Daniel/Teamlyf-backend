@@ -1,27 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TeamRole } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
-
-// TODO: Use checkworkspaceExist Middleware on routes
 
 // Create a new team within an workspace
 const createTeam = asyncHandler(async (req, res) => {
   try {
     const { workspaceId } = req.params;
-    const { id: userId } = req.user;
-    const { name } = req.body;
+    const { name, alias, employeeIds, roles } = req.body;
 
-    // Check if the workspace exists
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: workspaceId },
-    });
-
-    if (!workspace) {
-      return res.status(404).json({ error: "workspace not found" });
-    }
-
-    // Check if the team name already exists within the workspace
     const existingTeam = await prisma.team.findFirst({
       where: { name, workspaceId },
     });
@@ -36,10 +23,30 @@ const createTeam = asyncHandler(async (req, res) => {
     const newTeam = await prisma.team.create({
       data: {
         name,
-        user: { connect: { id: userId } },
+        alias,
         workspace: { connect: { id: workspaceId } },
       },
     });
+
+    // Create an employee-team association for the team creator as ADMIN
+    await prisma.employeeTeam.create({
+      data: {
+        teamCreator: { connect: { id: req.employeeId } },
+        team: { connect: { id: newTeam.id } },
+        role: TeamRole.LEAD,
+      },
+    });
+
+    // Create multiple employee-team associations
+    if (employeeIds && employeeIds.length > 0) {
+      await prisma.employeeTeam.createMany({
+        data: employeeIds.map((employeeId, index) => ({
+          employeeId,
+          teamId: newTeam.id,
+          role: roles && roles[index] ? roles[index] : TeamRole.MEMBER,
+        })),
+      });
+    }
 
     res.status(201).json(newTeam);
   } catch (error) {
@@ -52,17 +59,13 @@ const getAllTeams = asyncHandler(async (req, res) => {
   try {
     const { workspaceId } = req.params;
 
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: workspaceId },
-      include: { employees: true },
-    });
-
-    if (!workspace) {
-      return res.status(404).json({ error: "workspace not found" });
-    }
-
     const teams = await prisma.team.findMany({
       where: { workspaceId },
+      include: {
+        employeeTeam: {
+          select: { employeeId: true, role: true },
+        },
+      },
     });
 
     res.status(200).json(teams);
@@ -78,6 +81,11 @@ const getTeamById = asyncHandler(async (req, res) => {
   try {
     const team = await prisma.team.findFirst({
       where: { id: teamId, workspaceId },
+      include: {
+        employeeTeam: {
+          select: { employeeId: true, role: true },
+        },
+      },
     });
 
     if (!team) {
@@ -203,9 +211,9 @@ const removeEmployeeFromTeam = asyncHandler(async (req, res) => {
 
   try {
     // Find the team based on its ID and workspace
-    const team = await Team.findOne({
-      _id: teamId,
-      workspace: workspaceId,
+    const team = await prisma.team.findFirst({
+      teamId,
+      workspaceId,
     });
 
     if (!team) {
