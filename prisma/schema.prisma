@@ -483,8 +483,6 @@ model Team {
   name  String  @unique
   alias String?
 
-  employeeId String
-
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   employeeTeam EmployeeTeam[]
@@ -492,7 +490,6 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId])
   @@index([workspaceId])
 }
 

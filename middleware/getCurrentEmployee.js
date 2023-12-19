@@ -20,11 +20,7 @@ export const getCurrentEmployee = asyncHandler(async (req, res, next) => {
       return res
         .status(403)
         .json({ error: "Employee is not a member of this workspace" });
-    } else {
-      return res
-        .status(400)
-        .json({ error: "Email already exists in the workspace" });
-    }
+    } 
     // Attach the employee object to the request for further use if needed
     req.employeeId = employee.id;
 
@@ -34,3 +30,4 @@ export const getCurrentEmployee = asyncHandler(async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
