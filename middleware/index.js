@@ -8,6 +8,7 @@ import {
 } from "./employeeRoleMiddleware.js";
 import { getCurrentEmployee } from "./getCurrentEmployee.js";
 import { getCurrentWorkspace } from "./getCurrentWorkspace.js";
+import { checkTeamExists } from "./checkTeamExists.js";
 
 export {
   adminAndOwnerRoles,
@@ -18,4 +19,5 @@ export {
   employeeOwner,
   getCurrentEmployee,
   getCurrentWorkspace,
+  checkTeamExists
 };
