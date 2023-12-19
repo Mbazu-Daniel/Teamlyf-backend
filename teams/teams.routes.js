@@ -1,12 +1,12 @@
 import express from "express";
 import {
-  addEmployeeToTeam,
+  addEmployeesToTeam,
   createTeam,
   deleteTeam,
   getAllTeams,
   getTeamById,
-  getTeamEmployees,
-  removeEmployeeFromTeam,
+  getEmployeesInTeam,
+  removeEmployeesFromTeam,
   updateTeam,
   updateTeamDetails,
   updateEmployeeRoles
@@ -45,17 +45,17 @@ teamsRouter.delete("/:workspaceId/teams/:teamId", checkTeamExists, deleteTeam);
 teamsRouter.post(
   "/:workspaceId/teams/:teamId/add-employee",
   checkTeamExists,
-  addEmployeeToTeam
+  addEmployeesToTeam
 );
-teamsRouter.post(
+teamsRouter.delete(
   "/:workspaceId/teams/:teamId/remove-employee",
   checkTeamExists,
-  removeEmployeeFromTeam
+  removeEmployeesFromTeam
 );
 teamsRouter.get(
   "/:workspaceId/teams/:teamId/employees",
   checkTeamExists,
-  getTeamEmployees
+  getEmployeesInTeam
 );
 
 export default teamsRouter;
