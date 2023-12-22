@@ -13,6 +13,7 @@ import userRouter from "./admin/users/users.routes.js";
 import workspaceRouter from "./admin/workspaces/workspaces.routes.js";
 import leavesRouter from "./hr/leaves/leaves.routes.js";
 import leaveTypeRouter from "./hr/leaveType/leaveType.routes.js";
+import leaveCommentRouter from "./hr/leaveComment/leaveComment.routes.js";
 
 export {
   authRouter,
@@ -28,5 +29,6 @@ export {
   userRouter,
   workspaceRouter,
   leavesRouter,
-  leaveTypeRouter
+  leaveTypeRouter,
+  leaveCommentRouter,
 };

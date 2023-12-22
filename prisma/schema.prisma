@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Fri Dec 22 2023 05:57:20 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Dec 22 2023 07:13:39 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -564,8 +564,8 @@ model Leave {
   leaveTypeId     String
   status          LeaveStatus @default(PENDING)
 
-  leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
-  reviewComment LeaveComment[]
+  leaveType LeaveType      @relation(fields: [leaveTypeId], references: [id])
+  comments  LeaveComment[]
 
   employeeId  String
   employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -607,8 +607,8 @@ model LeaveComment {
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
-  leave   Leave?  @relation(fields: [leaveId], references: [id])
-  leaveId String?
+  leave   Leave  @relation(fields: [leaveId], references: [id])
+  leaveId String
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
@@ -787,6 +787,7 @@ enum LeaveStatus {
   PENDING
   APPROVED
   REJECTED
+  CANCELED
 }
 
 enum EmployeeRole {

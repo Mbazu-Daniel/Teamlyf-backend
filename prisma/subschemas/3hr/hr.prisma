@@ -150,7 +150,7 @@ model Leave {
    status        LeaveStatus    @default(PENDING)
 
   leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
-  reviewComment LeaveComment[]
+  comments LeaveComment[]
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -192,8 +192,8 @@ model LeaveComment {
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
-  leave   Leave?  @relation(fields: [leaveId], references: [id])
-  leaveId String?
+  leave   Leave  @relation(fields: [leaveId], references: [id])
+  leaveId String
 
 workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
