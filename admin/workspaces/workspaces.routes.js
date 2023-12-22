@@ -39,13 +39,13 @@ workspacesRouter.delete(
   deleteWorkspace
 );
 workspacesRouter.post(
-  "/transfer-owner/:workspaceId",
+  "/:workspaceId/transfer-owner",
   getCurrentWorkspace,
   getCurrentEmployee,
   transferWorkspaceOwnership
 );
 workspacesRouter.post(
-  "/leave-workspace/:workspaceId",
+  "/:workspaceId/leave-workspace",
   getCurrentWorkspace,
   getCurrentEmployee,
   leaveWorkspace
