@@ -141,21 +141,27 @@ model Leave {
   startDate     DateTime       @db.Date
   endDate       DateTime       @db.Date
   duration      Int
-  reason        String
+  reason        String?
+
+  //  acceptLeaveFrom DateTime? // accept leave startDate
+  // acceptLeaveTo   DateTime? // accepted leave endDate 
+  acceptLeaveBy String? // the admin that accepted the leave
   leaveTypeId String
+   status        LeaveStatus    @default(PENDING)
+
   leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
   reviewComment LeaveComment[]
-  status        LeaveStatus    @default(PENDING)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([employeeId])
   @@index([leaveTypeId])
-
+ @@index([workspaceId])
 }
 
 model LeaveType {
@@ -166,9 +172,16 @@ model LeaveType {
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
+  
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@unique([name])
   @@index([employeeId])
+   @@index([workspaceId])
 }
 
 model LeaveComment {
@@ -182,11 +195,15 @@ model LeaveComment {
   leave   Leave?  @relation(fields: [leaveId], references: [id])
   leaveId String?
 
+workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId])
   @@index([leaveId])
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 

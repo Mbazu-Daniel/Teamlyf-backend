@@ -29,7 +29,9 @@ model Workspace {
   invite    Invite[]
   spaces    Space[]
   tasks     Task[]
-
+leaves       Leave[]
+  leaveTypes   LeaveType[]
+  leaveComments LeaveComment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Group     Group[]

@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Tue Dec 19 2023 20:03:32 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Dec 22 2023 04:56:07 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -37,15 +37,17 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees Employee[]
-  teams     Team[]
-  invite    Invite[]
-  spaces    Space[]
-  tasks     Task[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Group     Group[]
+  employees     Employee[]
+  teams         Team[]
+  invite        Invite[]
+  spaces        Space[]
+  tasks         Task[]
+  leaves        Leave[]
+  leaveTypes    LeaveType[]
+  leaveComments LeaveComment[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  Group         Group[]
 
   @@index([userId])
   @@index([name])
@@ -550,24 +552,31 @@ model Timesheet {
 model Leave {
   id String @id @default(cuid())
 
-  appliedDate   DateTime       @default(now())
-  startDate     DateTime       @db.Date
-  endDate       DateTime       @db.Date
-  duration      Int
-  reason        String
+  appliedDate DateTime @default(now())
+  startDate   DateTime @db.Date
+  endDate     DateTime @db.Date
+  duration    Int
+  reason      String?
+
+  //  acceptLeaveFrom DateTime? // accept leave startDate
+  // acceptLeaveTo   DateTime? // accepted leave endDate 
+  acceptLeaveBy String? // the admin that accepted the leave
   leaveTypeId   String
+  status        LeaveStatus @default(PENDING)
+
   leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
   reviewComment LeaveComment[]
-  status        LeaveStatus    @default(PENDING)
 
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([employeeId])
   @@index([leaveTypeId])
+  @@index([workspaceId])
 }
 
 model LeaveType {
@@ -578,10 +587,16 @@ model LeaveType {
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name])
   @@index([employeeId])
+  @@index([workspaceId])
 }
 
 model LeaveComment {
@@ -595,11 +610,15 @@ model LeaveComment {
   leave   Leave?  @relation(fields: [leaveId], references: [id])
   leaveId String?
 
-  createdAt DateTime @default(now())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  createdAt   DateTime  @default(now())
+
   updatedAt DateTime @updatedAt
 
-  @@index([employeeId])
   @@index([leaveId])
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 model Education {
