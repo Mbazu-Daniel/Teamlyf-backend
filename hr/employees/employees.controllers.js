@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import asyncHandler from "express-async-handler";
 
 const prisma = new PrismaClient();
-// TODO: use checkTeamExist Middleware on routes
 
 
 // Get all employees by workspace
@@ -38,6 +37,25 @@ const getEmployeeById = asyncHandler(async (req, res) => {
         message: `Employee ${employeeId} not found in the workspace`,
       });
     }
+
+    res.status(200).json(employee);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// Get employee by ID by workspace
+const getCurrentEmployeeProfile = asyncHandler(async (req, res) => {
+  const { workspaceId,  } = req.params;
+  const employeeId = req.employeeId
+  console.log("🚀 ~ file: employees.controllers.js:50 ~ getCurrentEmployeeProfile ~ employeeId:", employeeId)
+
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: {
+        id: employeeId,
+        workspaceId,
+      },
+    });
 
     res.status(200).json(employee);
   } catch (error) {
@@ -252,4 +270,5 @@ export {
   getTeamsByEmployee,
   searchEmployees,
   updateEmployee,
+  getCurrentEmployeeProfile
 };
