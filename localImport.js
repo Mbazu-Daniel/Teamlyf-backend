@@ -11,6 +11,8 @@ import taskFileRouter from "./pm/tasksFile/tasksFile.routes.js";
 import teamsRouter from "./hr/teams/teams.routes.js";
 import userRouter from "./admin/users/users.routes.js";
 import workspaceRouter from "./admin/workspaces/workspaces.routes.js";
+import leavesRouter from "./hr/leaves/leaves.routes.js";
+import leaveTypeRouter from "./hr/leaveType/leaveType.routes.js";
 
 export {
   authRouter,
@@ -25,4 +27,6 @@ export {
   teamsRouter,
   userRouter,
   workspaceRouter,
+  leavesRouter,
+  leaveTypeRouter
 };

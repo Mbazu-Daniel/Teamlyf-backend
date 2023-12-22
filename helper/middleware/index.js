@@ -9,6 +9,7 @@ import {
 import { getCurrentEmployee } from "./getCurrentEmployee.js";
 import { getCurrentWorkspace } from "./getCurrentWorkspace.js";
 import { checkTeamExists } from "./checkTeamExists.js";
+import { checkLeaveExists } from "./checkLeaveExists.js";
 
 export {
   adminAndOwnerRoles,
@@ -19,5 +20,6 @@ export {
   employeeOwner,
   getCurrentEmployee,
   getCurrentWorkspace,
-  checkTeamExists
+  checkTeamExists,
+  checkLeaveExists
 };

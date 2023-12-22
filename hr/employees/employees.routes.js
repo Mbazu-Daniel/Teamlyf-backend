@@ -14,6 +14,7 @@ import {
   getTeamsByEmployee,
   searchEmployees,
   updateEmployee,
+  getCurrentEmployeeProfile,
 } from "./employees.controllers.js";
 
 const employeeRouter = express.Router({ mergeParams: true });
@@ -48,4 +49,5 @@ employeeRouter.patch(
   changeEmployeeRole
 );
 
+employeeRouter.get("/:workspaceId/profile", getCurrentEmployeeProfile);
 export default employeeRouter;
