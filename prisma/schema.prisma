@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Fri Dec 22 2023 04:56:07 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Dec 22 2023 05:57:20 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -558,11 +558,11 @@ model Leave {
   duration    Int
   reason      String?
 
-  //  acceptLeaveFrom DateTime? // accept leave startDate
-  // acceptLeaveTo   DateTime? // accepted leave endDate 
-  acceptLeaveBy String? // the admin that accepted the leave
-  leaveTypeId   String
-  status        LeaveStatus @default(PENDING)
+  //  leaveResponseFrom DateTime? // accept leave startDate
+  // leaveResponseTo   DateTime? // accepted leave endDate 
+  leaveResponseBy String? // the admin that responded to the leave
+  leaveTypeId     String
+  status          LeaveStatus @default(PENDING)
 
   leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
   reviewComment LeaveComment[]
@@ -619,6 +619,15 @@ model LeaveComment {
   @@index([leaveId])
   @@index([workspaceId])
   @@index([employeeId])
+}
+
+model LeaveHistory {
+  id            String       @id @default(cuid())
+  leaveId       String
+  oldStatus     LeaveStatus
+  updatedDate   DateTime?
+  updatedStatus LeaveStatus?
+  updatedBy     String?
 }
 
 model Education {

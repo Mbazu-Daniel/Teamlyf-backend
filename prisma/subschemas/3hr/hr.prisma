@@ -143,9 +143,9 @@ model Leave {
   duration      Int
   reason        String?
 
-  //  acceptLeaveFrom DateTime? // accept leave startDate
-  // acceptLeaveTo   DateTime? // accepted leave endDate 
-  acceptLeaveBy String? // the admin that accepted the leave
+  //  leaveResponseFrom DateTime? // accept leave startDate
+  // leaveResponseTo   DateTime? // accepted leave endDate 
+  leaveResponseBy String? // the admin that responded to the leave
   leaveTypeId String
    status        LeaveStatus    @default(PENDING)
 
@@ -206,6 +206,14 @@ workspaceId String
   @@index([employeeId])
 }
 
+model LeaveHistory {
+  id String @id @default(cuid())
+  leaveId String
+  oldStatus LeaveStatus
+  updatedDate DateTime?
+  updatedStatus LeaveStatus?
+  updatedBy String?
+}
 
 model Education {
   id String @id @default(cuid())
@@ -368,6 +376,7 @@ enum LeaveStatus {
   PENDING
   APPROVED
   REJECTED
+  CANCELED
 }
 
 enum EmployeeRole {

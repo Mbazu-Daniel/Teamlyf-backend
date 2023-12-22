@@ -19,7 +19,7 @@ import {
   taskRouter,
   teamsRouter,
   userRouter,
-  workspaceRouter,
+  workspaceRouter,leavesRouter,leaveTypeRouter
 } from "./localImport.js";
 dotenv.config();
 
@@ -61,7 +61,6 @@ app.use(`${basePath}/users`, userRouter);
 app.use(`${basePath}/workspace`, workspaceRouter);
 app.use(`${basePath}/workspace`, employeeRouter);
 app.use(`${basePath}/invites`, inviteRouter);
-app.use(`${basePath}/workspace`, teamsRouter);
 
 // Task Management
 app.use(`${basePath}/workspace`, spaceRouter);
@@ -70,5 +69,10 @@ app.use(`${basePath}/workspace`, taskRouter);
 app.use(`${basePath}/workspace`, taskCommentRouter);
 app.use(`${basePath}/workspace`, subtaskRouter);
 app.use(`${basePath}/workspace`, taskFileRouter);
+
+// HR Management 
+app.use(`${basePath}/workspace`, teamsRouter);
+app.use(`${basePath}/workspace`, leavesRouter);
+app.use(`${basePath}/workspace`, leaveTypeRouter);
 
 export default app;
