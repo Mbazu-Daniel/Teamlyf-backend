@@ -120,7 +120,6 @@ const registerAdminUser = asyncHandler(async (req, res) => {
 
 const forgetPassword = asyncHandler(async(req, res) => {
   try {
-    const {id: userId} = req.user
     const {email} = req.body
     const lowercaseEmail = email.toLowerCase();
   // Get the user 
@@ -164,14 +163,15 @@ const forgetPassword = asyncHandler(async(req, res) => {
 
 const resetPassword = asyncHandler(async (req, res) => {
   try {
-    const { resetToken, newPassword } = req.body;
+    const {resetToken} = req.params
+    const {  password } = req.body;
 
     // Find the user by their reset token
     const user = await prisma.user.findFirst({
       where: {
         passwordResetToken: resetToken,
         passwordResetAt: {
-          gte: new Date(Date.now() - 3600000), // Password reset token expires after 1 hour
+          gte: new Date(Date.now() - 3600000), 
         },
       },
     });
@@ -181,7 +181,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.update({
       where: { id: user.id },
