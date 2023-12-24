@@ -4,7 +4,6 @@ import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import generateResetToken from "../../helper/services/generateResetToken.js";
 import sendMail from "../../helper/services/sendMail.js";
-
 const prisma = new PrismaClient();
 
 const BASE_URL = `http://localhost:${process.env.PORT}`
@@ -73,55 +72,54 @@ const registerAdminUser = asyncHandler(async (req, res) => {
   }
 });
 
-const loginUser = asyncHandler(async (req, res) => {
-  try {
-    const email = req.body.email.toLowerCase();
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+// const loginUser = asyncHandler(async (req, res) => {
+//   try {
+//     const email = req.body.email.toLowerCase();
+//     const user = await prisma.user.findUnique({
+//       where: { email },
+//     });
 
-    if (!user) {
-      return res.status(404).json({ error: "Incorrect email or password!" });
-    }
-    const isPasswordCorrect = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
-    if (!isPasswordCorrect) {
-      return res.status(401).json("Wrong password or email!");
-    }
+//     if (!user) {
+//       return res.status(404).json({ error: "Incorrect email or password!" });
+//     }
+//     const isPasswordCorrect = await bcrypt.compare(
+//       req.body.password,
+//       user.password
+//     );
+//     if (!isPasswordCorrect) {
+//       return res.status(401).json("Wrong password or email!");
+//     }
 
-    // include user information
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      role: user.role
-    };
+//     // include user information
+//     const tokenPayload = {
+//       id: user.id,
+//       email: user.email,
+//       role: user.role
+//     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
-      expiresIn: "10000h",
-    });
-    res
-      .cookie("access_token", token, {
-        httpOnly: true,
-      })
-      .status(200)
-      .json({ access_token: token });
-  } catch (error) {
-    console.error({ error: "An error occurred while logging in" });
-  }
-});
+//     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+//       expiresIn: "10000h",
+//     });
+//     res
+//       .cookie("access_token", token, {
+//         httpOnly: true,
+//       })
+//       .status(200)
+//       .json({ access_token: token });
+//   } catch (error) {
+//     console.error({ error: error});
+//   }
+// });
 
-const logoutUser = asyncHandler((req, res) => {
-  res
-    .clearCookie("access_token")
-    .status(200)
-    .json({ message: "Logged out successfully" });
-});
+// const logoutUser = asyncHandler((req, res) => {
+//   res
+//     .clearCookie("access_token")
+//     .status(200)
+//     .json({ message: "Logged out successfully" });
+// });
 
 const forgetPassword = asyncHandler(async(req, res) => {
   try {
-    const {id: userId} = req.user
     const {email} = req.body
     const lowercaseEmail = email.toLowerCase();
   // Get the user 
@@ -165,14 +163,15 @@ const forgetPassword = asyncHandler(async(req, res) => {
 
 const resetPassword = asyncHandler(async (req, res) => {
   try {
-    const { resetToken, newPassword } = req.body;
+    const {resetToken} = req.params
+    const {  password } = req.body;
 
     // Find the user by their reset token
     const user = await prisma.user.findFirst({
       where: {
         passwordResetToken: resetToken,
         passwordResetAt: {
-          gte: new Date(Date.now() - 3600000), // Password reset token expires after 1 hour
+          gte: new Date(Date.now() - 3600000), 
         },
       },
     });
@@ -182,7 +181,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -240,4 +239,4 @@ const changePassword = asyncHandler(async (req, res) => {
 
 
 
-export { loginUser, logoutUser, registerUser , registerAdminUser,forgetPassword, resetPassword ,changePassword};
+export {  registerUser , registerAdminUser,forgetPassword, resetPassword ,changePassword};
