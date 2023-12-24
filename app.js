@@ -6,17 +6,19 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
+import session from 'express-session';
+import passport from 'passport';
 
 import {
   authRouter,
   employeeRouter,
   inviteRouter,
-  projectRouter,
-  spaceRouter,
-  subtaskRouter,
-  taskCommentRouter,
-  taskFileRouter,
-  taskRouter,
+  // projectRouter,
+  // spaceRouter,
+  // subtaskRouter,
+  // taskCommentRouter,
+  // taskFileRouter,
+  // taskRouter,
   teamsRouter,
   userRouter,
   workspaceRouter,
@@ -29,8 +31,17 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRETS,
+  resave: false,
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(cookieParser());
 
 app.use(
@@ -66,12 +77,12 @@ app.use(`${basePath}/workspace`, employeeRouter);
 app.use(`${basePath}/invites`, inviteRouter);
 
 // Task Management
-app.use(`${basePath}/workspace`, spaceRouter);
-app.use(`${basePath}/workspace`, projectRouter);
-app.use(`${basePath}/workspace`, taskRouter);
-app.use(`${basePath}/workspace`, taskCommentRouter);
-app.use(`${basePath}/workspace`, subtaskRouter);
-app.use(`${basePath}/workspace`, taskFileRouter);
+// app.use(`${basePath}/workspace`, spaceRouter);
+// app.use(`${basePath}/workspace`, projectRouter);
+// app.use(`${basePath}/workspace`, taskRouter);
+// app.use(`${basePath}/workspace`, taskCommentRouter);
+// app.use(`${basePath}/workspace`, subtaskRouter);
+// app.use(`${basePath}/workspace`, taskFileRouter);
 
 // HR Management
 app.use(`${basePath}/workspace`, teamsRouter);
