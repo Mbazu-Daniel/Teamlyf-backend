@@ -12,8 +12,9 @@ const leaveSelectOptions = {
   reason: true,
   status: true,
   leaveResponseBy: true,
-  leaveType: { select: { name: true } },
   employee: { select: { fullName: true } },
+  leaveType: { select: { name: true } },
+  comments: { select: { employeeId: true, comments: true } },
 };
 
 // Create a new leave request
@@ -113,7 +114,7 @@ const updateLeave = asyncHandler(async (req, res) => {
     duration = Math.round(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     );
-     const leave = await prisma.leave.update({
+    const leave = await prisma.leave.update({
       where: { id: leaveId },
       data: {
         startDate,
@@ -161,19 +162,20 @@ const updateLeaveStatus = asyncHandler(async (req, res) => {
     const { leaveId } = req.params;
     const { status } = req.body;
 
-       // Fetch the current leave request
-       const currentLeave = await prisma.leave.findUnique({
-        where: { id: leaveId },
-      });
-  
-      if (!currentLeave) {
-        return res.status(404).json({ message: `Leave request ${leaveId} not found` });
-      }
-  
+    // Fetch the current leave request
+    const currentLeave = await prisma.leave.findUnique({
+      where: { id: leaveId },
+    });
+
+    if (!currentLeave) {
+      return res
+        .status(404)
+        .json({ message: `Leave request ${leaveId} not found` });
+    }
 
     const leave = await prisma.leave.update({
       where: { id: leaveId },
-      data: { status, leaveResponseBy: employeeId},
+      data: { status, leaveResponseBy: employeeId },
       select: leaveSelectOptions,
     });
 
@@ -183,10 +185,9 @@ const updateLeaveStatus = asyncHandler(async (req, res) => {
         oldStatus: currentLeave.status,
         updatedDate: new Date(),
         updatedStatus: status,
-        updatedBy: employeeId
-
-      }
-    })
+        updatedBy: employeeId,
+      },
+    });
 
     res.status(200).json(leave);
   } catch (error) {

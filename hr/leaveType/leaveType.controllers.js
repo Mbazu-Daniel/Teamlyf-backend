@@ -4,7 +4,7 @@ import asyncHandler from "express-async-handler";
 const prisma = new PrismaClient();
 
 // Create multiple leave types
-const createLeaveTypes = asyncHandler(async (req, res) => {
+const createLeaveType = asyncHandler(async (req, res) => {
   try {
     const { workspaceId } = req.params;
     const employeeId = req.employeeId;
@@ -22,7 +22,7 @@ const createLeaveTypes = asyncHandler(async (req, res) => {
           error: `Leave types with names (${existingNames.map((index) => index.name).join(', ')}) already exist`,
         });
       }
-    const createdLeaveTypes = await prisma.leaveType.createMany({
+    await prisma.leaveType.createMany({
       data: leaveTypes.map((leaveType) => ({
         name: leaveType.name,
         employeeId: employeeId,
@@ -46,7 +46,7 @@ const createLeaveTypes = asyncHandler(async (req, res) => {
 });
 
 // Get all leave types in workspace
-const getAllLeaveTypes = asyncHandler(async (req, res) => {
+const getAllLeaveType = asyncHandler(async (req, res) => {
   try {
     const { workspaceId } = req.params;
 
@@ -87,7 +87,7 @@ const getLeaveTypeById = asyncHandler(async (req, res) => {
 });
 
 // Update multiple leave types
-const updateLeaveTypes = asyncHandler(async (req, res) => {
+const updateLeaveType = asyncHandler(async (req, res) => {
   try {
     const { leaveTypes } = req.body;
     const { workspaceId } = req.params;
@@ -138,7 +138,7 @@ const updateLeaveTypes = asyncHandler(async (req, res) => {
 });
 
 // Delete multiple leave types
-const deleteLeaveTypes = asyncHandler(async (req, res) => {
+const deleteLeaveType = asyncHandler(async (req, res) => {
   try {
     const { leaveTypeIds } = req.body;
     await prisma.leaveType.deleteMany({
@@ -153,9 +153,9 @@ const deleteLeaveTypes = asyncHandler(async (req, res) => {
 });
 
 export {
-  createLeaveTypes,
-  getAllLeaveTypes,
+  createLeaveType,
+  getAllLeaveType,
   getLeaveTypeById,
-  updateLeaveTypes,
-  deleteLeaveTypes,
+  updateLeaveType,
+  deleteLeaveType,
 };
