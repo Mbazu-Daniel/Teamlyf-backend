@@ -133,7 +133,7 @@ Welcome to **TeamLyf**, the ultimate solution for seamless collaboration and enh
 
   
 
--  **Daily Prebuilt**: Integrated for high-quality, reliable video conferencing.
+-  Daily Prebuilt or Video SDK: Integrated for high-quality, reliable video conferencing.
 
 -  **Socket.IO**: For real-time communication in our Chat Application.
 
@@ -141,17 +141,16 @@ Welcome to **TeamLyf**, the ultimate solution for seamless collaboration and enh
 
 ### Notifications and Email
 
-  
 
--  **Novu**: Utilized for handling push notifications efficiently.
+-  Novu: Utilized for handling push notifications efficiently.
 
--  **Resend**: Ensuring reliable email delivery.
+-  Resend: Ensuring reliable email delivery.
 
 ### Search and Analysis
--  **Elasticsearch**: To offer powerful search capabilities, particularly beneficial in the Document Management System.
+-  Elasticsearch: To offer powerful search capabilities, particularly beneficial in the Document Management System.
 
 ## Support
 
   
 
-For support, contact us at [support@teamlyf.com](mailto:mbazudaniel97@gmail.com). Our team is available 24/7 to assist you with any issues or queries.
+For support, contact me  on email [Daniel Mbazu](mailto:mbazudaniel97@gmail.com) or [Whatsapp](https://wa.me/2349096809900)  . Our team is available 24/7 to assist you with any issues or queries.
