@@ -1,4 +1,3 @@
-
 // Project Management 
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 model Space {
@@ -33,8 +32,14 @@ model Project {
 
   isFavourite Boolean @default(false)
 
-  status      TaskStatus @default(TO_DO)
-  statusColor String?
+  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
+  customStatusListId String?
+
+  customPriorityList   CustomPriorityList? @relation(fields: [customPriorityListId], references: [id])
+  customPriorityListId String?
+
+  projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
+  projectPriorityId String?
 
   projectProgress Int?
 
@@ -61,6 +66,9 @@ model Project {
   @@index([projectCreatorId])
   @@index([managerId])
   @@index([spaceId])
+  @@index([projectPriorityId])
+  @@index([customStatusListId])
+  @@index([customPriorityListId])
 }
 
 model Task {
@@ -88,13 +96,9 @@ model Task {
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  status        TaskStatus   @default(TO_DO)
-  statusColor   String?
-  priority      TaskPriority @default(NORMAL)
-  priorityColor String?
-
-  subtaskCollaborator SubtaskCollaborator[]
-  taskFiles           TaskFile[]
+  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
+  customStatusListId String?
+  taskFiles          TaskFile[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
@@ -109,6 +113,7 @@ model Task {
   @@index([projectId])
   @@index([workspaceId])
   @@index([milestoneId])
+  @@index([customStatusListId])
 }
 
 model Subtask {
@@ -118,7 +123,8 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  status TaskStatus @default(TO_DO)
+  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
+  customStatusListId String?
 
   subtaskCollaborator SubtaskCollaborator[]
 
@@ -133,6 +139,7 @@ model Subtask {
 
   @@index([employeeId])
   @@index([taskId])
+  @@index([customStatusListId])
 }
 
 model TaskComment {
@@ -207,16 +214,12 @@ model SubtaskCollaborator {
   subtaskId String
   subtasks  Subtask @relation(fields: [subtaskId], references: [id], onDelete: Cascade)
 
-  taskId String
-  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([taskId])
   @@index([subtaskId])
   @@index([employeeId])
 }
@@ -232,41 +235,60 @@ model TaskFile {
   fileUrl    String
   employeeId String?
   uploadedBy Employee? @relation(fields: [employeeId], references: [id])
+  workspaceId String?
+  workspace Workspace? @relation(fields: [workspaceId], references: [id])
 
   tasks  Task?   @relation(fields: [taskId], references: [id])
   taskId String?
 
   @@index([taskId])
   @@index([employeeId])
+  @@index([workspaceId])
 }
 
-// model TaskStatus {
-//     id        String     @id @default(cuid())
-//     name      String
-//     color     String?
-//     status    Boolean @default(true)
-//     task      Task[]
-//     project Project[]
-//     subTask Subtask[]
+model CustomStatusList {
+  id       String       @id @default(cuid())
+  name     String
+  statuses TaskStatus[]
+  projects Project[]
+  tasks    Task[]
+  subtasks Subtask[]
+}
 
-//     @@unique([name])
-// }
+model CustomPriorityList {
+  id                 String               @id @default(cuid())
+  name               String
+  priorities         ProjectPriority[]
+  projects           Project[]
+  
+}
 
-// model TaskPriority {
-//     id     String     @id @default(cuid())
-//     name   String  @unique
-//     color String?
-//     status Boolean @default(true)
-//     task   Task[]
-// }
+model TaskStatus {
+  id                 String            @id @default(cuid())
+  name               String
+  color              String?
+  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
+  customStatusListId String?
+
+  @@unique([name])
+  @@index([customStatusListId])
+}
+
+model ProjectPriority {
+  id                 String               @id @default(cuid())
+  name               String               @unique
+  color              String?
+  project            Project[]
+  customPriorityList CustomPriorityList[]
+}
 
 model Milestone {
-  id          String     @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   startDate   DateTime
   endDate     DateTime
   description String
-  status      TaskStatus @default(PENDING) //progress, completed, or delayed.
+  // status      TaskStatus @default(PENDING) //progress, completed, or delayed.
   task        Task[]
 
   createdAt DateTime @default(now())
@@ -301,24 +323,24 @@ enum ProjectAction {
   PROJECTS_COLLABORATOR_DELETED
 }
 
-enum TaskPriority {
-  HIGH
-  MEDIUM
-  LOW
-  CRITICAL
-  URGENT
-  NORMAL
-  MINOR
-}
+// enum TaskPriority {
+//   HIGH
+//   MEDIUM
+//   LOW
+//   CRITICAL
+//   URGENT
+//   NORMAL
+//   MINOR
+// }
 
-// get task status function for each of the  status
-enum TaskStatus {
-  TO_DO
-  IN_PROGRESS
-  PENDING
-  COMPLETED
-  CANCELED
-  DEFERRED
-  ON_HOLD
-  IN_REVIEW
-}
+// // get task status function for each of the  status
+// enum TaskStatus {
+//   TO_DO
+//   IN_PROGRESS
+//   PENDING
+//   COMPLETED
+//   CANCELED
+//   DEFERRED
+//   ON_HOLD
+//   IN_REVIEW
+// }
