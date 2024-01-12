@@ -17,7 +17,14 @@ import {
   getCurrentEmployeeProfile,
 } from "./employees.controllers.js";
 
-const employeeRouter = express.Router({ mergeParams: true });
+const app = express();
+const employeeRouter = express.Router();
+
+app.use(
+  "/",
+  employeeRouter
+  //  #swagger.tags = ['Employees']
+);
 
 employeeRouter.use(
   "/:workspaceId",
@@ -28,13 +35,13 @@ employeeRouter.use(
 
 // Routes for managing employees within an workspace
 
+employeeRouter.get("/:workspaceId/employees", getAllEmployees);
+
 employeeRouter.get("/:workspaceId/employees/search", searchEmployees);
 
 employeeRouter.get("/:workspaceId/employees/count", getEmployeesCount);
 
-employeeRouter.get("/:workspaceId/employees", getAllEmployees);
-
-employeeRouter.get("/:workspaceId/employees/", getEmployeeByEmail);
+employeeRouter.get("/:workspaceId/employees/email", getEmployeeByEmail);
 
 employeeRouter.get("/:workspaceId/employees/:employeeId", getEmployeeById);
 employeeRouter.patch("/:workspaceId/employees/:employeeId", updateEmployee);
