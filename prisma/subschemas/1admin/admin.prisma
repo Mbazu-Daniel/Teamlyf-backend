@@ -71,7 +71,10 @@ enum SourceType {
   TWITTER
   INSTAGRAM
   LINKEDIN
+  TIKTOK
   GOOGLE
+  FRIEND
+  WHATSAPP
   OTHER
 }
 
