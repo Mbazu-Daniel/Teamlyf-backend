@@ -1,21 +1,29 @@
 import express from "express";
 import {
-    createLeave,
-    getAllWorkspaceLeaves,
-    getLeaveById,
-    updateLeave,
-    deleteLeave,
-    getEmployeeLeaves,
-    updateLeaveStatus
+  createLeave,
+  getAllWorkspaceLeaves,
+  getLeaveById,
+  updateLeave,
+  deleteLeave,
+  getEmployeeLeaves,
+  updateLeaveStatus,
 } from "./leaves.controllers.js";
 import { verifyToken } from "../../helper/middleware/authenticate.js";
 import {
   getCurrentWorkspace,
   getCurrentEmployee,
   checkLeaveExists,
-} from "../../helper/middleware/index.js";;
+} from "../../helper/middleware/index.js";
 
-const leavesRouter = express.Router({ mergeParams: true });
+const app = express();
+const leavesRouter = express.Router();
+
+app.use(
+  "/",
+  leavesRouter
+
+  //  #swagger.tags = ['Leave']
+);
 
 leavesRouter.use(
   "/:workspaceId",
@@ -40,6 +48,10 @@ leavesRouter.patch(
   updateLeaveStatus
 );
 
-leavesRouter.delete("/:workspaceId/leaves/:leaveId", checkLeaveExists, deleteLeave);
+leavesRouter.delete(
+  "/:workspaceId/leaves/:leaveId",
+  checkLeaveExists,
+  deleteLeave
+);
 
 export default leavesRouter;

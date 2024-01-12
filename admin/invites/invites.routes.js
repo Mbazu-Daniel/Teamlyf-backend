@@ -6,7 +6,14 @@ import {
 } from "../../helper/middleware/index.js";
 import { generateInviteLink, joinWorkspace } from "./invites.controllers.js";
 
-const inviteRouter = express.Router({ mergeParams: true });
+const app = express();
+
+const inviteRouter = express.Router();
+app.use(
+  "/invites",
+  inviteRouter
+  //  #swagger.tags = ['Invite']
+);
 
 inviteRouter.use("/:workspaceId", verifyToken);
 

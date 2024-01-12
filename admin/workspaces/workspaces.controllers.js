@@ -5,6 +5,7 @@ import ShortUniqueId from "short-unique-id";
 const prisma = new PrismaClient();
 // TODO: total count of workspace in the platform
 // TODO: set permission for update and delete workspace to only employee with Admin and owner role
+// TODO: check existing workspace based on the current user and not general workspaces
 const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 // Create a new workspace

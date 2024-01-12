@@ -12,7 +12,14 @@ import {
   getCurrentEmployee,
 } from "../../helper/middleware/index.js";
 
-const leaveTypeRouter = express.Router({ mergeParams: true });
+const app = express();
+const leaveTypeRouter = express.Router();
+app.use(
+  "/",
+  leaveTypeRouter
+
+  //  #swagger.tags = ['Leave Type']
+);
 
 leaveTypeRouter.use(
   "/:workspaceId",

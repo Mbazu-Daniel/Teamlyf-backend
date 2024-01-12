@@ -4,7 +4,7 @@ import asyncHandler from "express-async-handler";
 import { v4 as uuidv4 } from "uuid";
 import sendMail from "../../helper/services/sendMail.js";
 import dotenv from "dotenv";
-dotenv.config()
+dotenv.config();
 const prisma = new PrismaClient();
 
 // TODO: Update this code to send template
@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 
 // TODO: function to leave a workspace (this should not CASCADE delete, the user information should still be available)
 
-const url = process.env.FRONTEND_URL
+const url = process.env.FRONTEND_URL;
 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
@@ -30,7 +30,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
     expireDate.setDate(expireDate.getDate() + 7);
 
     // Save the invite link with the workspace relationship
-    await prisma.Invite.create({
+    await prisma.invite.create({
       data: {
         token: inviteToken,
         email,
@@ -67,7 +67,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
 const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
-  let { fullName, email, password } = req.body;
+  const { fullName, email, password } = req.body;
   try {
     // Find the invite link in the database using Prisma
     const invite = await prisma.invite.findFirst({
@@ -81,8 +81,8 @@ const joinWorkspace = asyncHandler(async (req, res) => {
     }
 
     const invitedEmail = invite.email.toLowerCase();
-    
-    let existingUser = await prisma.user.findUnique({
+
+    const existingUser = await prisma.user.findUnique({
       where: { email: invitedEmail },
     });
 
@@ -107,8 +107,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
       return res.status(200).json(newEmployee);
     }
 
-    
-    if (!fullName || email || !password ) {
+    if (!fullName || email || !password) {
       return res
         .status(400)
         .json({ error: "Full name, email and password are required" });
