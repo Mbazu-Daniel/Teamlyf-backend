@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Mon Jan 08 2024 00:47:48 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Jan 12 2024 18:28:54 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -15,7 +15,7 @@ model User {
   id                 String       @id @default(cuid())
   email              String       @unique
   password           String
-  role               UserRole     @default(USER)
+  role               UserRole     @default(BASIC)
   source             SourceType   @default(OTHER)
   authStrategy       AuthStrategy @default(EMAIL)
   googleId           String?      @unique
@@ -85,12 +85,15 @@ enum SourceType {
   TWITTER
   INSTAGRAM
   LINKEDIN
+  TIKTOK
   GOOGLE
+  FRIEND
+  WHATSAPP
   OTHER
 }
 
 enum UserRole {
-  USER
+  BASIC
   ADMIN
   SUPER_ADMIN
 }
@@ -532,6 +535,7 @@ model Team {
 }
 
 model EmployeeTeam {
+  id         String   @id @default(cuid())
   employeeId String
   teamId     String
   role       TeamRole @default(MEMBER)
@@ -542,7 +546,6 @@ model EmployeeTeam {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@id([employeeId, teamId])
   @@index([employeeId])
   @@index([teamId])
 }
@@ -834,8 +837,7 @@ enum EmployeeRole {
 enum TeamRole {
   LEAD
   MEMBER
-  CONTRIBUTOR
-  OBSERVER
+  ADMIN
 }
 
 // Chat communication model 

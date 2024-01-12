@@ -1,5 +1,5 @@
 import { PrismaClient, UserRole } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import generateResetToken from '../../helper/services/generateResetToken.js';
 import sendMail from '../../helper/services/sendMail.js';
