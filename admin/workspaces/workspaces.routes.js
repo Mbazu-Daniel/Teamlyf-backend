@@ -9,6 +9,9 @@ import {
 	getWorkspaceOwners,
 	transferWorkspaceOwnership,
 	leaveWorkspace,
+	changeWorkspaceInviteCode,
+	getTotalWorkspacesCount,
+	joinWorkspaceUsingInviteCode,
 } from './workspaces.controllers.js';
 import {
 	getCurrentEmployee,
@@ -32,8 +35,9 @@ app.use(
 
 workspacesRouter.use('/', verifyToken);
 
-workspacesRouter.post('/create', createWorkspace);
-workspacesRouter.get('/user', getCurrentEmployee, getUserWorkspaces);
+workspacesRouter.post('/', createWorkspace);
+workspacesRouter.get('/current-user', getCurrentEmployee, getUserWorkspaces);
+workspacesRouter.get('/count', getCurrentEmployee, getTotalWorkspacesCount);
 workspacesRouter.get(
 	'/:workspaceId',
 
@@ -68,6 +72,17 @@ workspacesRouter.get(
 	'/workspace-owners',
 	getCurrentEmployee,
 	getWorkspaceOwners
+);
+
+workspacesRouter.patch(
+	'/:workspaceId/change-invite-code',
+	getCurrentEmployee,
+	changeWorkspaceInviteCode
+);
+workspacesRouter.post(
+	'/:workspaceId/join-with-invite-code',
+	getCurrentEmployee,
+	joinWorkspaceUsingInviteCode
 );
 
 export default workspacesRouter;
