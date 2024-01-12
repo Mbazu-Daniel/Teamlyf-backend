@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node --watch --trace-warnings server.js",
     "dev": "npx supervisor server.js",
-    "prisma": "npx prisma-multischema && npx prisma db push"
+    "prisma": "npx prisma-multischema && npx prisma db push",
+    "swagger": "node swagger-autogen.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.465.0",
@@ -17,6 +18,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
+    "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

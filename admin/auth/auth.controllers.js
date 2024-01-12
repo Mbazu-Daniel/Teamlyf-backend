@@ -62,7 +62,7 @@ const registerAdminUser = asyncHandler(async (req, res) => {
 
 			return res.status(201).json({ message: 'User registered successfully' });
 		}
-			res.status(400).json({ error: 'User already exists' });
+		res.status(400).json({ error: 'User already exists' });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: 'Registration failed' });

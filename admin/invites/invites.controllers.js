@@ -67,7 +67,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 
 const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
-  let { fullName, email, password } = req.body;
+  const { fullName, email, password } = req.body;
   try {
     // Find the invite link in the database using Prisma
     const invite = await prisma.invite.findFirst({
@@ -82,7 +82,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 
     const invitedEmail = invite.email.toLowerCase();
 
-    let existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email: invitedEmail },
     });
 

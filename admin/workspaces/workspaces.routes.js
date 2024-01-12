@@ -1,59 +1,73 @@
-import express from "express";
-import { verifyToken } from "../../helper/middleware/authenticate.js";
+import express from 'express';
+import { verifyToken } from '../../helper/middleware/authenticate.js';
 import {
-  createWorkspace,
-  deleteWorkspace,
-  getUserWorkspaces,
-  getWorkspaceById,
-  updateWorkspace,
-  getWorkspaceOwners,
-  transferWorkspaceOwnership,
-  leaveWorkspace,
-} from "./workspaces.controllers.js";
+	createWorkspace,
+	deleteWorkspace,
+	getUserWorkspaces,
+	getWorkspaceById,
+	updateWorkspace,
+	getWorkspaceOwners,
+	transferWorkspaceOwnership,
+	leaveWorkspace,
+} from './workspaces.controllers.js';
 import {
-  getCurrentEmployee,
-  getCurrentWorkspace,
-} from "../../helper/middleware/index.js";
-const workspacesRouter = express.Router({ mergeParams: true });
+	getCurrentEmployee,
+	getCurrentWorkspace,
+} from '../../helper/middleware/index.js';
+const app = express();
+const workspacesRouter = express.Router();
+app.use(
+	'/workspace',
+	workspacesRouter
 
-workspacesRouter.use("/", verifyToken);
+	/* 
+  
+  #swagger.tags = ['Workspace']
 
-workspacesRouter.post("/", createWorkspace);
-workspacesRouter.get("/", getCurrentEmployee, getUserWorkspaces);
+    #swagger.security = [{
+        "apiKeyAuth": []
+    }] 
+  */
+);
+
+workspacesRouter.use('/', verifyToken);
+
+workspacesRouter.post('/create', createWorkspace);
+workspacesRouter.get('/user', getCurrentEmployee, getUserWorkspaces);
 workspacesRouter.get(
-  "/:workspaceId",
+	'/:workspaceId',
 
-  getCurrentEmployee,
-  getWorkspaceById
+	getCurrentEmployee,
+	getWorkspaceById
 );
 workspacesRouter.patch(
-  "/:workspaceId",
-  getCurrentWorkspace,
-  getCurrentEmployee,
-  updateWorkspace
+	'/:workspaceId',
+	getCurrentWorkspace,
+	getCurrentEmployee,
+	updateWorkspace
 );
 workspacesRouter.delete(
-  "/:workspaceId",
-  getCurrentWorkspace,
-  getCurrentEmployee,
-  deleteWorkspace
+	'/:workspaceId',
+	getCurrentWorkspace,
+	getCurrentEmployee,
+	deleteWorkspace
 );
 workspacesRouter.post(
-  "/:workspaceId/transfer-owner",
-  getCurrentWorkspace,
-  getCurrentEmployee,
-  transferWorkspaceOwnership
+	'/:workspaceId/transfer-owner',
+	getCurrentWorkspace,
+	getCurrentEmployee,
+	transferWorkspaceOwnership
 );
 workspacesRouter.post(
-  "/:workspaceId/leave-workspace",
-  getCurrentWorkspace,
-  getCurrentEmployee,
-  leaveWorkspace
+	'/:workspaceId/leave-workspace',
+	getCurrentWorkspace,
+	getCurrentEmployee,
+	leaveWorkspace
 );
 workspacesRouter.get(
-  "/workspace-owners",
-  getCurrentEmployee,
-  getWorkspaceOwners
+	'/workspace-owners',
+	getCurrentEmployee,
+	getWorkspaceOwners
 );
 
 export default workspacesRouter;
