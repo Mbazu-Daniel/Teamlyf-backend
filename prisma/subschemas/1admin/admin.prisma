@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+// mbazudaniel97@gmail.com 
 model Workspace {
   id         String  @id @default(cuid())
   name       String  @unique
