@@ -16,7 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
-// mbazudaniel97@gmail.com 
+
 model Workspace {
   id         String  @id @default(cuid())
   name       String  @unique
@@ -27,20 +27,17 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-
   employees  Employee[]
   teams      Team[]
   invite     Invite[]
-  spaces     Space[]
+  projects     Project[]
   tasks      Task[]
-  // taskStatus       TaskStatus[]
-  // taskPriority    TaskPriority[]
-  // projectPriority ProjectPriority[]
+  taskStatus CustomTaskStatus[]
   taskFiles  TaskFile[]
   leaves     Leave[]
   leaveTypes LeaveType[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
 
   @@index([userId])
   @@index([name])

@@ -26,14 +26,13 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces          Space[]
+  // spaces          Space[]
   subtasks        Subtask[]
   taskComments    TaskComment[]
   taskHistory     TaskHistory[]
   taskCreator     Task[]        @relation("TaskCreator")
   taskFiles       TaskFile[]
   projectCreator  Project[]     @relation("ProjectCreator")
-  assignedManager Project[]     @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -373,9 +372,9 @@ model JobApplicantResponse {
   coverLetter String?
   resume      String
 
-  other  Json?
+  other Json?
 
-  status ApplicationStatus @default("PENDING")
+  status ApplicationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
