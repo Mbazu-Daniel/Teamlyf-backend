@@ -31,6 +31,7 @@ model Workspace {
   teams      Team[]
   invite     Invite[]
   projects     Project[]
+  projectPriority CustomProjectPriority[]
   tasks      Task[]
   taskStatus CustomTaskStatus[]
   taskFiles  TaskFile[]

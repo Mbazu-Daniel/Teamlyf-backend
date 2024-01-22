@@ -36,11 +36,14 @@ model Project {
   customTaskStatus   CustomTaskStatus? @relation(fields: [customTaskStatusId], references: [id])
   customTaskStatusId String?
 
+  customProjectPriority   CustomProjectPriority? @relation(fields: [customProjectPriorityId], references: [id])
+  customProjectPriorityId String?
+
   projectStatus   ProjectStatus? @relation(fields: [projectStatusId], references: [id])
   projectStatusId String?
 
-  projectPriorityId String?
-  projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
+  // projectPriorityId String?
+  // projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
 
   workspaceId String?
   workspace   Workspace? @relation(fields: [workspaceId], references: [id])
@@ -67,7 +70,7 @@ model Project {
   @@index([projectCreatorId])
   @@index([managerId])
   @@index([workspaceId])
-  @@index([projectPriorityId])
+  @@index([customProjectPriorityId])
   @@index([customTaskStatusId])
   @@index([projectStatusId])
 }
@@ -273,6 +276,27 @@ model CustomTaskStatus {
   @@index([workspaceId])
 }
 
+model ProjectPriority {
+  id                      String                 @id @default(cuid())
+  name                    String                 @unique
+  color                   String?
+  customProjectPriority   CustomProjectPriority? @relation(fields: [customProjectPriorityId], references: [id])
+  customProjectPriorityId String?
+
+  @@index([customProjectPriorityId])
+}
+
+model CustomProjectPriority {
+  id          String            @id @default(cuid())
+  name        String
+  workspace   Workspace?        @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
+  projects    Project[]
+  priority    ProjectPriority[]
+
+  @@index([workspaceId])
+}
+
 // TODO: Project don't need to have a custom status or Priority like the (Task Status) since project will be created  a status or priority can just be created on a fly and not neccessary used in other part of the application 
 model ProjectStatus {
   id      String    @id @default(cuid())
@@ -283,14 +307,9 @@ model ProjectStatus {
   @@unique([name])
 }
 
-model ProjectPriority {
-  id      String    @id @default(cuid())
-  name    String    @unique
-  color   String?
-  project Project[]
-}
 
-// model CustomProjectStatus {
+
+// model CustomProjectPriority {
 //   id               String       @id @default(cuid())
 //   name             String
 //   closedStatusName String?
