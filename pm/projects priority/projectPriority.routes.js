@@ -16,7 +16,7 @@ import {
 const app = express();
 const projectPriorityRouter = express.Router();
 app.use(
-	'/',
+	'/workspace',
 	projectPriorityRouter
 
 	//  #swagger.tags = ['Project Priority']

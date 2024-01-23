@@ -8,6 +8,7 @@ const prioritySelectOptions = {
 	color: true,
 };
 
+// TODO: the creation should not work if the projectPriority is not creating correctly
 const createProjectPriority = asyncHandler(async (req, res) => {
 	try {
 		const { name, priorities } = req.body;
