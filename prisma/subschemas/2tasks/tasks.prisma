@@ -33,14 +33,14 @@ model Project {
   isFavourite     Boolean @default(false)
   projectProgress Int?
 
-  customTaskStatus   CustomTaskStatus? @relation(fields: [customTaskStatusId], references: [id])
-  customTaskStatusId String?
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
 
-  customProjectPriority   CustomProjectPriority? @relation(fields: [customProjectPriorityId], references: [id])
-  customProjectPriorityId String?
+  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id])
+  customProjectPriorityId String
 
-  projectStatus   ProjectStatus? @relation(fields: [projectStatusId], references: [id])
-  projectStatusId String?
+  projectStatus   ProjectStatus @relation(fields: [projectStatusId], references: [id])
+  projectStatusId String
 
   // projectPriorityId String?
   // projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
@@ -58,17 +58,15 @@ model Project {
 
   projectCollaborators ProjectCollaborator[]
 
-  projectCreatorId String?
-  projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
+  projectCreatorId String
+  projectCreator   Employee @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
-  // can create another model to handle this to allow multiple managers
-  managerId String?
+ 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([projectCreatorId])
-  @@index([managerId])
   @@index([workspaceId])
   @@index([customProjectPriorityId])
   @@index([customTaskStatusId])
@@ -97,11 +95,11 @@ model Task {
   // spaceId String?
   // spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  customTaskStatus   CustomTaskStatus? @relation(fields: [customTaskStatusId], references: [id])
-  customTaskStatusId String?
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
   taskFiles          TaskFile[]
 
   // workspaceId String
@@ -127,8 +125,8 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  customTaskStatus   CustomTaskStatus? @relation(fields: [customTaskStatusId], references: [id])
-  customTaskStatusId String?
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
 
   subtaskCollaborator SubtaskCollaborator[]
 
@@ -167,11 +165,11 @@ model TaskHistory {
   id     String     @id @default(cuid())
   action TaskAction
 
-  taskId String?
-  tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,17 +249,6 @@ model TaskFile {
   @@index([workspaceId])
 }
 
-model TaskStatus {
-  id                 String           @id @default(cuid())
-  name               String
-  color              String
-  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id], onDelete: Cascade)
-  customTaskStatusId String
-
-  @@unique([name])
-  @@index([customTaskStatusId])
-}
-
 model CustomTaskStatus {
   id               String       @id @default(cuid())
   name             String
@@ -276,14 +263,14 @@ model CustomTaskStatus {
   @@index([workspaceId])
 }
 
-model ProjectPriority {
-  id                      String                @id @default(cuid())
-  name                    String
-  color                   String
-  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id], onDelete: Cascade)
-  customProjectPriorityId String
+model TaskStatus {
+  id                 String           @id @default(cuid())
+  name               String
+  color              String
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id], onDelete: Cascade)
+  customTaskStatusId String
 
-  @@index([customProjectPriorityId])
+  @@index([customTaskStatusId])
 }
 
 model CustomProjectPriority {
@@ -296,6 +283,18 @@ model CustomProjectPriority {
 
   @@index([workspaceId])
 }
+
+model ProjectPriority {
+  id                      String                @id @default(cuid())
+  name                    String
+  color                   String
+  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id], onDelete: Cascade)
+  customProjectPriorityId String
+
+  @@index([customProjectPriorityId])
+}
+
+
 
 // TODO: Project don't need to have a custom status or Priority like the (Task Status) since project will be created  a status or priority can just be created on a fly and not neccessary used in other part of the application 
 model ProjectStatus {

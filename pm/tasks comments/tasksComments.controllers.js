@@ -7,18 +7,6 @@ const createTaskComment = asyncHandler(async (req, res) => {
   const { text } = req.body;
 
   try {
-    // Check if the space and workspace specified exist
-    const space = await prisma.space.findUnique({
-      where: {
-        id: spaceId,
-        workspaceId,
-      },
-    });
-
-    if (!space) {
-      return res.status(404).json({ message: `Space ${spaceId} not found in Workspace ${workspaceId}` });
-    }
-
     if (!text) {
       return res.status(400).json({ error: "Text is required" });
     }
@@ -42,18 +30,6 @@ const getTaskComments = asyncHandler(async (req, res) => {
   const { taskId, workspaceId, spaceId } = req.params;
 
   try {
-    // Check if the space and workspace specified exist
-    const space = await prisma.space.findUnique({
-      where: {
-        id: spaceId,
-        workspaceId,
-      },
-    });
-
-    if (!space) {
-      return res.status(404).json({ message: `Space ${spaceId} not found in Workspace ${workspaceId}` });
-    }
-
     const taskComments = await prisma.taskComment.findMany({
       where: {
         taskId,
