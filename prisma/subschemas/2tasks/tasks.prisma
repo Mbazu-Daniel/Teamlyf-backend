@@ -45,8 +45,8 @@ model Project {
   // projectPriorityId String?
   // projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
 
-  workspaceId String?
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   startDate DateTime  @default(now())
   dueDate   DateTime?
@@ -104,8 +104,8 @@ model Task {
   customTaskStatusId String?
   taskFiles          TaskFile[]
 
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  // workspaceId String
+  // workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   milestone   Milestone? @relation(fields: [milestoneId], references: [id])
   milestoneId String?
@@ -115,7 +115,7 @@ model Task {
   // @@index([spaceId])
   @@index([employeeId])
   @@index([projectId])
-  @@index([workspaceId])
+  // @@index([workspaceId])
   @@index([milestoneId])
   @@index([customTaskStatusId])
 }
@@ -232,19 +232,19 @@ model SubtaskCollaborator {
 // TODO: create, get all files, update file name, share file, delete file
 
 model TaskFile {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   fileType    String
   fileSize    Int
   fileFormat  String
   fileUrl     String
-  employeeId  String?
-  uploadedBy  Employee?  @relation(fields: [employeeId], references: [id])
-  workspaceId String?
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  employeeId  String
+  uploadedBy  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  tasks  Task?   @relation(fields: [taskId], references: [id])
-  taskId String?
+  tasks  Task   @relation(fields: [taskId], references: [id])
+  taskId String
 
   @@index([taskId])
   @@index([employeeId])
@@ -252,11 +252,11 @@ model TaskFile {
 }
 
 model TaskStatus {
-  id                 String            @id @default(cuid())
+  id                 String           @id @default(cuid())
   name               String
-  color              String?
-  customTaskStatus   CustomTaskStatus? @relation(fields: [customTaskStatusId], references: [id])
-  customTaskStatusId String?
+  color              String
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id], onDelete: Cascade)
+  customTaskStatusId String
 
   @@unique([name])
   @@index([customTaskStatusId])
@@ -266,8 +266,8 @@ model CustomTaskStatus {
   id               String       @id @default(cuid())
   name             String
   closedStatusName String?
-  workspace        Workspace?   @relation(fields: [workspaceId], references: [id])
-  workspaceId      String?
+  workspace        Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId      String
   projects         Project[]
   statuses         TaskStatus[]
   tasks            Task[]
@@ -277,11 +277,11 @@ model CustomTaskStatus {
 }
 
 model ProjectPriority {
-  id                      String                 @id @default(cuid())
-  name                    String                 @unique
-  color                   String?
-  customProjectPriority   CustomProjectPriority? @relation(fields: [customProjectPriorityId], references: [id])
-  customProjectPriorityId String?
+  id                      String                @id @default(cuid())
+  name                    String
+  color                   String
+  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id], onDelete: Cascade)
+  customProjectPriorityId String
 
   @@index([customProjectPriorityId])
 }
@@ -289,8 +289,8 @@ model ProjectPriority {
 model CustomProjectPriority {
   id          String            @id @default(cuid())
   name        String
-  workspace   Workspace?        @relation(fields: [workspaceId], references: [id])
-  workspaceId String?
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
   projects    Project[]
   priority    ProjectPriority[]
 
@@ -301,13 +301,11 @@ model CustomProjectPriority {
 model ProjectStatus {
   id      String    @id @default(cuid())
   name    String
-  color   String?
+  color   String
   project Project[]
 
   @@unique([name])
 }
-
-
 
 // model CustomProjectPriority {
 //   id               String       @id @default(cuid())
