@@ -26,20 +26,18 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-
-  employees  Employee[]
-  teams      Team[]
-  invite     Invite[]
-  spaces     Space[]
-  tasks      Task[]
-  // taskStatus       TaskStatus[]
-  // taskPriority    TaskPriority[]
-  // projectPriority ProjectPriority[]
-  taskFiles  TaskFile[]
-  leaves     Leave[]
-  leaveTypes LeaveType[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  employees       Employee[]
+  teams           Team[]
+  invite          Invite[]
+  projects        Project[]
+  projectPriority CustomProjectPriority[]
+  // tasks      Task[]
+  taskStatus      CustomTaskStatus[]
+  taskFiles       TaskFile[]
+  leaves          Leave[]
+  leaveTypes      LeaveType[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
 
   @@index([userId])
   @@index([name])
@@ -71,7 +69,10 @@ enum SourceType {
   TWITTER
   INSTAGRAM
   LINKEDIN
+  TIKTOK
   GOOGLE
+  FRIEND
+  WHATSAPP
   OTHER
 }
 

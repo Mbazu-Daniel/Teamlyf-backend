@@ -1,60 +1,60 @@
-import express from "express";
-import { verifyToken } from "../../helper/middleware/authenticate.js";
+import express from 'express';
+import { verifyToken } from '../../utils/middleware/authenticate.js';
 import {
-  getCurrentEmployee,
-  getCurrentWorkspace,
-} from "../../helper/middleware/index.js";
+	getCurrentEmployee,
+	getCurrentWorkspace,
+} from '../../utils/middleware/index.js';
 import {
-  changeEmployeeRole,
-  deleteEmployee,
-  getAllEmployees,
-  getEmployeeById,
-  getEmployeesCount,
-  getEmployeeByEmail,
-  getTeamsByEmployee,
-  searchEmployees,
-  updateEmployee,
-  getCurrentEmployeeProfile,
-} from "./employees.controllers.js";
+	changeEmployeeRole,
+	deleteEmployee,
+	getAllEmployees,
+	getEmployeeById,
+	getEmployeesCount,
+	getEmployeeByEmail,
+	getTeamsByEmployee,
+	searchEmployees,
+	updateEmployee,
+	getCurrentEmployeeProfile,
+} from './employees.controllers.js';
 
 const app = express();
 const employeeRouter = express.Router();
 
 app.use(
-  "/",
-  employeeRouter
-  //  #swagger.tags = ['Employees']
+	'/workspace',
+	employeeRouter
+	//  #swagger.tags = ['Employees']
 );
 
 employeeRouter.use(
-  "/:workspaceId",
-  verifyToken,
-  getCurrentEmployee,
-  getCurrentWorkspace
+	'/:workspaceId',
+	verifyToken,
+	getCurrentEmployee,
+	getCurrentWorkspace
 );
 
 // Routes for managing employees within an workspace
 
-employeeRouter.get("/:workspaceId/employees", getAllEmployees);
+employeeRouter.get('/:workspaceId/employees', getAllEmployees);
 
-employeeRouter.get("/:workspaceId/employees/search", searchEmployees);
+employeeRouter.get('/:workspaceId/employees/search', searchEmployees);
 
-employeeRouter.get("/:workspaceId/employees/count", getEmployeesCount);
+employeeRouter.get('/:workspaceId/employees/count', getEmployeesCount);
 
-employeeRouter.get("/:workspaceId/employees/email", getEmployeeByEmail);
+employeeRouter.get('/:workspaceId/employees/email', getEmployeeByEmail);
 
-employeeRouter.get("/:workspaceId/employees/:employeeId", getEmployeeById);
-employeeRouter.patch("/:workspaceId/employees/:employeeId", updateEmployee);
-employeeRouter.delete("/:workspaceId/employees/:employeeId", deleteEmployee);
+employeeRouter.get('/:workspaceId/employees/:employeeId', getEmployeeById);
+employeeRouter.patch('/:workspaceId/employees/:employeeId', updateEmployee);
+employeeRouter.delete('/:workspaceId/employees/:employeeId', deleteEmployee);
 
 employeeRouter.get(
-  "/:workspaceId/employees/:employeeId/teams",
-  getTeamsByEmployee
+	'/:workspaceId/employees/:employeeId/teams',
+	getTeamsByEmployee
 );
 employeeRouter.patch(
-  "/:workspaceId/employees/:employeeId/change-role",
-  changeEmployeeRole
+	'/:workspaceId/employees/:employeeId/change-role',
+	changeEmployeeRole
 );
 
-employeeRouter.get("/:workspaceId/profile", getCurrentEmployeeProfile);
+employeeRouter.get('/:workspaceId/profile', getCurrentEmployeeProfile);
 export default employeeRouter;

@@ -28,14 +28,17 @@ const config = {
 				scheme: 'bearer',
 			},
 		},
+
+		schemas: {
+			LoginRequest: {
+				$email: 'example@gmail.com',
+				$password: 'password',
+			},
+		},
 	},
 	schemes: ['http', 'https'],
 };
 
 swaggerAutogen({ openapi: '3.0.0' })(outputFile, endpointsFiles, config);
 
-// .then(
-// 	async () => {
-// 		await import('./server.js');
-// 	}
-// );
+

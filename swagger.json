@@ -31,33 +31,22 @@
           "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "User credentials for login",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "example": "example@example.com"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "password"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
           },
           "401": {
             "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
           }
         }
       }
@@ -136,31 +125,6 @@
           "Auth"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Register new user",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "example": "example@example.com"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "password"
-                }
-              },
-              "required": [
-                "email",
-                "password"
-              ]
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -537,30 +501,18 @@
         }
       }
     },
-    "/workspace/create": {
+    "/workspace/": {
       "post": {
         "tags": [
           "Workspace"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "201": {
             "description": "Created"
           },
           "400": {
             "description": "Bad Request"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -593,27 +545,36 @@
         }
       }
     },
-    "/workspace/user": {
+    "/workspace/current-user": {
       "get": {
         "tags": [
           "Workspace"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
           },
-          "403": {
-            "description": "Forbidden"
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/workspace/count": {
+      "get": {
+        "tags": [
+          "Workspace"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -640,21 +601,11 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -682,21 +633,11 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "202": {
             "description": "Accepted"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -735,21 +676,11 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "204": {
             "description": "No Content"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -776,21 +707,11 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "500": {
             "description": "Internal Server Error"
@@ -831,13 +752,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -846,9 +760,6 @@
           },
           "400": {
             "description": "Bad Request"
-          },
-          "403": {
-            "description": "Forbidden"
           },
           "404": {
             "description": "Not Found"
@@ -897,7 +808,92 @@
         ]
       }
     },
-    "/{workspaceId}/employees": {
+    "/workspace/{workspaceId}/change-invite-code": {
+      "patch": {
+        "tags": [
+          "Workspace"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/workspace/{workspaceId}/join-with-invite-code": {
+      "post": {
+        "tags": [
+          "Workspace"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "inviteCode": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/employees": {
       "get": {
         "tags": [
           "Employees"
@@ -923,7 +919,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/search": {
+    "/workspace/{workspaceId}/employees/search": {
       "get": {
         "tags": [
           "Employees"
@@ -959,7 +955,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/count": {
+    "/workspace/{workspaceId}/employees/count": {
       "get": {
         "tags": [
           "Employees"
@@ -988,7 +984,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/email": {
+    "/workspace/{workspaceId}/employees/email": {
       "get": {
         "tags": [
           "Employees"
@@ -1024,7 +1020,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/{employeeId}": {
+    "/workspace/{workspaceId}/employees/{employeeId}": {
       "get": {
         "tags": [
           "Employees"
@@ -1125,7 +1121,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/{employeeId}/teams": {
+    "/workspace/{workspaceId}/employees/{employeeId}/teams": {
       "get": {
         "tags": [
           "Employees"
@@ -1162,7 +1158,7 @@
         }
       }
     },
-    "/{workspaceId}/employees/{employeeId}/change-role": {
+    "/workspace/{workspaceId}/employees/{employeeId}/change-role": {
       "patch": {
         "tags": [
           "Employees"
@@ -1216,7 +1212,7 @@
         }
       }
     },
-    "/{workspaceId}/profile": {
+    "/workspace/{workspaceId}/profile": {
       "get": {
         "tags": [
           "Employees"
@@ -2615,8 +2611,11 @@
         }
       }
     },
-    "/{workspaceId}/spaces": {
+    "/workspace/{workspaceId}/spaces": {
       "post": {
+        "tags": [
+          "Workspace"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2646,6 +2645,11 @@
             "description": "Forbidden"
           }
         },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2665,6 +2669,9 @@
         }
       },
       "get": {
+        "tags": [
+          "Workspace"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2683,11 +2690,19 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
-    "/{workspaceId}/spaces/{id}": {
+    "/workspace/{workspaceId}/spaces/{id}": {
       "get": {
+        "tags": [
+          "Workspace"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2717,9 +2732,17 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       },
       "patch": {
+        "tags": [
+          "Workspace"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2749,9 +2772,17 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       },
       "delete": {
+        "tags": [
+          "Workspace"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2781,7 +2812,12 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          }
+        ]
       }
     },
     "/{workspaceId}/spaces/{spaceId}/tasks/{taskId}/subtasks": {
@@ -3796,6 +3832,25 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "example@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "password"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
       }
     }
   }

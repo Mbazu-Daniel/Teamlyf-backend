@@ -26,14 +26,13 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces          Space[]
+  // spaces          Space[]
   subtasks        Subtask[]
   taskComments    TaskComment[]
   taskHistory     TaskHistory[]
   taskCreator     Task[]        @relation("TaskCreator")
   taskFiles       TaskFile[]
   projectCreator  Project[]     @relation("ProjectCreator")
-  assignedManager Project[]     @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -72,7 +71,6 @@ model Team {
 
   role TeamRole @default(MEMBER)
 
-
   workspaceId  String
   workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   employeeTeam EmployeeTeam[]
@@ -83,7 +81,9 @@ model Team {
   @@index([workspaceId])
 }
 
+// Join table for many-to-many relation between Employee and Team
 model EmployeeTeam {
+  id         String   @id @default(cuid())
   employeeId String
   teamId     String
   role       TeamRole @default(MEMBER)
@@ -94,7 +94,6 @@ model EmployeeTeam {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@id([employeeId, teamId])
   @@index([employeeId])
   @@index([teamId])
 }
@@ -134,34 +133,35 @@ model Timesheet {
 
   @@index([employeeId])
 }
+
 model Leave {
   id String @id @default(cuid())
 
-  appliedDate   DateTime       @default(now())
-  startDate     DateTime       @db.Date
-  endDate       DateTime       @db.Date
-  duration      Int
-  reason        String?
+  appliedDate DateTime @default(now())
+  startDate   DateTime @db.Date
+  endDate     DateTime @db.Date
+  duration    Int
+  reason      String?
 
   //  leaveResponseFrom DateTime? // accept leave startDate
   // leaveResponseTo   DateTime? // accepted leave endDate 
   leaveResponseBy String? // the admin that responded to the leave
-  leaveTypeId String
-   status        LeaveStatus    @default(PENDING)
+  leaveTypeId     String
+  status          LeaveStatus @default(PENDING)
 
-  leaveType     LeaveType      @relation(fields: [leaveTypeId], references: [id])
-  comments LeaveComment[]
+  leaveType LeaveType      @relation(fields: [leaveTypeId], references: [id])
+  comments  LeaveComment[]
 
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([employeeId])
   @@index([leaveTypeId])
- @@index([workspaceId])
+  @@index([workspaceId])
 }
 
 model LeaveType {
@@ -172,16 +172,16 @@ model LeaveType {
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
-  
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([name])
   @@index([employeeId])
-   @@index([workspaceId])
+  @@index([workspaceId])
 }
 
 model LeaveComment {
@@ -195,9 +195,9 @@ model LeaveComment {
   leave   Leave  @relation(fields: [leaveId], references: [id])
   leaveId String
 
-workspaceId String
+  workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  createdAt DateTime @default(now())
+  createdAt   DateTime  @default(now())
 
   updatedAt DateTime @updatedAt
 
@@ -207,12 +207,12 @@ workspaceId String
 }
 
 model LeaveHistory {
-  id String @id @default(cuid())
-  leaveId String
-  oldStatus LeaveStatus
-  updatedDate DateTime?
+  id            String       @id @default(cuid())
+  leaveId       String
+  oldStatus     LeaveStatus
+  updatedDate   DateTime?
   updatedStatus LeaveStatus?
-  updatedBy String?
+  updatedBy     String?
 }
 
 model Education {
@@ -234,8 +234,6 @@ model Education {
 
   @@index([employeeId])
 }
-
-
 
 model PerformanceAppraisal {
   id String @id @default(cuid())
@@ -280,8 +278,6 @@ model Payroll {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   Payslip   Payslip[]
-
-
 }
 
 model Deduction {
@@ -362,6 +358,34 @@ model Job {
   updatedAt     DateTime  @updatedAt
 }
 
+// TODO: Recieves external user applications
+// TODO: When application is received send an email to the applicant
+// TODO: When application is Rejected send a custom email 
+// TODO: When application is accepted send a custom email 
+
+model JobApplicantResponse {
+  id String @id @default(cuid())
+
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String
+
+  coverLetter String?
+  resume      String
+
+  other Json?
+
+  status ApplicationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 enum PaymentStatus {
   UNPAID
   PAID
@@ -389,6 +413,5 @@ enum EmployeeRole {
 enum TeamRole {
   LEAD
   MEMBER
-  CONTRIBUTOR
-  OBSERVER
+  ADMIN
 }
