@@ -24,19 +24,20 @@ app.use(
 	//  #swagger.tags = ['Auth']
 );
 authRouter.post('/login', (req, res, next) => {
-	/* #swagger.parameters['body'] = {
-    in: 'body',
-    description: 'User credentials for login',
+	/* #swagger.requestBody = {
     required: true,
-    schema: {
-      $email: "example@example.com",
-      $password: "password"
+    content: {
+      'application/json': {
+        schema: {
+          "$ref": "#/components/schemas/LoginRequest"
+        }
+      }
     }
 } */
 
 	passport.authenticate('local', (err, user, info) => {
 		if (err) {
-      console.error(err);
+			console.error(err);
 			return next(err);
 		}
 		if (!user) {
@@ -44,7 +45,7 @@ authRouter.post('/login', (req, res, next) => {
 		}
 		req.login(user, (err) => {
 			if (err) {
-        console.error(err);
+				console.error(err);
 				return next(err);
 			}
 
@@ -117,20 +118,7 @@ authRouter.get('/logout', (req, res) => {
 	});
 });
 
-authRouter.post(
-	'/register',
-	registerUser
-
-	/* #swagger.parameters['body'] = {
-    in: 'body',
-    description: 'Register new user',
-    required: true,
-    schema: {
-      $email: "example@example.com",
-      $password: "password"
-    }
-} */
-);
+authRouter.post('/register', registerUser);
 
 authRouter.post(
 	'/register-admin',

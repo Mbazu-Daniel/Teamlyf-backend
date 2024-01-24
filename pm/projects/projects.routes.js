@@ -1,63 +1,63 @@
-import express from "express";
+import express from 'express';
 import {
-  addCollaboratorsToProject,
-  createProject,
-  deleteProject,
-  getAllProjects,
-  getAllTasksInProject,
-  getProjectById,
-  getSingleTaskInProject,
-  removeCollaboratorsFromProject,
-  updateProject,
-  calculateProjectProgress
-} from "./projects.controllers.js";
+	addCollaboratorsToProject,
+	createProject,
+	deleteProject,
+	getAllProjects,
+	getAllTasksInProject,
+	getProjectById,
+	getSingleTaskInProject,
+	removeCollaboratorsFromProject,
+	updateProject,
+	// calculateProjectProgress,
+} from './projects.controllers.js';
 
 import {
-  getCurrentEmployee,
-  getCurrentWorkspace,
-} from "../../helper/middleware/index.js";
-import { verifyToken } from "../../helper/middleware/authenticate.js";
+	getCurrentEmployee,
+	getCurrentWorkspace,
+} from '../../utils/middleware/index.js';
+import { verifyToken } from '../../utils/middleware/authenticate.js';
+const app = express();
+const projectRouter = express.Router();
 
-// const projectRouter = express.Router();
-const projectRouter = express.Router({ mergeParams: true });
+app.use(
+	'/workspace',
+	projectRouter
 
-projectRouter.use("/:workspaceId", getCurrentEmployee, getCurrentWorkspace);
+	// #swagger.tags = ['Project']
+);
+projectRouter.use(
+	'/:workspaceId',
+	verifyToken,
+	getCurrentEmployee,
+	getCurrentWorkspace
+);
+
+projectRouter.post('/:workspaceId/projects', createProject);
+projectRouter.get('/:workspaceId/projects', getAllProjects);
+projectRouter.get('/:workspaceId/projects/:projectId', getProjectById);
+projectRouter.patch('/:workspaceId/projects/:projectId', updateProject);
+projectRouter.delete('/:workspaceId/projects/:projectId', deleteProject);
 
 projectRouter.post(
-  "/:workspaceId/spaces/:spaceId/projects",
-  verifyToken,
-  createProject
-);
-projectRouter.get("/:workspaceId/spaces/:spaceId/projects", getAllProjects);
-projectRouter.get("/:workspaceId/spaces/:spaceId/projects/:id", getProjectById);
-projectRouter.patch(
-  "/:workspaceId/spaces/:spaceId/projects/:id",
-  updateProject
-);
-projectRouter.delete(
-  "/:workspaceId/spaces/:spaceId/projects/:id",
-  deleteProject
-);
-
-projectRouter.post(
-  "/:workspaceId/spaces/:spaceId/projects/:projectId/add-collaborators",
-  addCollaboratorsToProject
+	'/:workspaceId/projects/:projectId/add-collaborators',
+	addCollaboratorsToProject
 );
 projectRouter.post(
-  "/:workspaceId/spaces/:spaceId/projects/:projectId/remove-collaborators",
-  removeCollaboratorsFromProject
+	'/:workspaceId/projects/:projectId/remove-collaborators',
+	removeCollaboratorsFromProject
 );
 
 projectRouter.get(
-  "/:workspaceId/spaces/:spaceId/projects/:projectId/tasks",
-  getAllTasksInProject
+	'/:workspaceId/projects/:projectId/tasks',
+	getAllTasksInProject
 );
 projectRouter.get(
-  "/:workspaceId/spaces/:spaceId/projects/:projectId/tasks/:taskId",
-  getSingleTaskInProject
+	'/:workspaceId/projects/:projectId/tasks/:taskId',
+	getSingleTaskInProject
 );
-projectRouter.get(
-  "/:workspaceId/spaces/:spaceId/projects/:projectId/calculate-progress",
-  calculateProjectProgress
-);
+// projectRouter.get(
+// 	'/:workspaceId/projects/:projectId/calculate-progress',
+// 	calculateProjectProgress
+// );
 export default projectRouter;

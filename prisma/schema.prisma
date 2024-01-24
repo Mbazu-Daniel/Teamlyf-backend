@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Fri Jan 12 2024 18:28:54 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Tue Jan 23 2024 04:10:18 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -39,21 +39,20 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees    Employee[]
-  teams        Team[]
-  invite       Invite[]
-  spaces       Space[]
-  tasks        Task[]
-  // taskStatus       TaskStatus[]
-  // taskPriority    TaskPriority[]
-  // projectPriority ProjectPriority[]
-  taskFiles    TaskFile[]
-  leaves       Leave[]
-  leaveTypes   LeaveType[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  LeaveComment LeaveComment[]
-  Group        Group[]
+  employees       Employee[]
+  teams           Team[]
+  invite          Invite[]
+  projects        Project[]
+  projectPriority CustomProjectPriority[]
+  // tasks      Task[]
+  taskStatus      CustomTaskStatus[]
+  taskFiles       TaskFile[]
+  leaves          Leave[]
+  leaveTypes      LeaveType[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  LeaveComment    LeaveComment[]
+  Group           Group[]
 
   @@index([userId])
   @@index([name])
@@ -105,30 +104,30 @@ enum AuthStrategy {
 }
 
 // Project Management 
-// TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
-model Space {
-  id    String @id @default(cuid())
-  title String
 
-  tasks    Task[]
-  projects Project[]
+// model Space {
+//   id    String @id @default(cuid())
+//   title String
 
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+//   tasks    Task[]
+//   projects Project[]
 
-  employeeId String
-  createdBy  Employee @relation(fields: [employeeId], references: [id])
+//   workspaceId String
+//   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//   employeeId String
+//   createdBy  Employee @relation(fields: [employeeId], references: [id])
 
-  @@unique([title])
-  @@index([workspaceId])
-  @@index([employeeId])
-}
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([title])
+//   @@index([workspaceId])
+//   @@index([employeeId])
+// }
 
 // Todo: Add Team to this model ?
-
+// TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 model Project {
   id          String  @id @default(cuid())
   name        String
@@ -136,45 +135,45 @@ model Project {
   description String?
   thumbnail   String?
 
-  isFavourite Boolean @default(false)
-
-  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
-  customStatusListId String?
-
-  customPriorityList   CustomPriorityList? @relation(fields: [customPriorityListId], references: [id])
-  customPriorityListId String?
-
-  projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
-  projectPriorityId String?
-
+  isFavourite     Boolean @default(false)
   projectProgress Int?
+
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
+
+  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id])
+  customProjectPriorityId String
+
+  projectStatus   ProjectStatus @relation(fields: [projectStatusId], references: [id])
+  projectStatusId String
+
+  // projectPriorityId String?
+  // projectPriority   ProjectPriority? @relation(fields: [projectPriorityId], references: [id])
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   startDate DateTime  @default(now())
   dueDate   DateTime?
 
   tasks Task[]
 
-  spaceId String
-  spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // spaceId String
+  // spaces  Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
   projectCollaborators ProjectCollaborator[]
 
-  projectCreatorId String?
-  projectCreator   Employee? @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
-
-  // can create another model to handle this to allow multiple managers
-  managerId       String?
-  assignedManager Employee? @relation("AssignedManager", fields: [managerId], references: [id], onDelete: Cascade)
+  projectCreatorId String
+  projectCreator   Employee @relation("ProjectCreator", fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([projectCreatorId])
-  @@index([managerId])
-  @@index([spaceId])
-  @@index([projectPriorityId])
-  @@index([customStatusListId])
-  @@index([customPriorityListId])
+  @@index([workspaceId])
+  @@index([customProjectPriorityId])
+  @@index([customTaskStatusId])
+  @@index([projectStatusId])
 }
 
 model Task {
@@ -196,30 +195,30 @@ model Task {
 
   taskCollaborators TaskCollaborator[]
 
-  spaceId String?
-  spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  // spaceId String?
+  // spaces  Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
 
-  projectId String?
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
-  customStatusListId String?
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
   taskFiles          TaskFile[]
 
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  // workspaceId String
+  // workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   milestone   Milestone? @relation(fields: [milestoneId], references: [id])
   milestoneId String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  @@index([spaceId])
+  // @@index([spaceId])
   @@index([employeeId])
   @@index([projectId])
-  @@index([workspaceId])
+  // @@index([workspaceId])
   @@index([milestoneId])
-  @@index([customStatusListId])
+  @@index([customTaskStatusId])
 }
 
 model Subtask {
@@ -229,8 +228,8 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
-  customStatusListId String?
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id])
+  customTaskStatusId String
 
   subtaskCollaborator SubtaskCollaborator[]
 
@@ -245,7 +244,7 @@ model Subtask {
 
   @@index([employeeId])
   @@index([taskId])
-  @@index([customStatusListId])
+  @@index([customTaskStatusId])
 }
 
 model TaskComment {
@@ -269,11 +268,11 @@ model TaskHistory {
   id     String     @id @default(cuid())
   action TaskAction
 
-  taskId String?
-  tasks  Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -301,8 +300,9 @@ model TaskCollaborator {
 model ProjectCollaborator {
   id String @id @default(cuid())
 
+  role      ProjectRole @default(MEMBER)
   projectId String
-  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projects  Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
@@ -333,59 +333,94 @@ model SubtaskCollaborator {
 // TODO: create, get all files, update file name, share file, delete file
 
 model TaskFile {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
   fileType    String
   fileSize    Int
   fileFormat  String
   fileUrl     String
-  employeeId  String?
-  uploadedBy  Employee?  @relation(fields: [employeeId], references: [id])
-  workspaceId String?
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  employeeId  String
+  uploadedBy  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  tasks  Task?   @relation(fields: [taskId], references: [id])
-  taskId String?
+  tasks  Task   @relation(fields: [taskId], references: [id])
+  taskId String
 
   @@index([taskId])
   @@index([employeeId])
   @@index([workspaceId])
 }
 
-model CustomStatusList {
-  id       String       @id @default(cuid())
-  name     String
-  statuses TaskStatus[]
-  projects Project[]
-  tasks    Task[]
-  subtasks Subtask[]
-}
+model CustomTaskStatus {
+  id               String       @id @default(cuid())
+  name             String
+  closedStatusName String?
+  workspace        Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId      String
+  projects         Project[]
+  statuses         TaskStatus[]
+  tasks            Task[]
+  subtasks         Subtask[]
 
-model CustomPriorityList {
-  id         String            @id @default(cuid())
-  name       String
-  priorities ProjectPriority[]
-  projects   Project[]
+  @@index([workspaceId])
 }
 
 model TaskStatus {
-  id                 String            @id @default(cuid())
+  id                 String           @id @default(cuid())
   name               String
-  color              String?
-  customStatusList   CustomStatusList? @relation(fields: [customStatusListId], references: [id])
-  customStatusListId String?
+  color              String
+  customTaskStatus   CustomTaskStatus @relation(fields: [customTaskStatusId], references: [id], onDelete: Cascade)
+  customTaskStatusId String
 
-  @@unique([name])
-  @@index([customStatusListId])
+  @@index([customTaskStatusId])
+}
+
+model CustomProjectPriority {
+  id          String            @id @default(cuid())
+  name        String
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  projects    Project[]
+  priority    ProjectPriority[]
+
+  @@index([workspaceId])
 }
 
 model ProjectPriority {
-  id                 String               @id @default(cuid())
-  name               String               @unique
-  color              String?
-  project            Project[]
-  customPriorityList CustomPriorityList[]
+  id                      String                @id @default(cuid())
+  name                    String
+  color                   String
+  customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id], onDelete: Cascade)
+  customProjectPriorityId String
+
+  @@index([customProjectPriorityId])
 }
+
+// TODO: Project don't need to have a custom status or Priority like the (Task Status) since project will be created  a status or priority can just be created on a fly and not neccessary used in other part of the application 
+model ProjectStatus {
+  id      String    @id @default(cuid())
+  name    String
+  color   String
+  project Project[]
+
+  @@unique([name])
+}
+
+// model CustomProjectPriority {
+//   id               String       @id @default(cuid())
+//   name             String
+//   closedStatusName String?
+//   statuses         ProjectStatus[]
+//   projects         Project[]
+// }
+
+// model CustomProjectPriority {
+//   id         String            @id @default(cuid())
+//   name       String
+//   priorities ProjectPriority[]
+//   projects   Project[]
+// }
 
 model Milestone {
   id          String   @id @default(cuid())
@@ -426,6 +461,13 @@ enum ProjectAction {
   DELETED_COMMENTS_TO_PROJECTS
   PROJECTS_COLLABORATOR_ADDED
   PROJECTS_COLLABORATOR_DELETED
+}
+
+enum ProjectRole {
+  LEAD
+  GUEST
+  MEMBER
+  ADMIN
 }
 
 // enum TaskPriority {
@@ -477,14 +519,13 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces          Space[]
-  subtasks        Subtask[]
-  taskComments    TaskComment[]
-  taskHistory     TaskHistory[]
-  taskCreator     Task[]        @relation("TaskCreator")
-  taskFiles       TaskFile[]
-  projectCreator  Project[]     @relation("ProjectCreator")
-  assignedManager Project[]     @relation("AssignedManager")
+  // spaces          Space[]
+  subtasks       Subtask[]
+  taskComments   TaskComment[]
+  taskHistory    TaskHistory[]
+  taskCreator    Task[]        @relation("TaskCreator")
+  taskFiles      TaskFile[]
+  projectCreator Project[]     @relation("ProjectCreator")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -534,6 +575,7 @@ model Team {
   @@index([workspaceId])
 }
 
+// Join table for many-to-many relation between Employee and Team
 model EmployeeTeam {
   id         String   @id @default(cuid())
   employeeId String
@@ -790,24 +832,53 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id            String    @id @default(cuid())
-  title         String
-  category      String?
-  requirement   String
-  branch        String?
-  email         String
-  address       String
-  salaryRange   Int
-  noOfPositions Int
-  company       String
-  types         String
-  education     String
-  industry      String
-  experience    String
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  employeeId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                   String                 @id @default(cuid())
+  title                String
+  category             String?
+  requirement          String
+  branch               String?
+  email                String
+  address              String
+  salaryRange          Int
+  noOfPositions        Int
+  company              String
+  types                String
+  education            String
+  industry             String
+  experience           String
+  employee             Employee?              @relation(fields: [employeeId], references: [id])
+  employeeId           String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  JobApplicantResponse JobApplicantResponse[]
+}
+
+// TODO: Recieves external user applications
+// TODO: When application is received send an email to the applicant
+// TODO: When application is Rejected send a custom email 
+// TODO: When application is accepted send a custom email 
+
+model JobApplicantResponse {
+  id String @id @default(cuid())
+
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String
+
+  coverLetter String?
+  resume      String
+
+  other Json?
+
+  status ApplicationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 enum PaymentStatus {

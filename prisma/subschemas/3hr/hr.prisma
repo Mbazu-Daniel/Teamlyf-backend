@@ -26,14 +26,13 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  spaces          Space[]
+  // spaces          Space[]
   subtasks        Subtask[]
   taskComments    TaskComment[]
   taskHistory     TaskHistory[]
   taskCreator     Task[]        @relation("TaskCreator")
   taskFiles       TaskFile[]
   projectCreator  Project[]     @relation("ProjectCreator")
-  assignedManager Project[]     @relation("AssignedManager")
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -82,6 +81,7 @@ model Team {
   @@index([workspaceId])
 }
 
+// Join table for many-to-many relation between Employee and Team
 model EmployeeTeam {
   id         String   @id @default(cuid())
   employeeId String
@@ -356,6 +356,34 @@ model Job {
   employeeId    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+}
+
+// TODO: Recieves external user applications
+// TODO: When application is received send an email to the applicant
+// TODO: When application is Rejected send a custom email 
+// TODO: When application is accepted send a custom email 
+
+model JobApplicantResponse {
+  id String @id @default(cuid())
+
+  job   Job    @relation(fields: [jobId], references: [id])
+  jobId String
+
+  coverLetter String?
+  resume      String
+
+  other Json?
+
+  status ApplicationStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
 
 enum PaymentStatus {
