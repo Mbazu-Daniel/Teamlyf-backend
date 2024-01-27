@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import asyncHandler from 'express-async-handler';
-import { createOrGetProjectStatus } from '../projects status/projectStatus.controllers.js';
 
 const prisma = new PrismaClient();
 
@@ -8,9 +7,11 @@ const prisma = new PrismaClient();
 // TODO: create an analytics for project where projects tasks that are not equal to a default status will be calculated against a default task status and from there we can see the progress bar of the projects
 // TODO: include progress bar in the project
 // TODO: by default every project is created with the status as "New Project" but when it has at least one tasks it can update to "In Progress"
+// TODO: filter project by project priority, project status,
 
 const projectSelectOptions = {
 	id: true,
+	workspace: { select: { name: true } },
 	name: true,
 	description: true,
 	thumbnail: true,
@@ -18,18 +19,16 @@ const projectSelectOptions = {
 	projectProgress: true,
 	startDate: true,
 	dueDate: true,
-	taskStatus: { select: { name: true } },
+	customTaskStatus: { select: { name: true } },
 	projectPriority: { select: { name: true } },
 	projectStatus: { select: { name: true } },
-	projectCreator: { select: { email: true } },
-	workspace: { select: { id: true, name: true } },
+	projectCreator: { select: { fullName: true } },
 
 	projectCollaborators: {
 		select: {
 			employee: {
 				select: {
-					id: true,
-					email: true,
+					fullName: true,
 				},
 			},
 		},
@@ -49,7 +48,7 @@ const createProject = asyncHandler(async (req, res) => {
 		startDate,
 		dueDate,
 		collaboratorIds,
-		taskStatusId,
+		customTaskStatusId,
 		projectPriorityId,
 	} = req.body;
 	try {
@@ -80,7 +79,7 @@ const createProject = asyncHandler(async (req, res) => {
 				dueDate: dueDate || null,
 
 				projectCreator: { connect: { id: req.employeeId } },
-				taskStatus: { connect: { id: taskStatusId } },
+				customTaskStatus: { connect: { id: customTaskStatusId } },
 				projectPriority: { connect: { id: projectPriorityId } },
 				projectStatus: { connect: { id: projectStatus.id } },
 				workspace: { connect: { id: workspaceId } },
@@ -92,7 +91,7 @@ const createProject = asyncHandler(async (req, res) => {
 			for (const collaboratorId of collaboratorIds) {
 				await prisma.projectCollaborator.create({
 					data: {
-						projectId: project.id,
+						projectId: newProject.id,
 						employeeId: collaboratorId,
 					},
 				});
@@ -205,59 +204,6 @@ const deleteProject = asyncHandler(async (req, res) => {
 	} catch (error) {
 		console.error(error);
 
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Get all projects
-const getAllTasksInProject = asyncHandler(async (req, res) => {
-	const { workspaceId, projectId } = req.params;
-	try {
-		const tasks = await prisma.task.findMany({
-			where: {
-				workspaceId,
-				projectId,
-			},
-		});
-
-		res.status(200).json(tasks);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: error.message });
-	}
-});
-
-const getSingleTaskInProject = asyncHandler(async (req, res) => {
-	const { projectId, taskId } = req.params;
-	try {
-		const existingProject = await prisma.project.findFirst({
-			where: {
-				workspaceId,
-				id: projectId,
-			},
-		});
-		if (!existingProject) {
-			return res
-				.status(404)
-				.json({ message: `Project with ID ${projectId} not found` });
-		}
-
-		const task = await prisma.task.findFirst({
-			where: {
-				id: taskId,
-				projectId,
-			},
-		});
-
-		if (!task) {
-			return res.status(404).json({
-				message: `Task with ID ${taskId} not found in Project ${projectId}`,
-			});
-		}
-
-		res.status(200).json(task);
-	} catch (error) {
-		console.error(error);
 		res.status(500).json({ error: error.message });
 	}
 });
@@ -411,9 +357,7 @@ export {
 	createProject,
 	deleteProject,
 	getAllProjects,
-	getAllTasksInProject,
 	getProjectById,
-	getSingleTaskInProject,
 	removeCollaboratorsFromProject,
 	updateProject,
 	// calculateProjectProgress
