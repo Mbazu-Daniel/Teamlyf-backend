@@ -4,12 +4,9 @@ import {
 	createProject,
 	deleteProject,
 	getAllProjects,
-	getAllTasksInProject,
 	getProjectById,
-	getSingleTaskInProject,
 	removeCollaboratorsFromProject,
 	updateProject,
-	// calculateProjectProgress,
 } from './projects.controllers.js';
 
 import {
@@ -24,7 +21,7 @@ app.use(
 	'/workspace',
 	projectRouter
 
-	// #swagger.tags = ['Project']
+	// #swagger.tags = ['Projects']
 );
 projectRouter.use(
 	'/:workspaceId',
@@ -48,14 +45,6 @@ projectRouter.post(
 	removeCollaboratorsFromProject
 );
 
-projectRouter.get(
-	'/:workspaceId/projects/:projectId/tasks',
-	getAllTasksInProject
-);
-projectRouter.get(
-	'/:workspaceId/projects/:projectId/tasks/:taskId',
-	getSingleTaskInProject
-);
 // projectRouter.get(
 // 	'/:workspaceId/projects/:projectId/calculate-progress',
 // 	calculateProjectProgress

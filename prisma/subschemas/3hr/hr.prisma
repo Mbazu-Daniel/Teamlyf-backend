@@ -30,9 +30,9 @@ model Employee {
   subtasks        Subtask[]
   taskComments    TaskComment[]
   taskHistory     TaskHistory[]
-  taskCreator     Task[]        @relation("TaskCreator")
+  tasks     Task[]        
   taskFiles       TaskFile[]
-  projectCreator  Project[]     @relation("ProjectCreator")
+  projects  Project[]    
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
