@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sat Jan 27 2024 18:56:25 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Sat Feb 03 2024 09:27:27 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -44,15 +44,17 @@ model Workspace {
   invite          Invite[]
   projects        Project[]
   projectPriority CustomProjectPriority[]
-  // tasks      Task[]
+  taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
+  tasks           Task[]
   taskFiles       TaskFile[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
-  LeaveComment    LeaveComment[]
-  Group           Group[]
+
+  leaveComment LeaveComment[]
+  group        Group[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([userId])
   @@index([name])
@@ -106,6 +108,7 @@ enum AuthStrategy {
 // Project Management 
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
+// TODO: thinking of adding task priority model as well to track  task priority for  project
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -136,6 +139,7 @@ model Project {
 
   projectCollaborators ProjectCollaborator[]
   tasks                Task[]
+  projectHistory       ProjectHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,7 +163,7 @@ model Task {
   subtasks     Subtask[]
   taskComments TaskComment[]
   taskHistory  TaskHistory[]
-  tags         TaskTag[]
+  tags         Json?
 
   employeeId String
   createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -167,22 +171,27 @@ model Task {
   taskCollaborators TaskCollaborator[]
 
   projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  taskStatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
-  taskStatusId String?
-  taskFiles    TaskFile[]
+  taskStatus   TaskStatus @relation(fields: [taskStatusId], references: [id])
+  taskStatusId String
 
-  // milestone   Milestone? @relation(fields: [milestoneId], references: [id])
-  // milestoneId String?
+  taskPriority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  taskPriorityId String?
+
+  taskFiles TaskFile[]
+
+  workspaces  Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaceId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // @@index([spaceId])
+  @@index([workspaceId])
   @@index([employeeId])
   @@index([projectId])
-  // @@index([workspaceId])
-  // @@index([milestoneId])
+  @@index([taskPriorityId])
   @@index([taskStatusId])
 }
 
@@ -212,17 +221,17 @@ model Subtask {
   @@index([taskStatusId])
 }
 
-model TaskTag {
-  id      String @id @default(cuid())
-  tagName String
+// model TaskTag {
+//   id      String @id @default(cuid())
+//   tagName String
 
-  tasks Task[]
+//   tasks Task[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
 
-  @@index([tagName])
-}
+//   @@index([tagName])
+// }
 
 model TaskComment {
   id   String @id @default(cuid())
@@ -231,13 +240,30 @@ model TaskComment {
   taskId String
   tasks  Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([taskId])
+  @@index([employeeId])
+}
+
+model ProjectHistory {
+  id     String        @id @default(cuid())
+  action ProjectAction
+
+  projectId String
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
   @@index([employeeId])
 }
 
@@ -324,6 +350,9 @@ model TaskFile {
   tasks  Task   @relation(fields: [taskId], references: [id])
   taskId String
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([taskId])
   @@index([employeeId])
   @@index([workspaceId])
@@ -338,6 +367,9 @@ model CustomTaskStatus {
   statuses         TaskStatus[]
   projects         Project[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([workspaceId])
 }
 
@@ -350,6 +382,9 @@ model TaskStatus {
   tasks              Task[]
   subtasks           Subtask[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([customTaskStatusId])
 }
 
@@ -359,6 +394,9 @@ model CustomProjectPriority {
   workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   workspaceId String
   priority    ProjectPriority[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([workspaceId])
 }
@@ -371,7 +409,37 @@ model ProjectPriority {
   customProjectPriority   CustomProjectPriority @relation(fields: [customProjectPriorityId], references: [id], onDelete: Cascade)
   customProjectPriorityId String
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([customProjectPriorityId])
+}
+
+model CustomTaskPriority {
+  id          String         @id @default(cuid())
+  name        String
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  priority    TaskPriority[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model TaskPriority {
+  id                   String             @id @default(cuid())
+  name                 String
+  color                String
+  tasks                Task[]
+  customTaskPriority   CustomTaskPriority @relation(fields: [customTaskPriorityId], references: [id], onDelete: Cascade)
+  customTaskPriorityId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customTaskPriorityId])
 }
 
 // TODO: Project don't need to have a custom status or Priority like the (Task Status) since project will be created  a status or priority can just be created on a fly and not neccessary used in other part of the application 
@@ -380,6 +448,9 @@ model ProjectStatus {
   name    String
   color   String
   project Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([name])
 }
@@ -407,7 +478,7 @@ enum TaskAction {
   UPDATED_COMMENTS_TO_TASKS
   DELETED_COMMENTS_TO_TASKS
   TASKS_COLLABORATOR_ADDED
-  TASKS_COLLABORATOR_DELETED
+  TASKS_COLLABORATOR_REMOVDED
   CREATED_SUBTASKS
 }
 
@@ -416,7 +487,7 @@ enum ProjectAction {
   UPDATED_PROJECTS
   DELETED_PROJECTS
   PROJECTS_COLLABORATOR_ADDED
-  PROJECTS_COLLABORATOR_DELETED
+  PROJECTS_COLLABORATOR_REMOVED
 }
 
 enum ProjectRole {
@@ -483,9 +554,10 @@ model Employee {
   conversationsReceived  Conversation[]  @relation("EmployeeTwo")
   directMessages         DirectMessage[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Group     Group[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ProjectHistory ProjectHistory[]
+  Group          Group[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -495,7 +567,7 @@ model Employee {
 
 model Team {
   id    String  @id @default(cuid())
-  name  String  @unique
+  name  String
   alias String?
 
   role TeamRole @default(MEMBER)
