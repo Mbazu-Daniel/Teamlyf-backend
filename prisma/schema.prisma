@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sat Feb 03 2024 09:27:27 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Mon Feb 05 2024 20:16:21 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -202,23 +202,27 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  taskStatus   TaskStatus @relation(fields: [taskStatusId], references: [id])
-  taskStatusId String
+  taskStatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
+  taskStatusId String?
+
+  taskPriority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  taskPriorityId String?
 
   subtaskCollaborator SubtaskCollaborator[]
 
   employeeId String
   createdBy  Employee @relation(fields: [employeeId], references: [id])
 
-  taskId String?
-  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([taskStatusId])
+  @@index([taskPriorityId])
   @@index([employeeId])
   @@index([taskId])
-  @@index([taskStatusId])
 }
 
 // model TaskTag {
@@ -433,6 +437,7 @@ model TaskPriority {
   name                 String
   color                String
   tasks                Task[]
+  subTasks             Subtask[]
   customTaskPriority   CustomTaskPriority @relation(fields: [customTaskPriorityId], references: [id], onDelete: Cascade)
   customTaskPriorityId String
 
@@ -478,7 +483,7 @@ enum TaskAction {
   UPDATED_COMMENTS_TO_TASKS
   DELETED_COMMENTS_TO_TASKS
   TASKS_COLLABORATOR_ADDED
-  TASKS_COLLABORATOR_REMOVDED
+  TASKS_COLLABORATOR_REMOVED
   CREATED_SUBTASKS
 }
 

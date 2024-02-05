@@ -8,8 +8,6 @@ const prisma = new PrismaClient();
 // TODO: get tasks history
 // TODO: get user task counts
 const taskSelectOptions = {
-	createdAt: true,
-	projects: { select: { name: true } },
 	id: true,
 	title: true,
 	description: true,
@@ -21,6 +19,8 @@ const taskSelectOptions = {
 	taskStatus: { select: { name: true, color: true } },
 	taskPriority: { select: { name: true, color: true } },
 	createdBy: { select: { fullName: true } },
+	createdAt: true,
+	projects: { select: { name: true } },
 
 	taskCollaborators: {
 		select: {
@@ -59,7 +59,7 @@ const createTask = asyncHandler(async (req, res) => {
 			dueDate: dueDate || null,
 			reminderDate: reminderDate || null,
 			taskStatus: { connect: { id: status } },
-			taskPriority: { connect: { id: priority } },
+			// taskPriority: { connect: { id: priority } },
 			tags: tagList || null,
 			createdBy: { connect: { id: req.employeeId } },
 			projects: { connect: { id: projectId } },
@@ -205,7 +205,6 @@ const updateTask = asyncHandler(async (req, res) => {
 const deleteTask = asyncHandler(async (req, res) => {
 	const { taskId, projectId } = req.params;
 	try {
-	
 		await prisma.task.delete({
 			where: {
 				id: taskId,
@@ -243,16 +242,6 @@ const addCollaboratorsToTask = asyncHandler(async (req, res) => {
 	const { employeeIds } = req.body;
 
 	try {
-		const task = await prisma.task.findUnique({
-			where: {
-				id: taskId,
-			},
-		});
-
-		if (!task) {
-			return res.status(404).json({ message: `Task ${taskId} not found` });
-		}
-
 		// Check if employeeIds are valid and exist in the Employee table
 		const validEmployeeIds = await prisma.employee.findMany({
 			where: {
@@ -315,16 +304,6 @@ const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
 	const { employeeIds } = req.body;
 
 	try {
-		const task = await prisma.task.findUnique({
-			where: {
-				id: taskId,
-			},
-		});
-
-		if (!task) {
-			return res.status(404).json({ message: `Task ${taskId} not found` });
-		}
-
 		// Remove TaskCollaborator entries for each specified employee
 		const deleteResults = await prisma.taskCollaborator.deleteMany({
 			where: {
@@ -355,35 +334,6 @@ const removeCollaboratorsFromTask = asyncHandler(async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 });
-
-// const updateTaskOrder = asyncHandler(async (req, res) => {
-// 	const { taskId, workspaceId } = req.params;
-// 	const { newPosition } = req.body;
-
-// 	try {
-// 		// Check if the task exists and belongs to the user or workspace
-// 		const task = await prisma.task.findFirst({
-// 			where: {
-// 				id: taskId,
-// 			},
-// 		});
-
-// 		if (!task) {
-// 			return res.status(404).json({ message: 'Task not found' });
-// 		}
-
-// 		// Update the task's order in the database
-// 		const updatedTask = await prisma.task.update({
-// 			where: { id: taskId },
-// 			data: { position: newPosition },
-// 		});
-
-// 		res.status(200).json(updatedTask);
-// 	} catch (error) {
-// 		console.error(error);
-// 		res.status(500).json({ error: error.message });
-// 	}
-// });
 
 export {
 	createTask,

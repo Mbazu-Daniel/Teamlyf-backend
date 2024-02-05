@@ -64,7 +64,7 @@ model Task {
   taskCollaborators TaskCollaborator[]
 
   projectId String
-  projects   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projects  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   taskStatus   TaskStatus @relation(fields: [taskStatusId], references: [id])
   taskStatusId String
@@ -74,7 +74,7 @@ model Task {
 
   taskFiles TaskFile[]
 
-  workspaces   Workspace? @relation(fields: [workspaceId], references: [id])
+  workspaces  Workspace? @relation(fields: [workspaceId], references: [id])
   workspaceId String?
 
   createdAt DateTime @default(now())
@@ -95,23 +95,27 @@ model Subtask {
   startDate DateTime
   dueDate   DateTime?
 
-  taskStatus   TaskStatus @relation(fields: [taskStatusId], references: [id])
-  taskStatusId String
+  taskStatus   TaskStatus? @relation(fields: [taskStatusId], references: [id])
+  taskStatusId String?
+
+  taskPriority   TaskPriority? @relation(fields: [taskPriorityId], references: [id])
+  taskPriorityId String?
 
   subtaskCollaborator SubtaskCollaborator[]
 
   employeeId String
   createdBy  Employee @relation(fields: [employeeId], references: [id])
 
-  taskId String?
-  tasks  Task?   @relation(fields: [taskId], references: [id])
+  taskId String
+  tasks  Task   @relation(fields: [taskId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([taskStatusId])
+  @@index([taskPriorityId])
   @@index([employeeId])
   @@index([taskId])
-  @@index([taskStatusId])
 }
 
 // model TaskTag {
@@ -326,6 +330,7 @@ model TaskPriority {
   name                 String
   color                String
   tasks                Task[]
+  subTasks             Subtask[]
   customTaskPriority   CustomTaskPriority @relation(fields: [customTaskPriorityId], references: [id], onDelete: Cascade)
   customTaskPriorityId String
 
@@ -371,7 +376,7 @@ enum TaskAction {
   UPDATED_COMMENTS_TO_TASKS
   DELETED_COMMENTS_TO_TASKS
   TASKS_COLLABORATOR_ADDED
-  TASKS_COLLABORATOR_REMOVDED
+  TASKS_COLLABORATOR_REMOVED
   CREATED_SUBTASKS
 }
 
