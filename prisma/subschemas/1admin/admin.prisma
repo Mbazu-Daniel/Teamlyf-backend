@@ -31,13 +31,17 @@ model Workspace {
   invite          Invite[]
   projects        Project[]
   projectPriority CustomProjectPriority[]
-  // tasks      Task[]
+  taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
+  tasks           Task[]
   taskFiles       TaskFile[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
+
+  leaveComment LeaveComment[]
+  group        Group[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([userId])
   @@index([name])

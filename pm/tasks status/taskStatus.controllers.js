@@ -143,7 +143,7 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
 		// Create new project statuses
 		const newStatuses = await Promise.all(
 			statuses
-				.filter((status) => !status.id) // Filter out statuses with id (existing statuses)
+				.filter((status) => !status.id) 
 				.map(async (status) => {
 					return prisma.taskStatus.create({
 						data: {

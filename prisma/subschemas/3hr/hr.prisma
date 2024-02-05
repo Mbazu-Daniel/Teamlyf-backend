@@ -66,7 +66,7 @@ model Employee {
 
 model Team {
   id    String  @id @default(cuid())
-  name  String  @unique
+  name  String  
   alias String?
 
   role TeamRole @default(MEMBER)

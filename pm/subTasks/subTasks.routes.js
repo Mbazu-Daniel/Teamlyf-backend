@@ -1,43 +1,58 @@
-import express from "express";
+import express from 'express';
 import {
-  createSubtask,
-  deleteSubtask,
-  getAllSubtasks,
-  updateSubtask,
-} from "./subTasks.controllers.js";
+	createSubtask,
+	deleteSubtask,
+	getAllSubtasks,
+	updateSubtask,
+} from './subTasks.controllers.js';
 
-import { verifyToken } from "../../helper/middleware/authenticate.js";
+import { verifyToken } from '../../utils/middleware/authenticate.js';
 
 import {
-  getCurrentEmployee,
-  getCurrentWorkspace,
-} from "../../helper/middleware/index.js";
+	getCurrentEmployee,
+	getCurrentWorkspace,
+} from '../../utils/middleware/index.js';
+import { checkTaskExists } from '../../utils/middleware/checkTaskExists.js';
 
-const subtaskRouter = express.Router({ mergeParams: true });
+const app = express();
+
+const subtaskRouter = express.Router();
+
+
+app.use(
+	'/workspace',
+	subtaskRouter
+
+	// #swagger.tags = ['Sub Task']
+);
 
 subtaskRouter.use(
-  "/:workspaceId",
-  verifyToken,
-  getCurrentEmployee,
-  getCurrentWorkspace
+	'/:workspaceId',
+	verifyToken,
+	getCurrentEmployee,
+	getCurrentWorkspace
 );
 
 // Get all space related tasks
 subtaskRouter.post(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/subtasks",
-  createSubtask
+	'/:workspaceId/projects/:projectId/tasks/:taskId/subtasks',
+	checkTaskExists,
+	createSubtask
 );
 subtaskRouter.get(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/subtasks",
-  getAllSubtasks
+	'/:workspaceId/projects/:projectId/tasks/:taskId/subtasks',
+	checkTaskExists,
+	getAllSubtasks
 );
 subtaskRouter.patch(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/subtasks/:id",
-  updateSubtask
+	'/:workspaceId/projects/:projectId/tasks/:taskId/subtasks/:id',
+	checkTaskExists,
+	updateSubtask
 );
 subtaskRouter.delete(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/subtasks/:id",
-  deleteSubtask
+	'/:workspaceId/projects/:projectId/tasks/:taskId/subtasks/:id',
+	checkTaskExists,
+	deleteSubtask
 );
 
 export default subtaskRouter;
