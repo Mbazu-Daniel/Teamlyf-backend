@@ -7,10 +7,16 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8000/api/v1/"
+      "url": "http://localhost:8000/api/v1",
+      "description": "local testing server"
     },
     {
-      "url": "https://localhost:8000/api/v1/"
+      "url": "https://teamlyf.cyclic.app/api/v1",
+      "description": "cyclic testing server"
+    },
+    {
+      "url": "https://teamlyf.onrender.com/api/v1",
+      "description": "render testing server"
     }
   ],
   "tags": [
@@ -2809,8 +2815,11 @@
         }
       }
     },
-    "/{workspaceId}/spaces/{spaceId}/tasks/{taskId}/subtasks": {
+    "/workspace/{workspaceId}/projects/{projectId}/tasks/{taskId}/subtasks": {
       "post": {
+        "tags": [
+          "Sub Task"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2822,7 +2831,7 @@
             }
           },
           {
-            "name": "spaceId",
+            "name": "projectId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2844,6 +2853,12 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         },
         "requestBody": {
@@ -2864,6 +2879,9 @@
                   "status": {
                     "example": "any"
                   },
+                  "priority": {
+                    "example": "any"
+                  },
                   "collaboratorsId": {
                     "example": "any"
                   }
@@ -2874,6 +2892,9 @@
         }
       },
       "get": {
+        "tags": [
+          "Sub Task"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2885,7 +2906,7 @@
             }
           },
           {
-            "name": "spaceId",
+            "name": "projectId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2905,14 +2926,20 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       }
     },
-    "/{workspaceId}/spaces/{spaceId}/tasks/{taskId}/subtasks/{id}": {
+    "/workspace/{workspaceId}/projects/{projectId}/tasks/{taskId}/subtasks/{id}": {
       "patch": {
+        "tags": [
+          "Sub Task"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2924,7 +2951,7 @@
             }
           },
           {
-            "name": "spaceId",
+            "name": "projectId",
             "in": "path",
             "required": true,
             "schema": {
@@ -2958,9 +2985,41 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "dueDate": {
+                    "example": "any"
+                  },
+                  "status": {
+                    "example": "any"
+                  },
+                  "priority": {
+                    "example": "any"
+                  },
+                  "collaboratorsId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "delete": {
+        "tags": [
+          "Sub Task"
+        ],
         "description": "",
         "parameters": [
           {
@@ -2972,7 +3031,7 @@
             }
           },
           {
-            "name": "spaceId",
+            "name": "projectId",
             "in": "path",
             "required": true,
             "schema": {
