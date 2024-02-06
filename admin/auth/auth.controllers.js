@@ -1,4 +1,5 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import pkg from '@prisma/client';
+const  { PrismaClient, UserRole } = pkg;
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import generateResetToken from '../../utils/services/generateResetToken.js';

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient } =  pkg
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import { v4 as uuidv4 } from 'uuid';

@@ -1,5 +1,6 @@
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 import asyncHandler from 'express-async-handler';
-import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const createProjectStatus = asyncHandler(async (req, res) => {
