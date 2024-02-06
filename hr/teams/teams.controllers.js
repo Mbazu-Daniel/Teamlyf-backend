@@ -44,7 +44,7 @@ const createTeam = asyncHandler(async (req, res) => {
         data: employeeIds.map((employeeId, index) => ({
           employeeId,
           teamId: newTeam.id,
-          role: roles && roles[index] ? roles[index] : TeamRole.MEMBER,
+          role: roles?.[index] ? roles[index] : TeamRole.MEMBER,
         })),
       });
     }
@@ -53,7 +53,7 @@ const createTeam = asyncHandler(async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
+})
 
 // Get all teams within an workspace
 const getAllTeams = asyncHandler(async (req, res) => {
@@ -137,7 +137,7 @@ const updateTeam = asyncHandler(async (req, res) => {
       data: { name, alias },
     });
 
-    // Handle associated employee-team relationships
+    // Handle associated employee-team team
     const { employeeIds, roles, teamCreatorRole } = req.body;
 
     if (employeeIds && employeeIds.length > 0) {
@@ -161,14 +161,14 @@ const updateTeam = asyncHandler(async (req, res) => {
         data: employeeIds.map((employeeId, index) => ({
           teamId,
           employeeId,
-          role: roles && roles[index] ? roles[index] : TeamRole.MEMBER,
+          role: roles?.[index] ? roles[index] : TeamRole.MEMBER,
         })),
         onConflict: {
           target: ["teamId", "employeeId"],
           action: {
             update: {
               role: (_, options) =>
-                roles && roles[options.index]
+                roles?.[options.index]
                   ? roles[options.index]
                   : TeamRole.MEMBER,
             },
@@ -226,7 +226,7 @@ const updateEmployeeRoles = asyncHandler(async (req, res) => {
     // Create or update roles for other team members
     for (let index = 0; index < employeeIds.length; index++) {
       const employeeId = employeeIds[index];
-      const role = roles && roles[index] ? roles[index] : TeamRole.MEMBER;
+      const role = roles?.[index] ? roles[index] : TeamRole.MEMBER;
 
       await prisma.employeeTeam.upsert({
         where: {
@@ -260,14 +260,14 @@ const addEmployeesToTeam = asyncHandler(async (req, res) => {
   const { employeeData } = req.body;
 
   try {
-    const existingRelationships = await prisma.employeeTeam.findMany({
+    const existingTeam = await prisma.employeeTeam.findMany({
       where: {
         teamId,
         employeeId: { in: employeeData.map((data) => data.employeeId) },
       },
     });
 
-    const existingEmployeeIds = existingRelationships.map((rel) => rel.employeeId);
+    const existingEmployeeIds = existingTeam.map((rel) => rel.employeeId);
     const newEmployeeData = employeeData.filter((data) => !existingEmployeeIds.includes(data.employeeId));
 
 
@@ -306,7 +306,7 @@ const removeEmployeesFromTeam = asyncHandler(async (req, res) => {
 
   try {
     // Check if the employees are in the team
-    const existingRelationships = await prisma.employeeTeam.findMany({
+    const existingTeam = await prisma.employeeTeam.findMany({
       where: {
         employeeId: { in: employeeIds },
         teamId,
@@ -314,7 +314,7 @@ const removeEmployeesFromTeam = asyncHandler(async (req, res) => {
     });
 
     const missingEmployees = employeeIds.filter(
-      (id) => !existingRelationships.some((rel) => rel.employeeId === id)
+      (id) => !existingTeam.some((rel) => rel.employeeId === id)
     );
 
     if (missingEmployees.length > 0) {

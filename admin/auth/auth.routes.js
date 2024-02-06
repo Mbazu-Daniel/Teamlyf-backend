@@ -1,7 +1,7 @@
 import {
 	verifySuperAdmin,
 	verifyLogin,
-} from '../../helper/middleware/authenticate.js';
+} from '../../utils/middleware/authenticate.js';
 import {
 	registerUser,
 	registerAdminUser,
@@ -12,7 +12,7 @@ import {
 import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import '../../helper/config/passportConfig.js';
+import '../../utils/config/passportConfig.js';
 
 const app = express();
 const authRouter = express.Router();
@@ -51,7 +51,7 @@ authRouter.post('/login', (req, res, next) => {
 
 			// Generate JWT
 			const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-				expiresIn: '1h',
+				expiresIn: '1000h',
 			});
 
 			// Set the token as a cookie in the response
