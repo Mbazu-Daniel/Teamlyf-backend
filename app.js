@@ -10,6 +10,8 @@ import session from 'express-session';
 import passport from 'passport';
 import treblle from '@treblle/express';
 import swaggerUi from 'swagger-ui-express';
+import Memorystore from 'memorystore';
+const MemoryStore = Memorystore(session);
 
 import swaggerDocument from './swagger.json' assert { type: 'json' };
 
@@ -41,15 +43,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// app.use(
-//   treblle({
-//     apiKey: process.env.TREBLLE_API_KEY,
-//     projectId: process.env.TREBLLE_PROJECT_ID,
-//     additionalFieldsToMask: [],
-//   })
-// );
+app.set('trust proxy', 1);
 app.use(
 	session({
+		cookie: { maxAge: 86400000 },
+		store: new MemoryStore({
+			checkPeriod: 86400000,
+		}),
 		secret: process.env.SESSION_SECRETS,
 		resave: false,
 		saveUninitialized: true,
