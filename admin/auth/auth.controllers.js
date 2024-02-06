@@ -1,8 +1,8 @@
 import { PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
-import generateResetToken from '../../helper/services/generateResetToken.js';
-import sendMail from '../../helper/services/sendMail.js';
+import generateResetToken from '../../utils/services/generateResetToken.js';
+import sendMail from '../../utils/services/sendMail.js';
 const prisma = new PrismaClient();
 
 const BASE_URL = process.env.FRONTEND_URL;

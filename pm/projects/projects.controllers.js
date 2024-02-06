@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProjectAction} from '@prisma/client';
 import asyncHandler from 'express-async-handler';
 
 const prisma = new PrismaClient();
@@ -10,6 +10,7 @@ const prisma = new PrismaClient();
 // TODO: filter project by project priority, project status,
 
 const projectSelectOptions = {
+	createdAt: true,
 	id: true,
 	workspace: { select: { name: true } },
 	name: true,
@@ -41,6 +42,7 @@ const createProject = asyncHandler(async (req, res) => {
 	const initialStatus = 'New Project';
 	const initialColor = '#00ff00';
 	const {
+		 
 		name,
 		description,
 		thumbnail,
@@ -52,6 +54,7 @@ const createProject = asyncHandler(async (req, res) => {
 		projectPriorityId,
 	} = req.body;
 	try {
+	
 		// Check if ProjectStatus with the given name already exists
 		let projectStatus = await prisma.projectStatus.findUnique({
 			where: {
@@ -77,12 +80,21 @@ const createProject = asyncHandler(async (req, res) => {
 				category: category || null,
 				startDate: startDate || new Date(),
 				dueDate: dueDate || null,
-
 				projectCreator: { connect: { id: req.employeeId } },
 				customTaskStatus: { connect: { id: customTaskStatusId } },
 				projectPriority: { connect: { id: projectPriorityId } },
 				projectStatus: { connect: { id: projectStatus.id } },
 				workspace: { connect: { id: workspaceId } },
+			},
+			select: projectSelectOptions,
+		});
+
+		// Log project addition in history using Prisma
+		await prisma.projectHistory.create({
+			data: {
+				projects: { connect: { id: newProject.id } },
+				employee: { connect: { id: req.employeeId } },
+				action: ProjectAction.CREATED_PROJECTS,
 			},
 		});
 
@@ -96,6 +108,13 @@ const createProject = asyncHandler(async (req, res) => {
 					},
 				});
 			}
+			await prisma.projectHistory.create({
+				data: {
+					projects: { connect: { id: newProject.id } },
+					employee: { connect: { id: req.employeeId } },
+					action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
+				},
+			});
 		}
 
 		res.status(201).json(newProject);
@@ -264,6 +283,14 @@ const addCollaboratorsToProject = asyncHandler(async (req, res) => {
 					employeeId,
 				},
 			});
+
+			await prisma.projectHistory.create({
+				data: {
+					projects: { connect: { id: projectId } },
+					employee: { connect: { id: req.employeeId } },
+					action: ProjectAction.PROJECTS_COLLABORATOR_ADDED,
+				},
+			});
 		}
 
 		res.status(200).json({ message: 'Collaborators added to the project' });
@@ -305,6 +332,13 @@ const removeCollaboratorsFromProject = asyncHandler(async (req, res) => {
 				message: 'No matching collaborators found for the specified project',
 			});
 		}
+		await prisma.projectHistory.create({
+			data: {
+				projects: { connect: { id: projectId } },
+				employee: { connect: { id: req.employeeId } },
+				action: ProjectAction.PROJECTS_COLLABORATOR_REMOVED,
+			},
+		});
 
 		res.status(200).json({ message: 'Collaborators removed from the project' });
 	} catch (error) {

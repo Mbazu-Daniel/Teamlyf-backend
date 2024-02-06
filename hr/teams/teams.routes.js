@@ -18,7 +18,15 @@ import {
 	checkTeamExists,
 } from '../../utils/middleware/index.js';
 
-const teamsRouter = express.Router({ mergeParams: true });
+const teamsRouter = express.Router();
+const app = express();
+
+app.use(
+	'/workspace',
+	teamsRouter
+
+	// #swagger.tags = ['Teams']
+);
 
 teamsRouter.use(
 	'/:workspaceId',
