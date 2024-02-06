@@ -1,28 +1,40 @@
-import { EmployeeRole, PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
+const { EmployeeRole, PrismaClient, TeamRole, UserRole }  =  pkg
 import asyncHandler from 'express-async-handler';
 import ShortUniqueId from 'short-unique-id';
 
 const prisma = new PrismaClient();
-// TODO: total count of workspace in the platform
 // TODO: set permission for update and delete workspace to only employee with Admin and owner role
 // TODO: check existing workspace based on the current user and not general workspaces
 const { randomUUID } = new ShortUniqueId({ length: 10 });
+
+const workspaceSelectOptions = {
+	id: true,
+	name: true,
+	logo: true,
+	address: true,
+	inviteCode: true,
+	userId: true,
+	createdAt: true,
+};
 
 // Create a new workspace
 const createWorkspace = asyncHandler(async (req, res) => {
 	const { name, logo, address } = req.body;
 	const { id: userId, email } = req.user;
+	const defaultCustomName = 'default';
+	const defaultName = 'general';
 
 	try {
 		// Check if an workspace with the same name already exists
 		const existingWorkspace = await prisma.workspace.findFirst({
-			where: { id: userId, name },
+			where: { name, userId },
 		});
 
 		if (existingWorkspace) {
-			return res
-				.status(400)
-				.json({ error: `workspace name ${name} already exists.` });
+			return res.status(400).json({
+				error: `workspace name ${name} already exists for this user ${email} `,
+			});
 		}
 
 		// Check if a user with the provided email already exists
@@ -45,6 +57,8 @@ const createWorkspace = asyncHandler(async (req, res) => {
 				inviteCode: randomUUID(),
 				userId,
 			},
+
+			select: workspaceSelectOptions,
 		});
 
 		// Create a new employee associated with the user who created the workspace
@@ -60,25 +74,80 @@ const createWorkspace = asyncHandler(async (req, res) => {
 		// Create a default team named "General"
 		await prisma.team.create({
 			data: {
-				name: 'General',
+				name: defaultName,
 				role: TeamRole.ADMIN,
-				workspace: { connect: { id: newWorkspace.id } },
-			},
-		});
-		// Create a default space named "General"
-		await prisma.space.create({
-			data: {
-				name: 'General',
-				createdBy: { connect: { id: newEmploye.id } },
 				workspace: { connect: { id: newWorkspace.id } },
 			},
 		});
 		// Create a default group named "General"
 		await prisma.group.create({
 			data: {
-				name: 'General',
+				name: defaultName,
 				employee: { connect: { id: newEmploye.id } },
 				workspace: { connect: { id: newWorkspace.id } },
+			},
+		});
+
+		// Create default task priorities with different colors
+		const defaultTaskPriorities = [
+			{ name: 'high', color: '#FF0000' },
+			{ name: 'medium', color: '#FFFF00' },
+			{ name: 'low', color: '#00FF00' },
+			{ name: 'urgent', color: '#0000FF' },
+		];
+
+		const customTaskPriority = await prisma.customTaskPriority.create({
+			data: {
+				name: defaultCustomName,
+				workspace: { connect: { id: newWorkspace.id } },
+				priority: {
+					create: defaultTaskPriorities.map(({ name, color }) => ({
+						name,
+						color,
+					})),
+				},
+			},
+		});
+
+		// Create default project priorities with different colors
+		const defaultProjectPriorities = [
+			{ name: 'high', color: '#FF0000' },
+			{ name: 'medium', color: '#FFFF00' },
+			{ name: 'low', color: '#00FF00' },
+			{ name: 'urgent', color: '#0000FF' },
+		];
+		const customProjectPriority = await prisma.customProjectPriority.create({
+			data: {
+				name: defaultCustomName,
+				workspace: { connect: { id: newWorkspace.id } },
+				priority: {
+					create: defaultProjectPriorities.map(({ name, color }) => ({
+						name,
+						color,
+					})),
+				},
+			},
+		});
+
+		// Create default task statuses with different colors
+		const defaultTaskStatuses = [
+			{ name: 'todo', color: '#FFA500' },
+			{ name: 'in review', color: '#008000' },
+			{ name: 'in progress', color: '#0000FF' },
+			{ name: 'completed', color: '#00FF00' },
+			{ name: 'blocked', color: '#FF0000' },
+		];
+
+		const customTaskStatus = await prisma.customTaskStatus.create({
+			data: {
+				name: defaultCustomName,
+				workspace: { connect: { id: newWorkspace.id } },
+				statuses: {
+					create: defaultTaskStatuses.map(({ name, color }) => ({
+						name,
+						color,
+					})),
+				},
 			},
 		});
 
@@ -97,6 +166,7 @@ const getUserWorkspaces = asyncHandler(async (req, res) => {
 			where: {
 				OR: [{ userId: id }, { employees: { some: { email } } }],
 			},
+			// select: workspaceSelectOptions,
 		});
 
 		// Check if the user is not part of any workspaces
@@ -275,7 +345,6 @@ const leaveWorkspace = asyncHandler(async (req, res) => {
 	}
 });
 
-
 // Join a workspace using inviteCode
 const joinWorkspaceUsingInviteCode = asyncHandler(async (req, res) => {
 	const { inviteCode } = req.body;
@@ -352,11 +421,9 @@ const changeWorkspaceInviteCode = asyncHandler(async (req, res) => {
 		});
 
 		if (!user || user.role !== EmployeeRole.OWNER) {
-			return res
-				.status(403)
-				.json({
-					error: 'You do not have permission to change the invite code.',
-				});
+			return res.status(403).json({
+				error: 'You do not have permission to change the invite code.',
+			});
 		}
 
 		// Update the workspace inviteCode

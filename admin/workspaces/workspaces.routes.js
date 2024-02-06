@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../../helper/middleware/authenticate.js';
+import { verifyToken } from '../../utils/middleware/authenticate.js';
 import {
 	createWorkspace,
 	deleteWorkspace,
@@ -16,9 +16,10 @@ import {
 import {
 	getCurrentEmployee,
 	getCurrentWorkspace,
-} from '../../helper/middleware/index.js';
+} from '../../utils/middleware/index.js';
 const app = express();
 const workspacesRouter = express.Router();
+
 app.use(
 	'/workspace',
 	workspacesRouter
@@ -26,14 +27,10 @@ app.use(
 	/* 
   
   #swagger.tags = ['Workspace']
-
-    #swagger.security = [{
-        "apiKeyAuth": []
-    }] 
   */
 );
 
-workspacesRouter.use('/', verifyToken);
+workspacesRouter.use('/workspace', verifyToken);
 
 workspacesRouter.post('/', createWorkspace);
 workspacesRouter.get('/current-user', getCurrentEmployee, getUserWorkspaces);

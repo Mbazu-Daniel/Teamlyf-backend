@@ -1,6 +1,7 @@
+import pkg from '@prisma/client';
+const { PrismaClient, AuthStrategy } = pkg;
 import passport from 'passport';
 import bcrypt from 'bcryptjs';
-import { PrismaClient, AuthStrategy } from '@prisma/client';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github2';

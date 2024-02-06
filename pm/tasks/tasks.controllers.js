@@ -1,4 +1,5 @@
-import { PrismaClient, TaskAction } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient, TaskAction } = pkg;
 import asyncHandler from 'express-async-handler';
 const prisma = new PrismaClient();
 

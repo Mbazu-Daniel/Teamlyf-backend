@@ -1,44 +1,47 @@
-import express from "express";
-import { verifyToken } from "../../helper/middleware/authenticate.js";
-import { allEmployeeRoles, getCurrentWorkspace } from "../../helper/middleware/index.js";;
-import upload from "../../helper/services/multerConfig.js";
+import express from 'express';
+import { verifyToken } from '../../utils/middleware/authenticate.js';
+import {
+	allEmployeeRoles,
+	getCurrentWorkspace,
+} from '../../utils/middleware/index.js';
+import upload from '../../utils/services/multerConfig.js';
 
 import {
-  calculateTotalFileSizeInWorkspace,
-  createTaskFile,
-  deleteTaskFile,
-  getAllFiles,
-  getTaskFiles,
-  shareTaskFile,
-  updateTaskFile,
-} from "./tasksFile.controllers.js";
+	calculateTotalFileSizeInWorkspace,
+	createTaskFile,
+	deleteTaskFile,
+	getAllFiles,
+	getTaskFiles,
+	shareTaskFile,
+	updateTaskFile,
+} from './tasksFile.controllers.js';
 
 const taskFileRouter = express.Router({ mergeParams: true });
 
 taskFileRouter.use(
-  "/:workspaceId",
-  verifyToken,
-  allEmployeeRoles,
-  getCurrentWorkspace
+	'/:workspaceId',
+	verifyToken,
+	allEmployeeRoles,
+	getCurrentWorkspace
 );
 
 // Get all space related tasks
 taskFileRouter.post(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/files",
-  upload.single("file"),
-  createTaskFile
+	'/:workspaceId/projects/:projectId/tasks/:taskId/files',
+	upload.single('file'),
+	createTaskFile
 );
 taskFileRouter.get(
-  "/:workspaceId/spaces/:spaceId/tasks/:taskId/files",
-  getTaskFiles
+	'/:workspaceId/projects/:projectId/tasks/:taskId/files',
+	getTaskFiles
 );
 
-taskFileRouter.get("/:workspaceId/files/", getAllFiles);
-taskFileRouter.patch("/:workspaceId/files/:fileId", updateTaskFile);
-taskFileRouter.delete("/:workspaceId/files/:fileId", deleteTaskFile);
-taskFileRouter.post("/:workspaceId/files/fileId", shareTaskFile);
+taskFileRouter.get('/:workspaceId/files/', getAllFiles);
+taskFileRouter.patch('/:workspaceId/files/:fileId', updateTaskFile);
+taskFileRouter.delete('/:workspaceId/files/:fileId', deleteTaskFile);
+taskFileRouter.post('/:workspaceId/files/fileId', shareTaskFile);
 taskFileRouter.get(
-  "/:workspaceId/files/calculate-file-size",
-  calculateTotalFileSizeInWorkspace
+	'/:workspaceId/files/calculate-file-size',
+	calculateTotalFileSizeInWorkspace
 );
 export default taskFileRouter;
