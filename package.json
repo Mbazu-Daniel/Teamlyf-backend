@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"generate": "npx prisma generate",
-		"start": "npx prisma generate && node --watch server.js",
+		"start": "node --watch server.js",
 		"dev": "npx supervisor server.js",
 		"prisma": "npx prisma-multischema && npx prisma db push",
 		"swagger": "node swagger-autogen.js"
