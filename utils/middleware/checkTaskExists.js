@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
 export const checkTaskExists = async (req, res, next) => {

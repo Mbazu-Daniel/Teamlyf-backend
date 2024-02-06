@@ -1,4 +1,5 @@
-import { EmployeeRole, PrismaClient, TeamRole, UserRole } from '@prisma/client';
+import pkg from '@prisma/client';
+const { EmployeeRole, PrismaClient, TeamRole, UserRole }  =  pkg
 import asyncHandler from 'express-async-handler';
 import ShortUniqueId from 'short-unique-id';
 

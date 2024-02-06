@@ -1,20 +1,21 @@
-import { PrismaClient } from "@prisma/client";
+import pkg from '@prisma/client';
+const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
 
 export const checkTeamExists = async (req, res, next) => {
-  const { workspaceId, teamId } = req.params;
-  try {
-    const team = await prisma.team.findFirst({
-      where: { id: teamId, workspaceId },
-    });
+	const { workspaceId, teamId } = req.params;
+	try {
+		const team = await prisma.team.findFirst({
+			where: { id: teamId, workspaceId },
+		});
 
-    if (!team) {
-      return res.status(404).json(`Team ${teamId} not found`);
-    }
+		if (!team) {
+			return res.status(404).json(`Team ${teamId} not found`);
+		}
 
-    next();
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+		next();
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
 };
