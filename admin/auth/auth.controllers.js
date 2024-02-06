@@ -1,10 +1,9 @@
-import pkg from '@prisma/client';
-const  { PrismaClient, UserRole } = pkg;
+import { PrismaClient, UserRole } from '@prisma/client';
+const prisma = new PrismaClient();
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
 import generateResetToken from '../../utils/services/generateResetToken.js';
 import sendMail from '../../utils/services/sendMail.js';
-const prisma = new PrismaClient();
 
 const BASE_URL = process.env.FRONTEND_URL;
 const registerUser = asyncHandler(async (req, res) => {
