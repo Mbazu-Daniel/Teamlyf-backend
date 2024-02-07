@@ -1,4 +1,5 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import pkg from '@prisma/client';
+const { PrismaClient, UserRole } = pkg;
 const prisma = new PrismaClient();
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
