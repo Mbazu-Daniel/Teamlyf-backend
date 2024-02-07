@@ -46,15 +46,16 @@ app.use(express.urlencoded({ extended: false }));
 app.set('trust proxy', 1);
 app.use(
 	session({
+		secret: process.env.SESSION_SECRETS,
+		resave: false,
+		saveUninitialized: true,
 		cookie: { maxAge: 86400000 },
 		store: new MemoryStore({
 			checkPeriod: 86400000,
 		}),
-		secret: process.env.SESSION_SECRETS,
-		resave: false,
-		saveUninitialized: true,
 	})
 );
+
 
 app.use(passport.initialize());
 app.use(passport.session());
