@@ -17,6 +17,12 @@ import {
 	getCurrentEmployee,
 	getCurrentWorkspace,
 } from '../../utils/middleware/index.js';
+import {
+	validateCreateWorkspace,
+	validateJoinWorkspace,
+	validateUpdateWorkspace,
+} from './workspaces.validate.js';
+
 const app = express();
 const workspacesRouter = express.Router();
 
@@ -32,7 +38,7 @@ app.use(
 
 workspacesRouter.use('/workspace', verifyToken);
 
-workspacesRouter.post('/', createWorkspace);
+workspacesRouter.post('/', validateCreateWorkspace, createWorkspace);
 workspacesRouter.get('/current-user', getCurrentEmployee, getUserWorkspaces);
 workspacesRouter.get('/count', getCurrentEmployee, getTotalWorkspacesCount);
 workspacesRouter.get(
@@ -45,6 +51,7 @@ workspacesRouter.patch(
 	'/:workspaceId',
 	getCurrentWorkspace,
 	getCurrentEmployee,
+	validateUpdateWorkspace,
 	updateWorkspace
 );
 workspacesRouter.delete(
@@ -79,6 +86,7 @@ workspacesRouter.patch(
 workspacesRouter.post(
 	'/:workspaceId/join-with-invite-code',
 	getCurrentEmployee,
+	validateJoinWorkspace,
 	joinWorkspaceUsingInviteCode
 );
 
