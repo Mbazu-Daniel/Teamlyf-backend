@@ -12,7 +12,17 @@ import {
 	updateTaskComment,
 } from './tasksComments.controllers.js';
 
-const taskCommentRouter = express.Router({ mergeParams: true });
+const taskCommentRouter = express.Router();
+
+const app = express();
+
+app.use(
+	'/workspace',
+	taskCommentRouter
+
+	// #swagger.tags = ['Tasks Comments']
+);
+
 
 taskCommentRouter.use(
 	'/:workspaceId',
@@ -23,19 +33,19 @@ taskCommentRouter.use(
 
 // Get all space related tasks
 taskCommentRouter.post(
-	'/:workspaceId/spaces/:spaceId/tasks/:taskId/comments',
+	'/:workspaceId/projects/:projectId/tasks/:taskId/comments',
 	createTaskComment
 );
 taskCommentRouter.get(
-	'/:workspaceId/spaces/:spaceId/tasks/:taskId/comments',
+	'/:workspaceId/projects/:projectId/tasks/:taskId/comments',
 	getTaskComments
 );
 taskCommentRouter.patch(
-	'/:workspaceId/spaces/:spaceId/tasks/:taskId/comments/:id',
+	'/:workspaceId/projects/:projectId/tasks/:taskId/comments/:id',
 	updateTaskComment
 );
 taskCommentRouter.delete(
-	'/:workspaceId/spaces/:spaceId/tasks/:taskId/comments/:id',
+	'/:workspaceId/projects/:projectId/tasks/:taskId/comments/:id',
 	deleteTaskComment
 );
 export default taskCommentRouter;
