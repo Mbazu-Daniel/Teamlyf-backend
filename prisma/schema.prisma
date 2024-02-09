@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Fri Feb 09 2024 06:54:43 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Feb 09 2024 22:43:46 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -558,6 +558,7 @@ model Employee {
   updatedAt      DateTime         @updatedAt
   ProjectHistory ProjectHistory[]
   Group          Group[]
+  GroupMembers   GroupMembers[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -920,9 +921,11 @@ enum TeamRole {
 
 // Chat communication model 
 model Group {
-  id   String      @id @default(cuid())
-  name String
-  type MessageType @default(TEXT)
+  id          String      @id @default(cuid())
+  name        String
+  description String?     @db.Text
+  thumbnail   String?
+  type        MessageType @default(TEXT)
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -932,11 +935,27 @@ model Group {
 
   messages Message[]
 
+  groupMembers GroupMembers[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId])
   @@index([workspaceId])
+}
+
+model GroupMembers {
+  id       String    @id @default(cuid())
+  group    Group     @relation(fields: [groupId], references: [id])
+  groupId  String
+  member   Employee  @relation(fields: [memberId], references: [id])
+  memberId String
+  role     GroupRole @default(ADMIN)
+
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([memberId])
 }
 
 model Message {
@@ -1004,6 +1023,13 @@ enum MessageStatus {
   READ
   DELIVERED
   SENT
+}
+
+enum GroupRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+  GUEST
 }
 
 // // File model

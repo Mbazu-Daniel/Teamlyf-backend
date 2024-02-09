@@ -1,5 +1,5 @@
 import pkg from '@prisma/client';
-const { PrismaClient, ProjectAction } = pkg;
+const { PrismaClient, ProjectAction, GroupRole } = pkg;
 import asyncHandler from 'express-async-handler';
 
 const prisma = new PrismaClient();
@@ -43,7 +43,6 @@ const createProject = asyncHandler(async (req, res) => {
 	const initialStatus = 'New Project';
 	const initialColor = '#00ff00';
 	const {
-		 
 		name,
 		description,
 		thumbnail,
@@ -55,7 +54,6 @@ const createProject = asyncHandler(async (req, res) => {
 		projectPriorityId,
 	} = req.body;
 	try {
-	
 		// Check if ProjectStatus with the given name already exists
 		let projectStatus = await prisma.projectStatus.findUnique({
 			where: {
@@ -88,6 +86,22 @@ const createProject = asyncHandler(async (req, res) => {
 				workspace: { connect: { id: workspaceId } },
 			},
 			select: projectSelectOptions,
+		});
+
+		const newGroup = await prisma.group.create({
+			data: {
+				name, // group will have same name as project
+				employee: { connect: { id: req.employeeId } },
+				workspace: { connect: { id: workspaceId } },
+			},
+		});
+
+		await prisma.groupMembers.create({
+			data: {
+				group: { connect: { id: newGroup.id } },
+				member: { connect: { id: req.employeeId } },
+				role: GroupRole.ADMIN,
+			},
 		});
 
 		// Log project addition in history using Prisma
