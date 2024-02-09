@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Tue Feb 06 2024 22:49:29 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Fri Feb 09 2024 06:54:43 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -47,7 +47,6 @@ model Workspace {
   taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
   tasks           Task[]
-  taskFiles       TaskFile[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
 
@@ -340,26 +339,22 @@ model SubtaskCollaborator {
 // TODO: create, get all files, update file name, share file, delete file
 
 model TaskFile {
-  id          String    @id @default(cuid())
-  name        String
-  fileType    String
-  fileSize    Int
-  fileFormat  String
-  fileUrl     String
-  employeeId  String
-  uploadedBy  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  tasks  Task   @relation(fields: [taskId], references: [id])
-  taskId String
+  id         String   @id @default(cuid())
+  name       String
+  fileType   String
+  fileSize   Int
+  fileFormat String
+  fileUrl    String
+  employeeId String
+  uploadedBy Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  tasks      Task     @relation(fields: [taskId], references: [id])
+  taskId     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([taskId])
   @@index([employeeId])
-  @@index([workspaceId])
 }
 
 model CustomTaskStatus {

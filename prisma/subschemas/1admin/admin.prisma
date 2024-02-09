@@ -34,7 +34,6 @@ model Workspace {
   taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
   tasks           Task[]
-  taskFiles       TaskFile[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
 

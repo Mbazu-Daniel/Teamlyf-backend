@@ -6,7 +6,7 @@ const { UserRole } = pkg;
 const registerSchema = Joi.object({
 	email: Joi.string().email().required(),
 	password: Joi.string().min(6).required(),
-	role: Joi.string().valid(UserRole.USER).required(),
+	role: Joi.string().valid(UserRole.BASIC).required(),
 });
 
 const validateRegister = asyncHandler(async (req, res, next) => {
