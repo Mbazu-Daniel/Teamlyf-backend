@@ -4,7 +4,7 @@ const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
 const createTaskComment = asyncHandler(async (req, res) => {
-	const { taskId, workspaceId, spaceId } = req.params;
+	const { taskId } = req.params;
 	const { text } = req.body;
 
 	try {
@@ -28,7 +28,7 @@ const createTaskComment = asyncHandler(async (req, res) => {
 });
 
 const getTaskComments = asyncHandler(async (req, res) => {
-	const { taskId, workspaceId, spaceId } = req.params;
+	const { taskId } = req.params;
 
 	try {
 		const taskComments = await prisma.taskComment.findMany({
@@ -45,11 +45,12 @@ const getTaskComments = asyncHandler(async (req, res) => {
 });
 
 const updateTaskComment = asyncHandler(async (req, res) => {
-	const { id } = req.params;
+	const { id, taskId } = req.params;
 
 	try {
 		const taskComment = await prisma.taskComment.findUnique({
 			where: {
+				taskId,
 				id,
 			},
 		});
@@ -73,12 +74,13 @@ const updateTaskComment = asyncHandler(async (req, res) => {
 });
 
 const deleteTaskComment = asyncHandler(async (req, res) => {
-	const { id } = req.params;
+	const { id, taskId } = req.params;
 
 	try {
 		const taskComment = await prisma.taskComment.findUnique({
 			where: {
 				id,
+				taskId,
 			},
 		});
 

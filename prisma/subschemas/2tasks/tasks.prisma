@@ -233,26 +233,22 @@ model SubtaskCollaborator {
 // TODO: create, get all files, update file name, share file, delete file
 
 model TaskFile {
-  id          String    @id @default(cuid())
-  name        String
-  fileType    String
-  fileSize    Int
-  fileFormat  String
-  fileUrl     String
-  employeeId  String
-  uploadedBy  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-
-  tasks  Task   @relation(fields: [taskId], references: [id])
-  taskId String
+  id         String   @id @default(cuid())
+  name       String
+  fileType   String
+  fileSize   Int
+  fileFormat String
+  fileUrl    String
+  employeeId String
+  uploadedBy Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  tasks      Task     @relation(fields: [taskId], references: [id])
+  taskId     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([taskId])
   @@index([employeeId])
-  @@index([workspaceId])
 }
 
 model CustomTaskStatus {
