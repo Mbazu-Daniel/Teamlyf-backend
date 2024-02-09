@@ -1,22 +1,40 @@
 // Chat communication model 
 model Group {
-  id   String      @id @default(cuid())
-  name String
-  type MessageType @default(TEXT)
+  id          String      @id @default(cuid())
+  name        String
+  description String?     @db.Text
+  thumbnail   String?
+  type        MessageType @default(TEXT)
 
   employeeId String
-  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   messages Message[]
 
+  groupMembers GroupMembers[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId])
   @@index([workspaceId])
+}
+
+model GroupMembers {
+  id       String    @id @default(cuid())
+  group    Group     @relation(fields: [groupId], references: [id])
+  groupId  String
+  member   Employee  @relation(fields: [memberId], references: [id])
+  memberId String
+  role     GroupRole @default(ADMIN)
+
+  createdAt DateTime @default(now())
+
+  @@index([groupId])
+  @@index([memberId])
 }
 
 model Message {
@@ -84,4 +102,11 @@ enum MessageStatus {
   READ
   DELIVERED
   SENT
+}
+
+enum GroupRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+  GUEST
 }

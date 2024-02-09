@@ -21,9 +21,9 @@ import employeeRouter from './hr/employees/employees.routes.js';
 import inviteRouter from './admin/invites/invites.routes.js';
 import projectRouter from './pm/projects/projects.routes.js';
 import taskRouter from './pm/tasks/tasks.routes.js';
-import subtaskRouter from "./pm/subTasks/subTasks.routes.js";
-import taskCommentRouter from "./pm/tasks comments/tasksComments.routes.js";
-import taskFileRouter from "./pm/tasks files/tasksFile.routes.js";
+import subtaskRouter from './pm/subTasks/subTasks.routes.js';
+import taskCommentRouter from './pm/tasks comments/tasksComments.routes.js';
+import taskFileRouter from './pm/tasks files/tasksFile.routes.js';
 import teamsRouter from './hr/teams/teams.routes.js';
 import userRouter from './admin/users/users.routes.js';
 import workspaceRouter from './admin/workspaces/workspaces.routes.js';
@@ -34,6 +34,7 @@ import projectPriorityRouter from './pm/projects priority/projectPriority.routes
 import tasksStatusRouter from './pm/tasks status/taskStatus.routes.js';
 import tasksPriorityRouter from './pm/tasks priority/taskPriority.routes.js';
 import projectStatusRouter from './pm/projects status/projectStatus.routes.js';
+import groupRouter from './chats/groups/groups.routes.js';
 
 dotenv.config();
 
@@ -55,7 +56,6 @@ app.use(
 		}),
 	})
 );
-
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -88,14 +88,14 @@ app.get('/', (req, res) => {
 });
 
 const basePath = '/api/v1';
-// // Authentication
+// Authentication
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
 
-// Administration (workspace)
+// Administration
+app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/workspace`, workspaceRouter);
 app.use(`${basePath}/workspace`, employeeRouter);
-app.use(`${basePath}/invites`, inviteRouter);
 
 // Task Management
 app.use(`${basePath}/workspace`, projectRouter);
@@ -113,5 +113,8 @@ app.use(`${basePath}/workspace`, teamsRouter);
 app.use(`${basePath}/workspace`, leavesRouter);
 app.use(`${basePath}/workspace`, leaveTypeRouter);
 app.use(`${basePath}/workspace`, leaveCommentRouter);
+
+// Chat Management
+app.use(`${basePath}/workspace`, groupRouter);
 
 export default app;
