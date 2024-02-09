@@ -1,5 +1,5 @@
 import pkg from '@prisma/client';
-const { EmployeeRole, PrismaClient, TeamRole, UserRole }  =  pkg
+const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupRole } = pkg;
 import asyncHandler from 'express-async-handler';
 import ShortUniqueId from 'short-unique-id';
 
@@ -62,7 +62,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
 		});
 
 		// Create a new employee associated with the user who created the workspace
-		const newEmploye = await prisma.employee.create({
+		const newEmployee = await prisma.employee.create({
 			data: {
 				email: email,
 				role: EmployeeRole.OWNER,
@@ -80,11 +80,19 @@ const createWorkspace = asyncHandler(async (req, res) => {
 			},
 		});
 		// Create a default group named "General"
-		await prisma.group.create({
+		const newGroup = await prisma.group.create({
 			data: {
 				name: defaultName,
-				employee: { connect: { id: newEmploye.id } },
+				employee: { connect: { id: newEmployee.id } },
 				workspace: { connect: { id: newWorkspace.id } },
+			},
+		});
+
+		await prisma.groupMembers.create({
+			data: {
+				group: { connect: { id: newGroup.id } },
+				member: { connect: { id: req.employeeId } },
+				role: GroupRole.ADMIN,
 			},
 		});
 
