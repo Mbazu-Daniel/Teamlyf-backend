@@ -35,6 +35,7 @@ import tasksStatusRouter from './pm/tasks status/taskStatus.routes.js';
 import tasksPriorityRouter from './pm/tasks priority/taskPriority.routes.js';
 import projectStatusRouter from './pm/projects status/projectStatus.routes.js';
 import groupRouter from './chats/groups/groups.routes.js';
+import conversationRouter from './chats/conversations/conversations.routes.js';
 
 dotenv.config();
 
@@ -116,5 +117,8 @@ app.use(`${basePath}/workspace`, leaveCommentRouter);
 
 // Chat Management
 app.use(`${basePath}/workspace`, groupRouter);
+app.use(`${basePath}/workspace`, conversationRouter);
+
+
 
 export default app;
