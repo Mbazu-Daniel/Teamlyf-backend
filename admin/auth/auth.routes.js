@@ -13,6 +13,13 @@ import express from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import '../../utils/config/passportConfig.js';
+import {
+	validateChangePassword,
+	validateForgetPassword,
+	validateRegister,
+	validateRegisterAdmin,
+	validateResetPassword,
+} from './auth.validate.js';
 
 const app = express();
 const authRouter = express.Router();
@@ -88,6 +95,7 @@ authRouter.get(
 	'/github',
 	passport.authenticate('github', { scope: ['user:email'] })
 );
+
 authRouter.get(
 	//  #swagger.tags = ['Auth']
 	'/github/callback',
@@ -118,16 +126,26 @@ authRouter.get('/logout', (req, res) => {
 	});
 });
 
-authRouter.post('/register', registerUser);
+authRouter.post('/register', validateRegister, registerUser);
 
 authRouter.post(
 	'/register-admin',
 
 	verifySuperAdmin,
+	validateRegisterAdmin,
 	registerAdminUser
 );
-authRouter.post('/forget-password', forgetPassword);
-authRouter.post('/reset-password/:resetToken', resetPassword);
-authRouter.post('/change-password', verifyLogin, changePassword);
+authRouter.post('/forget-password', validateForgetPassword, forgetPassword);
+authRouter.post(
+	'/reset-password/:resetToken',
+	validateResetPassword,
+	resetPassword
+);
+authRouter.post(
+	'/change-password',
+	verifyLogin,
+	validateChangePassword,
+	changePassword
+);
 
 export default authRouter;

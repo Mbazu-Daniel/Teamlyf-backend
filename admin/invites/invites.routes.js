@@ -5,6 +5,10 @@ import {
 	getCurrentWorkspace,
 } from '../../utils/middleware/index.js';
 import { generateInviteLink, joinWorkspace } from './invites.controllers.js';
+import {
+	validateGenerateInviteLink,
+	validateJoinWorkspace,
+} from './invites.validate.js';
 
 const app = express();
 
@@ -21,8 +25,9 @@ inviteRouter.post(
 	'/:workspaceId/generate-invite-link',
 	getCurrentWorkspace,
 	getCurrentEmployee,
+	validateGenerateInviteLink,
 	generateInviteLink
 );
-inviteRouter.post('/join/:inviteToken', joinWorkspace);
+inviteRouter.post('/join/:inviteToken', validateJoinWorkspace, joinWorkspace);
 
 export default inviteRouter;

@@ -16,7 +16,16 @@ import {
 	updateTaskFile,
 } from './tasksFile.controllers.js';
 
-const taskFileRouter = express.Router({ mergeParams: true });
+const taskFileRouter = express.Router();
+
+const app = express();
+
+app.use(
+	'/workspace',
+	taskFileRouter
+
+	// #swagger.tags = ['Tasks Files']
+);
 
 taskFileRouter.use(
 	'/:workspaceId',
@@ -35,13 +44,14 @@ taskFileRouter.get(
 	'/:workspaceId/projects/:projectId/tasks/:taskId/files',
 	getTaskFiles
 );
-
-taskFileRouter.get('/:workspaceId/files/', getAllFiles);
-taskFileRouter.patch('/:workspaceId/files/:fileId', updateTaskFile);
-taskFileRouter.delete('/:workspaceId/files/:fileId', deleteTaskFile);
-taskFileRouter.post('/:workspaceId/files/fileId', shareTaskFile);
-taskFileRouter.get(
-	'/:workspaceId/files/calculate-file-size',
-	calculateTotalFileSizeInWorkspace
-);
+// TODO: get all files in a project
+// taskFileRouter.get('/:workspaceId/files/', getAllFiles); 
+taskFileRouter.patch('/:workspaceId/projects/:projectId/tasks/:taskId/files/:fileId', updateTaskFile);
+taskFileRouter.delete('/:workspaceId/projects/:projectId/tasks/:taskId/files/:fileId', deleteTaskFile);
+taskFileRouter.post('/:workspaceId/projects/:projectId/tasks/:taskId/files/fileId', shareTaskFile);
+// TODO: get total file size in a workspace 
+// taskFileRouter.get(
+// 	'/:workspaceId/files/calculate-file-size',
+// 	calculateTotalFileSizeInWorkspace
+// );
 export default taskFileRouter;
