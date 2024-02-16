@@ -42,7 +42,7 @@
 		"passport-local": "^1.0.0",
 		"prisma": "^5.9.1",
 		"prisma-multischema": "^1.1.4",
-		"resend": "^1.0.0",
+		"resend": "^1.1.0",
 		"short-unique-id": "^5.0.3",
 		"swagger-autogen": "^2.23.7",
 		"swagger-ui-express": "^5.0.0",
