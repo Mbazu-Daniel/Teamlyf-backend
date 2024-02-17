@@ -260,6 +260,27 @@ const removeMembersFromGroup = asyncHandler(async (req, res) => {
 	}
 });
 
+
+// Search for groups by name
+const searchGroupsByName = asyncHandler(async (req, res) => {
+    const { name } = req.query;
+
+    try {
+        const groups = await prisma.group.findMany({
+            where: {
+                name: {
+                    contains: name,
+                },
+            },
+        });
+
+        res.status(200).json(groups);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export {
 	getAllGroups,
 	createGroup,
@@ -269,4 +290,5 @@ export {
 	getGroupMembers,
 	addMembersToGroup,
 	removeMembersFromGroup,
+	searchGroupsByName
 };
