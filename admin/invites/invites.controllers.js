@@ -115,7 +115,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 				.json({ error: 'Full name, email and password are required' });
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await generateHashedPassword(password, saltRounds);
 
 		const newUser = await prisma.user.create({
 			data: {

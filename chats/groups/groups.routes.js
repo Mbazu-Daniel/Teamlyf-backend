@@ -46,8 +46,34 @@ groupRouter.post(
 	addMembersToGroup
 );
 groupRouter.post(
-	'/:workspaceId/groups/:groupId/remove-members',
-	removeMembersFromGroup
+  "/:workspaceId/groups/:groupId/remove-members",
+  removeMembersFromGroup
+
+  /* #swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+}
+
+#swagger.parameters['groupId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+#swagger.requestBody = {
+    required: true,
+    content: {
+      'application/json': {
+        schema: {
+          "$ref": "#/components/schemas/RemoveProjectCollaborators"
+        }
+      }
+    }
+}
+
+
+*/
 );
 
 export default groupRouter;
