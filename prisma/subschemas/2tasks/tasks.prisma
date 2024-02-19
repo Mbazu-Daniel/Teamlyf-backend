@@ -27,6 +27,9 @@ model Project {
   projectCreatorId String
   projectCreator   Employee @relation(fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
@@ -39,6 +42,7 @@ model Project {
 
   @@index([projectCreatorId])
   @@index([workspaceId])
+  @@index([milestoneId])
   @@index([customTaskStatusId])
   @@index([projectStatusId])
   @@index([projectPriorityId])
@@ -80,7 +84,6 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([spaceId])
   @@index([workspaceId])
   @@index([employeeId])
   @@index([projectId])
@@ -117,18 +120,6 @@ model Subtask {
   @@index([employeeId])
   @@index([taskId])
 }
-
-// model TaskTag {
-//   id      String @id @default(cuid())
-//   tagName String
-
-//   tasks Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([tagName])
-// }
 
 model TaskComment {
   id   String @id @default(cuid())
@@ -349,17 +340,18 @@ model ProjectStatus {
   @@unique([name])
 }
 
-// model Milestone {
-//   id          String   @id @default(cuid())
-//   name        String
-//   startDate   DateTime
-//   endDate     DateTime
-//   description String
-//   task        Task[]
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
 
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 // ENUMS
 enum TaskAction {
@@ -389,4 +381,10 @@ enum ProjectRole {
   GUEST
   MEMBER
   ADMIN
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
 }

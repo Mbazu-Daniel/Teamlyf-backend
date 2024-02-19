@@ -27,12 +27,12 @@ model Employee {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   // spaces          Space[]
-  subtasks        Subtask[]
-  taskComments    TaskComment[]
-  taskHistory     TaskHistory[]
-  tasks     Task[]        
-  taskFiles       TaskFile[]
-  projects  Project[]    
+  subtasks     Subtask[]
+  taskComments TaskComment[]
+  taskHistory  TaskHistory[]
+  tasks        Task[]
+  taskFiles    TaskFile[]
+  projects     Project[]
 
   employeeTeam EmployeeTeam[]
   invite       Invite[]
@@ -41,11 +41,11 @@ model Employee {
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  attendance   Attendance[]
   leave        Leave[]
-  education    Education[]
   leaveComment LeaveComment[]
   leaveType    LeaveType[]
+  education    Education[]
+  attendance   Attendance[]
   job          Job[]
   timesheet    Timesheet[]
   payroll      Payroll[]
@@ -66,7 +66,7 @@ model Employee {
 
 model Team {
   id    String  @id @default(cuid())
-  name  String  
+  name  String
   alias String?
 
   role TeamRole @default(MEMBER)
@@ -98,41 +98,9 @@ model EmployeeTeam {
   @@index([teamId])
 }
 
-model Attendance {
-  id           String           @id @default(cuid())
-  clockIn      DateTime
-  clockOut     DateTime?
-  totalHour    Float?
-  late         Float?
-  earlyLeaving Float?
-  overtime     Float?
-  break        Float?
-  state        AttendanceStatus
 
-  employeeId String
-  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@index([employeeId])
-}
-
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
-}
 
 model Leave {
   id String @id @default(cuid())
@@ -215,13 +183,33 @@ model LeaveHistory {
   updatedBy     String?
 }
 
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
 model Education {
   id String @id @default(cuid())
 
-  institution   String?
-  courseOfStudy String?
+  institution   String
+  courseOfStudy String
   result        String?
-  degree        String?
+  degree        String
   startDate     DateTime?
   endDate       DateTime?
   status        Boolean   @default(true)
@@ -235,30 +223,20 @@ model Education {
   @@index([employeeId])
 }
 
-model PerformanceAppraisal {
-  id String @id @default(cuid())
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
 
-  appraisalDate      DateTime
-  rating             Float
-  comments           String
-  goals              String
-  achievements       String
-  managerComments    String
-  appraisalQuestions Json
-  appraisalResponse  AppraisalResponse[]
-}
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-model AppraisalResponse {
-  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  appraisalId          String
-  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
-
-  question String
-  response String
-
-  // @@index([employeeId])
-  @@index([appraisalId])
+  @@index([employeeId])
 }
 
 // PAYMENT
@@ -348,7 +326,7 @@ model Job {
   salaryRange   Int
   noOfPositions Int
   company       String
-  types         String
+  type          String
   education     String
   industry      String
   experience    String
@@ -378,6 +356,32 @@ model JobApplicantResponse {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  appraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
 }
 
 enum ApplicationStatus {
@@ -415,3 +419,14 @@ enum TeamRole {
   MEMBER
   ADMIN
 }
+
+// enum Degree {
+//   Bachelors
+//   Masters
+//   Phd
+//   Associates
+//   Professional
+//   Certificate
+//   Diploma
+//   Honorary
+// }
