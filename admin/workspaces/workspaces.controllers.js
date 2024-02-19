@@ -167,7 +167,19 @@ const createWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all workspaces
+// Get all  workspaces
+const getAllWorkspaces = asyncHandler(async (req, res) => {
+
+  try {
+    const workspaces = await prisma.workspace.findMany({
+    });
+
+    res.status(200).json(workspaces);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// Get users  workspaces
 const getUserWorkspaces = asyncHandler(async (req, res) => {
   const { email, id } = req.user;
   try {
@@ -478,4 +490,5 @@ export {
   changeWorkspaceInviteCode,
   getTotalWorkspacesCount,
   joinWorkspaceUsingInviteCode,
+  getAllWorkspaces,
 };
