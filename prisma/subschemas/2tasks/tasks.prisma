@@ -2,6 +2,20 @@
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 // TODO: thinking of adding task priority model as well to track  task priority for  project
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -27,6 +41,9 @@ model Project {
   projectCreatorId String
   projectCreator   Employee @relation(fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
@@ -39,6 +56,7 @@ model Project {
 
   @@index([projectCreatorId])
   @@index([workspaceId])
+  @@index([milestoneId])
   @@index([customTaskStatusId])
   @@index([projectStatusId])
   @@index([projectPriorityId])
@@ -80,7 +98,6 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([spaceId])
   @@index([workspaceId])
   @@index([employeeId])
   @@index([projectId])
@@ -117,18 +134,6 @@ model Subtask {
   @@index([employeeId])
   @@index([taskId])
 }
-
-// model TaskTag {
-//   id      String @id @default(cuid())
-//   tagName String
-
-//   tasks Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([tagName])
-// }
 
 model TaskComment {
   id   String @id @default(cuid())
@@ -349,18 +354,6 @@ model ProjectStatus {
   @@unique([name])
 }
 
-// model Milestone {
-//   id          String   @id @default(cuid())
-//   name        String
-//   startDate   DateTime
-//   endDate     DateTime
-//   description String
-//   task        Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
 // ENUMS
 enum TaskAction {
   CREATED_TASKS
@@ -389,4 +382,10 @@ enum ProjectRole {
   GUEST
   MEMBER
   ADMIN
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
 }

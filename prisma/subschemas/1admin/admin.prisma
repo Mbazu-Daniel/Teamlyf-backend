@@ -1,3 +1,5 @@
+
+// TODO: add Notification
 model User {
   id                 String       @id @default(cuid())
   email              String       @unique
@@ -39,6 +41,7 @@ model Workspace {
 
   leaveComment LeaveComment[]
   group        Group[]
+  events Event[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 

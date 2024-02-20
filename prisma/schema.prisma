@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Fri Feb 09 2024 22:43:46 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Tue Feb 20 2024 08:35:22 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -11,6 +11,7 @@ datasource db {
   relationMode = "prisma"
 }
 
+// TODO: add Notification
 model User {
   id                 String       @id @default(cuid())
   email              String       @unique
@@ -52,6 +53,7 @@ model Workspace {
 
   leaveComment LeaveComment[]
   group        Group[]
+  events       Event[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -108,6 +110,20 @@ enum AuthStrategy {
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 // TODO: thinking of adding task priority model as well to track  task priority for  project
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -133,6 +149,9 @@ model Project {
   projectCreatorId String
   projectCreator   Employee @relation(fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
@@ -145,6 +164,7 @@ model Project {
 
   @@index([projectCreatorId])
   @@index([workspaceId])
+  @@index([milestoneId])
   @@index([customTaskStatusId])
   @@index([projectStatusId])
   @@index([projectPriorityId])
@@ -186,7 +206,6 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([spaceId])
   @@index([workspaceId])
   @@index([employeeId])
   @@index([projectId])
@@ -223,18 +242,6 @@ model Subtask {
   @@index([employeeId])
   @@index([taskId])
 }
-
-// model TaskTag {
-//   id      String @id @default(cuid())
-//   tagName String
-
-//   tasks Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([tagName])
-// }
 
 model TaskComment {
   id   String @id @default(cuid())
@@ -455,18 +462,6 @@ model ProjectStatus {
   @@unique([name])
 }
 
-// model Milestone {
-//   id          String   @id @default(cuid())
-//   name        String
-//   startDate   DateTime
-//   endDate     DateTime
-//   description String
-//   task        Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
 // ENUMS
 enum TaskAction {
   CREATED_TASKS
@@ -497,7 +492,14 @@ enum ProjectRole {
   ADMIN
 }
 
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+}
+
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+// TODO: add employee contact list to store some contact details ?
 
 model Employee {
   id            String    @id @default(cuid())
@@ -540,11 +542,11 @@ model Employee {
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  attendance   Attendance[]
   leave        Leave[]
-  education    Education[]
   leaveComment LeaveComment[]
   leaveType    LeaveType[]
+  education    Education[]
+  attendance   Attendance[]
   job          Job[]
   timesheet    Timesheet[]
   payroll      Payroll[]
@@ -557,6 +559,7 @@ model Employee {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   ProjectHistory ProjectHistory[]
+  Event          Event[]
   Group          Group[]
   GroupMembers   GroupMembers[]
 
@@ -598,42 +601,6 @@ model EmployeeTeam {
 
   @@index([employeeId])
   @@index([teamId])
-}
-
-model Attendance {
-  id           String           @id @default(cuid())
-  clockIn      DateTime
-  clockOut     DateTime?
-  totalHour    Float?
-  late         Float?
-  earlyLeaving Float?
-  overtime     Float?
-  break        Float?
-  state        AttendanceStatus
-
-  employeeId String
-  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
-}
-
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
 }
 
 model Leave {
@@ -717,13 +684,33 @@ model LeaveHistory {
   updatedBy     String?
 }
 
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
 model Education {
   id String @id @default(cuid())
 
-  institution   String?
-  courseOfStudy String?
+  institution   String
+  courseOfStudy String
   result        String?
-  degree        String?
+  degree        String
   startDate     DateTime?
   endDate       DateTime?
   status        Boolean   @default(true)
@@ -737,30 +724,20 @@ model Education {
   @@index([employeeId])
 }
 
-model PerformanceAppraisal {
-  id String @id @default(cuid())
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
 
-  appraisalDate      DateTime
-  rating             Float
-  comments           String
-  goals              String
-  achievements       String
-  managerComments    String
-  appraisalQuestions Json
-  appraisalResponse  AppraisalResponse[]
-}
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
 
-model AppraisalResponse {
-  id String @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  appraisalId          String
-  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
-
-  question String
-  response String
-
-  // @@index([employeeId])
-  @@index([appraisalId])
+  @@index([employeeId])
 }
 
 // PAYMENT
@@ -850,7 +827,7 @@ model Job {
   salaryRange          Int
   noOfPositions        Int
   company              String
-  types                String
+  type                 String
   education            String
   industry             String
   experience           String
@@ -881,6 +858,53 @@ model JobApplicantResponse {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  appraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  flier       String?
+  description String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean   @default(false)
+  timezone    String    @default("GMT")
+  createdBy   Employee  @relation(fields: [createdById], references: [id])
+  createdById String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([createdById])
 }
 
 enum ApplicationStatus {
@@ -919,6 +943,17 @@ enum TeamRole {
   ADMIN
 }
 
+// TODO: use this on the frontend 
+// enum Degree {
+//   Bachelors
+//   Masters
+//   Phd
+//   Associates
+//   Professional
+//   Certificate
+//   Diploma
+//   Honorary
+// }
 // Chat communication model 
 model Group {
   id          String      @id @default(cuid())
