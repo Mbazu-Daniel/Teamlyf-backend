@@ -23,7 +23,12 @@ app.use(
   #swagger.tags = ['Notification']
   */
 );
-notificationRouter.use(verifyToken, getCurrentEmployee, getCurrentWorkspace);
+notificationRouter.use(
+  ":workspaceId",
+  verifyToken,
+  getCurrentEmployee,
+  getCurrentWorkspace
+);
 
 notificationRouter.post("/:workspaceId/notifications", createNotification);
 notificationRouter.get("/:workspaceId/notifications", getNotifications);
