@@ -15,9 +15,16 @@ import {
 const app = express();
 const educationRouter = express.Router();
 
-app.use("/workspace", educationRouter);
+app.use("/workspace", educationRouter
 
-// #swagger.tags = ['Education']
+
+	/* 
+  
+  #swagger.tags = ['Education']
+  */
+);
+
+
 
 educationRouter.use(
   "/:workspaceId",
