@@ -2,6 +2,20 @@
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 // TODO: thinking of adding task priority model as well to track  task priority for  project
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -338,19 +352,6 @@ model ProjectStatus {
   updatedAt DateTime @updatedAt
 
   @@unique([name])
-}
-
-model Milestone {
-  id          String          @id @default(cuid())
-  name        String
-  description String?
-  startDate   DateTime?
-  endDate     DateTime?
-  status      MilestoneStatus @default(PLANNED)
-  projects    Project[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 // ENUMS

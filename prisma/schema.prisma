@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Mon Feb 19 2024 21:58:39 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Tue Feb 20 2024 08:35:22 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -11,6 +11,7 @@ datasource db {
   relationMode = "prisma"
 }
 
+// TODO: add Notification
 model User {
   id                 String       @id @default(cuid())
   email              String       @unique
@@ -52,6 +53,7 @@ model Workspace {
 
   leaveComment LeaveComment[]
   group        Group[]
+  events       Event[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
@@ -108,6 +110,20 @@ enum AuthStrategy {
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 // TODO: thinking of adding task priority model as well to track  task priority for  project
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -446,19 +462,6 @@ model ProjectStatus {
   @@unique([name])
 }
 
-model Milestone {
-  id          String          @id @default(cuid())
-  name        String
-  description String?
-  startDate   DateTime?
-  endDate     DateTime?
-  status      MilestoneStatus @default(PLANNED)
-  projects    Project[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 // ENUMS
 enum TaskAction {
   CREATED_TASKS
@@ -496,6 +499,7 @@ enum MilestoneStatus {
 }
 
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+// TODO: add employee contact list to store some contact details ?
 
 model Employee {
   id            String    @id @default(cuid())
@@ -555,6 +559,7 @@ model Employee {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   ProjectHistory ProjectHistory[]
+  Event          Event[]
   Group          Group[]
   GroupMembers   GroupMembers[]
 
@@ -881,6 +886,27 @@ model AppraisalResponse {
   @@index([appraisalId])
 }
 
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  flier       String?
+  description String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean   @default(false)
+  timezone    String    @default("GMT")
+  createdBy   Employee  @relation(fields: [createdById], references: [id])
+  createdById String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([createdById])
+}
+
 enum ApplicationStatus {
   PENDING
   ACCEPTED
@@ -917,6 +943,7 @@ enum TeamRole {
   ADMIN
 }
 
+// TODO: use this on the frontend 
 // enum Degree {
 //   Bachelors
 //   Masters

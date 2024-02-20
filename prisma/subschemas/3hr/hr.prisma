@@ -1,4 +1,5 @@
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+// TODO: add employee contact list to store some contact details ?
 
 model Employee {
   id            String    @id @default(cuid())
@@ -97,10 +98,6 @@ model EmployeeTeam {
   @@index([employeeId])
   @@index([teamId])
 }
-
-
-
-
 
 model Leave {
   id String @id @default(cuid())
@@ -384,6 +381,27 @@ model AppraisalResponse {
   @@index([appraisalId])
 }
 
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  flier       String?
+  description String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean  @default(false)
+  timezone    String   @default("GMT")
+  createdBy   Employee @relation(fields: [createdById], references: [id])
+  createdById String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([createdById])
+}
+
 enum ApplicationStatus {
   PENDING
   ACCEPTED
@@ -420,6 +438,7 @@ enum TeamRole {
   ADMIN
 }
 
+// TODO: use this on the frontend 
 // enum Degree {
 //   Bachelors
 //   Masters

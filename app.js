@@ -43,6 +43,7 @@ import leavesRouter from "./hr/leaves/leaves.routes.js";
 import leaveTypeRouter from "./hr/leaves type/leaveType.routes.js";
 import leaveCommentRouter from "./hr/leaves comment/leaveComment.routes.js";
 import educationRouter from "./hr/education/education.routes.js";
+import eventsRouter from "./hr/events/events.routes.js";
 
 // CHAT
 import groupRouter from "./chats/groups/groups.routes.js";
@@ -127,6 +128,7 @@ app.use(`${basePath}/workspace`, leavesRouter);
 app.use(`${basePath}/workspace`, leaveTypeRouter);
 app.use(`${basePath}/workspace`, leaveCommentRouter);
 app.use(`${basePath}/workspace`, educationRouter);
+app.use(`${basePath}/workspace`, eventsRouter);
 
 // Chat Management
 app.use(`${basePath}/workspace`, groupRouter);
