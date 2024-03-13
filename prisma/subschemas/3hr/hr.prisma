@@ -315,27 +315,33 @@ model Payslip {
 model Job {
   id            String    @id @default(cuid())
   title         String
+  description   String
   category      String?
-  requirement   String
   branch        String?
-  email         String
-  address       String
-  salaryRange   Int
-  noOfPositions Int
-  company       String
-  type          String
-  education     String
-  industry      String
-  experience    String
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  employeeId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  email         String?
+  address       String?
+  salaryRange   Int?
+  noOfPositions Int?
+  // type          String
+  // education     String
+  // industry      String
+  // experience    String
+  isActive        Boolean   @default(true)
+  createdBy     Employee  @relation(fields: [employeeId], references: [id])
+  employeeId    String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // TODO: Recieves external user applications
 // TODO: When application is received send an email to the applicant
-// TODO: When application is Rejected send a custom email 
+// TODO: When application is rejected send a custom email 
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
@@ -349,7 +355,7 @@ model JobApplicantResponse {
 
   other Json?
 
-  status ApplicationStatus @default(PENDING)
+  status JobApplicationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -382,27 +388,35 @@ model AppraisalResponse {
 }
 
 model Event {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   flier       String?
   description String?
   location    String?
   startDate   DateTime
   endDate     DateTime
-  isPublished Boolean  @default(false)
-  timezone    String   @default("GMT")
-  createdBy   Employee @relation(fields: [createdById], references: [id])
+  isPublished Boolean   @default(false)
+  timezone    String    @default("GMT")
+  createdBy   Employee  @relation(fields: [createdById], references: [id])
   createdById String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([workspaceId])
   @@index([createdById])
 }
 
-enum ApplicationStatus {
+// TODO: handle holidays (public and weekly holiday)
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum JobApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED

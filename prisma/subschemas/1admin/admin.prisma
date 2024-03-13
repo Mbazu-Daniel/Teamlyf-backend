@@ -1,4 +1,3 @@
-
 // TODO: add Notification
 model User {
   id                 String       @id @default(cuid())
@@ -38,12 +37,12 @@ model Workspace {
   tasks           Task[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
-
-  leaveComment LeaveComment[]
-  group        Group[]
-  events Event[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  jobs            Job[]
+  leaveComment    LeaveComment[]
+  group           Group[]
+  events          Event[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
 
   @@index([userId])
   @@index([name])

@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Tue Feb 20 2024 08:35:22 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Sat Mar 09 2024 06:01:59 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -50,12 +50,12 @@ model Workspace {
   tasks           Task[]
   leaves          Leave[]
   leaveTypes      LeaveType[]
-
-  leaveComment LeaveComment[]
-  group        Group[]
-  events       Event[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  jobs            Job[]
+  leaveComment    LeaveComment[]
+  group           Group[]
+  events          Event[]
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
 
   @@index([userId])
   @@index([name])
@@ -817,30 +817,36 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id                   String                 @id @default(cuid())
-  title                String
-  category             String?
-  requirement          String
-  branch               String?
-  email                String
-  address              String
-  salaryRange          Int
-  noOfPositions        Int
-  company              String
-  type                 String
-  education            String
-  industry             String
-  experience           String
-  employee             Employee?              @relation(fields: [employeeId], references: [id])
-  employeeId           String?
+  id            String    @id @default(cuid())
+  title         String
+  description   String
+  category      String?
+  branch        String?
+  email         String?
+  address       String?
+  salaryRange   Int?
+  noOfPositions Int?
+  // type          String
+  // education     String
+  // industry      String
+  // experience    String
+  isActive      Boolean   @default(true)
+  createdBy     Employee  @relation(fields: [employeeId], references: [id])
+  employeeId    String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   JobApplicantResponse JobApplicantResponse[]
+
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // TODO: Recieves external user applications
 // TODO: When application is received send an email to the applicant
-// TODO: When application is Rejected send a custom email 
+// TODO: When application is rejected send a custom email 
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
@@ -854,7 +860,7 @@ model JobApplicantResponse {
 
   other Json?
 
-  status ApplicationStatus @default(PENDING)
+  status JobApplicationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -907,7 +913,15 @@ model Event {
   @@index([createdById])
 }
 
-enum ApplicationStatus {
+// TODO: handle holidays (public and weekly holiday)
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum JobApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
