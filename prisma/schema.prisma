@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sat Mar 09 2024 06:01:59 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Wed Mar 20 2024 12:40:04 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -40,22 +40,31 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees       Employee[]
-  teams           Team[]
-  invite          Invite[]
+  employees Employee[]
+  teams     Team[]
+  invite    Invite[]
+
+  // PM/TASKS
   projects        Project[]
   projectPriority CustomProjectPriority[]
   taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
   tasks           Task[]
-  leaves          Leave[]
-  leaveTypes      LeaveType[]
-  jobs            Job[]
-  leaveComment    LeaveComment[]
-  group           Group[]
-  events          Event[]
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
+
+  // HR
+  leaves       Leave[]
+  leaveTypes   LeaveType[]
+  jobs         Job[]
+  leaveComment LeaveComment[]
+  group        Group[]
+  events       Event[]
+
+  // FILE MANAGER 
+  files   File[]
+  folders Folder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([name])
@@ -527,41 +536,47 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  // spaces          Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  tasks        Task[]
-  taskFiles    TaskFile[]
-  projects     Project[]
+  invite Invite[]
 
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
-
+  // PM/TASKS
+  subtasks            Subtask[]
+  taskComments        TaskComment[]
+  taskHistory         TaskHistory[]
+  projectHistory      ProjectHistory[]
+  tasks               Task[]
+  taskFiles           TaskFile[]
+  projects            Project[]
+  employeeTeam        EmployeeTeam[]
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
+  // HR
   leave        Leave[]
   leaveComment LeaveComment[]
   leaveType    LeaveType[]
-  education    Education[]
-  attendance   Attendance[]
-  job          Job[]
-  timesheet    Timesheet[]
+  educations   Education[]
+  attendances  Attendance[]
+  jobs         Job[]
+  events       Event[]
+  timesheets   Timesheet[]
   payroll      Payroll[]
 
+  // CHAT
   messages               Message[]
   conversationsInitiated Conversation[]  @relation("EmployeeOne")
   conversationsReceived  Conversation[]  @relation("EmployeeTwo")
   directMessages         DirectMessage[]
+  groups                 Group[]
+  groupMembers           GroupMembers[]
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  ProjectHistory ProjectHistory[]
-  Event          Event[]
-  Group          Group[]
-  GroupMembers   GroupMembers[]
+  // FILE MANAGER 
+  files           File[]
+  folders         Folder[]
+  sharedFileLinks SharedFileLink[]
+  trashbins       TrashBin[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
@@ -817,7 +832,7 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id            String    @id @default(cuid())
+  id            String                 @id @default(cuid())
   title         String
   description   String
   category      String?
@@ -830,15 +845,17 @@ model Job {
   // education     String
   // industry      String
   // experience    String
-  isActive      Boolean   @default(true)
-  createdBy     Employee  @relation(fields: [employeeId], references: [id])
-  employeeId    String
-  workspace     Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId   String
+  isActive      Boolean                @default(true)
+  jobApplicant  JobApplicantResponse[]
 
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  JobApplicantResponse JobApplicantResponse[]
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([workspaceId])
   @@index([employeeId])
@@ -850,10 +867,11 @@ model Job {
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
-  id String @id @default(cuid())
-
-  job   Job    @relation(fields: [jobId], references: [id])
-  jobId String
+  id       String @id @default(cuid())
+  fullName String
+  email    String
+  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId    String
 
   coverLetter String?
   resume      String
@@ -1081,113 +1099,119 @@ enum GroupRole {
   GUEST
 }
 
-// // File model
-// model File {
-//   fileId          Int      @id @default(autoincrement())
-//   employeeId          Int
-//   folderId        Int?
-//   filename         String
-//   filetype         String
-//   size             Int
-//   is_deleted       Boolean @default(false)
-//   version_number   Int
-//   file_content_type String
-//   file_content     String
-//   thumbnail_url    String
-//   download_count   Int
-//   tags             String[]
-//   access_control_type String
-//   created_at       DateTime @default(now())
-//   updated_at       DateTime
-//   metadata         Json
-//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-//   folder           Folder?  @relation(fields: [folderId], references: [folderId])
-//   permissions      Permission[]
-// }
+// TODO: files from tasks and any other attachments should be added to this file manager storage 
+// TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 
-// // Folder model
-// model Folder {
-//   folderId        Int      @id @default(autoincrement())
-//   employeeId          Int
-//   parent_folderId Int?
-//   folder_name      String
-//   created_at       DateTime @default(now())
-//   updated_at       DateTime
-//   is_deleted       Boolean @default(false)
-//   access_control_type String
-//   metadata         Json
-//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-//   parentFolder     Folder?  @relation("ParentFolder", fields: [parent_folderId], references: [folderId])
-//   subFolders       Folder[] @relation("SubFolders")
-//   files            File[]
-//   permissions      Permission[]
-// }
+// File model
+model File {
+  id          String    @id @default(cuid())
+  fileName    String
+  fileType    String
+  fileSize    Int
+  fileFormat  String
+  fileUrl     String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  employeeId  String
+  uploadBy    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  folderId    String?
+  folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: NoAction)
 
-// // Permission model
-// model Permission {
-//   permissionId    Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   role             String
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
+  versions       FileVersion[]
+  trashbin       TrashBin[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  SharedFileLink SharedFileLink[]
 
-// // Activity Log model
+  @@index([workspaceId])
+  @@index([employeeId])
+  @@index([folderId])
+}
+
+// Folder model
+model Folder {
+  id String @id @default(cuid())
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+
+  parentFolderId String?
+  parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  childFolders   Folder[] @relation("ChildFolders")
+
+  files    File[]
+  trashbin TrashBin[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  SharedFileLink SharedFileLink[]
+
+  @@index([workspaceId])
+  @@index([employeeId])
+  @@index([parentFolderId])
+}
+
+model FileVersion {
+  id      String @id @default(cuid())
+  file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId  String
+  version Int
+
+  timestamp DateTime //Timestamp of the version
+  notes     String? // Additional notes or comments
+
+  createdAt DateTime @default(now())
+
+  @@index([fileId])
+}
+
+// TrashBin model for deleted files
+
+// TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
+model TrashBin {
+  id          String   @id @default(cuid())
+  folderId    String
+  folder      Folder   @relation(fields: [folderId], references: [id])
+  fileId      String
+  file        File     @relation(fields: [fileId], references: [id])
+  deletedBy   Employee @relation(fields: [deletedById], references: [id], onDelete: Cascade)
+  deletedById String
+  reason      String?
+  deletedAt   DateTime @default(now())
+
+  @@index([folderId])
+  @@index([fileId])
+  @@index([deletedById])
+}
+
+// Activity Log model// Share model for file/folder sharing
+model SharedFileLink {
+  id         String    @id @default(cuid())
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId String
+  file       File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId     String?
+  folder     Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId   String?
+  // Additional attributes
+  permission String // Permission level (e.g., read, write, admin)
+  expiration DateTime? // Expiration date for the share
+
+  @@index([folderId])
+  @@index([fileId])
+  @@index([employeeId])
+}
+
+// // ActivityLog model
 // model ActivityLog {
-//   logId           Int      @id @default(autoincrement())
-//   employeeId          Int
-//   action_type      String
-//   targetId        Int
-//   target_type      String
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
-
-// // SharedLink model
-// model SharedLink {
-//   linkId          Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   link_url         String
-//   expiration_date  DateTime
-//   password_protected Boolean
-//   access_count     Int
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
-
-// // Notification model
-// model Notification {
-//   notificationId  Int      @id @default(autoincrement())
-//   employeeId          Int
-//   senderId        Int
-//   notification_type String
-//   targetId        Int
-//   target_type      String
-//   is_read          Boolean
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   sender           Employee     @relation("Sender", fields: [senderId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
-
-// // Comment model
-// model Comment {
-//   commentId       Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   comment_text     String
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+//     id        String      @id @default(cuid())
+//     employee      Employee     @relation(fields: [employeeId], references: [id])
+//     employeeId    String
+//     action    String
+//     timestamp DateTime @default(now())
+//     // Additional attributes
+//     ipAddress String? // IP address of the user performing the action
+//     userAgent String? // User agent of the client application
 // }

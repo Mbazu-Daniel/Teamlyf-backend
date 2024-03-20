@@ -27,37 +27,47 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  // spaces          Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  tasks        Task[]
-  taskFiles    TaskFile[]
-  projects     Project[]
+  invite Invite[]
 
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
-
+  // PM/TASKS
+  subtasks            Subtask[]
+  taskComments        TaskComment[]
+  taskHistory         TaskHistory[]
+  projectHistory      ProjectHistory[]
+  tasks               Task[]
+  taskFiles           TaskFile[]
+  projects            Project[]
+  employeeTeam        EmployeeTeam[]
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
+  // HR
   leave        Leave[]
   leaveComment LeaveComment[]
   leaveType    LeaveType[]
-  education    Education[]
-  attendance   Attendance[]
-  job          Job[]
-  timesheet    Timesheet[]
+  educations   Education[]
+  attendances  Attendance[]
+  jobs         Job[]
+  events       Event[]
+  timesheets   Timesheet[]
   payroll      Payroll[]
 
+  // CHAT
   messages               Message[]
   conversationsInitiated Conversation[]  @relation("EmployeeOne")
   conversationsReceived  Conversation[]  @relation("EmployeeTwo")
   directMessages         DirectMessage[]
+  groups                 Group[]
+  groupMembers           GroupMembers[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // FILE MANAGER 
+  files           File[]
+  folders         Folder[]
+  sharedFileLinks SharedFileLink[]
+  trashbins       TrashBin[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
@@ -313,7 +323,7 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id            String    @id @default(cuid())
+  id            String                 @id @default(cuid())
   title         String
   description   String
   category      String?
@@ -326,11 +336,14 @@ model Job {
   // education     String
   // industry      String
   // experience    String
-  isActive        Boolean   @default(true)
-  createdBy     Employee  @relation(fields: [employeeId], references: [id])
-  employeeId    String
-  workspace     Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId   String
+  isActive      Boolean                @default(true)
+  jobApplicant  JobApplicantResponse[]
+
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -345,10 +358,11 @@ model Job {
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
-  id String @id @default(cuid())
-
-  job   Job    @relation(fields: [jobId], references: [id])
-  jobId String
+  id       String @id @default(cuid())
+  fullName String
+  email    String
+  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId    String
 
   coverLetter String?
   resume      String

@@ -27,22 +27,32 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees       Employee[]
-  teams           Team[]
-  invite          Invite[]
+  employees Employee[]
+  teams     Team[]
+  invite    Invite[]
+
+  // PM/TASKS
   projects        Project[]
   projectPriority CustomProjectPriority[]
   taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
   tasks           Task[]
-  leaves          Leave[]
-  leaveTypes      LeaveType[]
-  jobs            Job[]
-  leaveComment    LeaveComment[]
-  group           Group[]
-  events          Event[]
-  createdAt       DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
+
+  // HR
+  leaves       Leave[]
+  leaveTypes   LeaveType[]
+  jobs         Job[]
+  leaveComment LeaveComment[]
+  group        Group[]
+  events       Event[]
+
+  // FILE MANAGER 
+  files     File[]
+  folders   Folder[]
+
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([name])
