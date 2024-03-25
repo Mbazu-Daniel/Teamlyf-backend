@@ -1,14 +1,28 @@
 // TODO: files from tasks and any other attachments should be added to this file manager storage 
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
+// TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
+// TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
+
+enum FileSource {
+    TASK
+    CHAT
+    PROJECT
+    LMS
+}
 
 // File model
 model File {
-    id          String    @id @default(cuid())
-    fileName    String
-    fileType    String
-    fileSize    Int
-    fileFormat  String
-    fileUrl     String
+    id         String @id @default(cuid())
+    fileName   String
+    fileType   String
+    fileSize   Int
+    fileFormat String
+    fileUrl    String
+
+    source      FileSource // Source of the file (e.g., Task, Project, Chat, LMS)
+    sourceId    String // ID of the entity the file belongs to (e.g., Task ID, Project ID)
+    description String?
+
     workspaceId String
     workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
     employeeId  String
@@ -19,7 +33,7 @@ model File {
     versions  FileVersion[]
     trashbin  TrashBin[]
     createdAt DateTime      @default(now())
-    updatedAt DateTime
+    updatedAt DateTime      @updatedAt
 
     @@index([workspaceId])
     @@index([employeeId])
@@ -28,8 +42,9 @@ model File {
 
 // Folder model
 model Folder {
-    id String @id @default(cuid())
-
+    id          String    @id @default(cuid())
+    name        String
+    description String?
     workspaceId String
     workspace   Workspace @relation(fields: [workspaceId], references: [id])
     employeeId  String
@@ -42,8 +57,10 @@ model Folder {
     files    File[]
     trashbin TrashBin[]
 
+    isTrashed       Boolean   @default(false)
+
     createdAt DateTime @default(now())
-    updatedAt DateTime
+    updatedAt DateTime @updatedAt
 
     @@index([workspaceId])
     @@index([employeeId])
