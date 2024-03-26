@@ -98,4 +98,83 @@ const getUserFiles = asyncHandler(async (req, res) => {
   res.status(200).json(userFiles);
 });
 
-export { uploadFile, getFileDetails, getUserFiles };
+
+
+// Update a task file by ID
+const updateFileDetails = asyncHandler(async (req, res) => {
+  const { fileId, workspaceId } = req.params;
+  const { originalname, size, mimetype } = req.file;
+
+  try {
+    // Check if the task file exists
+    const file = await prisma.file.findUnique({
+      where: {
+        id: fileId,
+      },
+    });
+
+    if (!file) {
+      return res
+        .status(404)
+        .json({ error: `File with id ${fileId} not found` });
+    }
+
+    // Update the task file
+    const updatedFile = await prisma.file.update({
+      where: {
+        workspaceId,
+        id: fileId,
+      },
+      data: {
+        name: originalname,
+        file_type: mimetype,
+        file_size: size,
+      },
+    });
+
+    res.status(200).json(updatedFile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete a task file by ID
+const deleteFile = asyncHandler(async (req, res) => {
+  const { workspaceId, fileId } = req.params;
+
+  try {
+    // Check if the task file exists
+    const file = await prisma.file.findUnique({
+      where: {
+        id: fileId,
+      },
+    });
+
+    if (!file) {
+      return res
+        .status(404)
+        .json({ error: `File with id ${fileId} not found` });
+    }
+    // Delete the task file if it exists
+    const deletedFile = await prisma.file.delete({
+      where: {
+        id: fileId,
+        workspaceId,
+      },
+    });
+    if (!deletedFile) {
+      res
+        .status(404)
+        .json({ error: `File with id ${deletedFile.id} not found` });
+    }
+    res.status(204).json({ message: "file deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export { uploadFile, getFileDetails, getUserFiles, updateFileDetails, deleteFile};
+
+
