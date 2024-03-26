@@ -8,8 +8,8 @@ const prisma = new PrismaClient();
 const uploadFile = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   const employeeId = req.employeeId;
+  const { fileName, fileType, fileSize, fileFormat, fileUrl } = req.file;
   const { source, description, sourceId, folderId } = req.body;
-
   try {
     //  Handle single or multiple file uploads
     const files = req.files || [req.file];
@@ -57,4 +57,45 @@ const uploadFile = asyncHandler(async (req, res) => {
   }
 });
 
-export { uploadFile };
+// Get File Details Controller
+const getFileDetails = asyncHandler(async (req, res) => {
+  const { workspaceId, fileId } = req.params;
+  try {
+    const file = await prisma.file.findUnique({
+      where: {
+        id: fileId,
+        workspaceId,
+      },
+    });
+
+    if (!file) {
+      return res
+        .status(404)
+        .json({ error: `File with id ${fileId} not found` });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  res.status(200).json(file);
+});
+
+// Get User's Files
+const getUserFiles = asyncHandler(async (req, res) => {
+  const employeeId = req.employeeId;
+
+  try {
+    const userFiles = await prisma.file.findMany({
+      where: {
+        uploadBy: {
+          id: employeeId,
+        },
+      },
+    });
+    res.status(200).json(userFiles);
+  } catch (error) {
+    console.error(error);
+  }
+  res.status(200).json(userFiles);
+});
+
+export { uploadFile, getFileDetails, getUserFiles };
