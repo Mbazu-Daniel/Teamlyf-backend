@@ -44,6 +44,8 @@ import leaveTypeRouter from "./hr/leaves type/leaveType.routes.js";
 import leaveCommentRouter from "./hr/leaves comment/leaveComment.routes.js";
 import educationRouter from "./hr/education/education.routes.js";
 import eventsRouter from "./hr/events/events.routes.js";
+import jobsRouter from "./hr/jobs/jobs.routes.js";
+import jobResponsesRouter from "./hr/jobResponse/jobResponse.routes.js";
 
 // CHAT
 import groupRouter from "./chats/groups/groups.routes.js";
@@ -105,8 +107,8 @@ const basePath = "/api/v1";
 // Administration
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
-app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/workspace`, workspaceRouter);
+app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/workspace`, employeeRouter);
 app.use(`${basePath}/workspace`, notificationRouter);
 
@@ -129,6 +131,8 @@ app.use(`${basePath}/workspace`, leaveTypeRouter);
 app.use(`${basePath}/workspace`, leaveCommentRouter);
 app.use(`${basePath}/workspace`, educationRouter);
 app.use(`${basePath}/workspace`, eventsRouter);
+app.use(`${basePath}/workspace`, jobsRouter);
+app.use(`${basePath}/workspace`, jobResponsesRouter);
 
 // Chat Management
 app.use(`${basePath}/workspace`, groupRouter);
