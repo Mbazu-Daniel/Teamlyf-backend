@@ -6,13 +6,14 @@ import asyncHandler from "express-async-handler";
 import generateResetToken from "../../utils/services/generateResetToken.js";
 import sendMail from "../../utils/services/sendMail.js";
 import generateHashedPassword from "../../utils/services/generateHashPassword.js";
-
+import dotenv from "dotenv";
+dotenv.config();
 const BASE_URL = process.env.FRONTEND_URL;
-const saltRounds = 10;
+const saltRounds = parseInt(process.env.SALT);
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { email, password, role } = req.body;
-
+    const { email, password } = req.body;
+  
     const lowercaseEmail = email.toLowerCase();
 
     // Check if the user already exists
@@ -22,9 +23,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if (!existingUser) {
       const hashedPassword = await generateHashedPassword(password, saltRounds);
+   
 
       await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword, role },
+        data: { email: lowercaseEmail, password: hashedPassword },
       });
 
       return res.status(201).json({ message: "User registered successfully" });
@@ -43,7 +45,7 @@ const registerAdminUser = asyncHandler(async (req, res) => {
     const lowercaseEmail = email.toLowerCase();
 
     // Check if the user making the request is a superAdmin
-    const currentUser = req.user; // Replace this with your actual user identification method
+    const currentUser = req.user;
 
     if (!currentUser.role === UserRole.SUPER_ADMIN) {
       return res.status(403).json({
