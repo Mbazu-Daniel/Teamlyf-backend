@@ -50,6 +50,7 @@ model Employee {
   attendances  Attendance[]
   jobs         Job[]
   events       Event[]
+  announcements Announcement[]
   timesheets   Timesheet[]
   payroll      Payroll[]
 
@@ -227,6 +228,22 @@ model Education {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([employeeId])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
   @@index([employeeId])
 }
 
@@ -411,15 +428,15 @@ model Event {
   endDate     DateTime
   isPublished Boolean   @default(false)
   timezone    String    @default("GMT")
-  createdBy   Employee  @relation(fields: [createdById], references: [id])
-  createdById String
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([workspaceId])
-  @@index([createdById])
+  @@index([employeeId])
 }
 
 // TODO: handle holidays (public and weekly holiday)

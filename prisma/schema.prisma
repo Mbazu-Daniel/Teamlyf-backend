@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sun Mar 24 2024 22:02:07 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Wed Apr 24 2024 14:21:54 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -52,12 +52,13 @@ model Workspace {
   tasks           Task[]
 
   // HR
-  leaves       Leave[]
-  leaveTypes   LeaveType[]
-  jobs         Job[]
-  leaveComment LeaveComment[]
-  group        Group[]
-  events       Event[]
+  leaves        Leave[]
+  leaveTypes    LeaveType[]
+  jobs          Job[]
+  leaveComment  LeaveComment[]
+  group         Group[]
+  events        Event[]
+  announcements Announcement[]
 
   // FILE MANAGER 
   files   File[]
@@ -552,15 +553,16 @@ model Employee {
   subtaskCollaborator SubtaskCollaborator[]
 
   // HR
-  leave        Leave[]
-  leaveComment LeaveComment[]
-  leaveType    LeaveType[]
-  educations   Education[]
-  attendances  Attendance[]
-  jobs         Job[]
-  events       Event[]
-  timesheets   Timesheet[]
-  payroll      Payroll[]
+  leave         Leave[]
+  leaveComment  LeaveComment[]
+  leaveType     LeaveType[]
+  educations    Education[]
+  attendances   Attendance[]
+  jobs          Job[]
+  events        Event[]
+  announcements Announcement[]
+  timesheets    Timesheet[]
+  payroll       Payroll[]
 
   // CHAT
   messages               Message[]
@@ -736,6 +738,22 @@ model Education {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([employeeId])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
   @@index([employeeId])
 }
 
@@ -920,15 +938,15 @@ model Event {
   endDate     DateTime
   isPublished Boolean   @default(false)
   timezone    String    @default("GMT")
-  createdBy   Employee  @relation(fields: [createdById], references: [id])
-  createdById String
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([workspaceId])
-  @@index([createdById])
+  @@index([employeeId])
 }
 
 // TODO: handle holidays (public and weekly holiday)
@@ -1109,19 +1127,20 @@ enum FileSource {
   CHAT
   PROJECT
   LMS
+  DEFAULT
 }
 
 // File model
 model File {
-  id         String @id @default(cuid())
-  fileName   String
-  fileType   String
-  fileSize   Int
-  fileFormat String
-  fileUrl    String
+  id             String @id @default(cuid())
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String @db.LongText()
+  fileIdentifier String
 
-  source      FileSource // Source of the file (e.g., Task, Project, Chat, LMS)
-  sourceId    String // ID of the entity the file belongs to (e.g., Task ID, Project ID)
+  source      FileSource @default(DEFAULT) // Source of the file (e.g., Task, Project, Chat, LMS)
+  sourceId    String? // ID of the entity the file belongs to (e.g., Task ID, Project ID)
   description String?
 
   workspaceId String
@@ -1131,8 +1150,12 @@ model File {
   folderId    String?
   folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: NoAction)
 
-  versions       FileVersion[]
-  trashbin       TrashBin[]
+  versions FileVersion[]
+  trashbin TrashBin[]
+
+  isTrashed Boolean @default(false)
+  isStarred Boolean @default(false)
+
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   SharedFileLink SharedFileLink[]
@@ -1158,6 +1181,9 @@ model Folder {
 
   files    File[]
   trashbin TrashBin[]
+
+  isTrashed Boolean @default(false)
+  isStarred Boolean @default(false)
 
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt

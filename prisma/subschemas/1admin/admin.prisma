@@ -39,18 +39,18 @@ model Workspace {
   tasks           Task[]
 
   // HR
-  leaves       Leave[]
-  leaveTypes   LeaveType[]
-  jobs         Job[]
-  leaveComment LeaveComment[]
-  group        Group[]
-  events       Event[]
+  leaves        Leave[]
+  leaveTypes    LeaveType[]
+  jobs          Job[]
+  leaveComment  LeaveComment[]
+  group         Group[]
+  events        Event[]
+  announcements Announcement[]
 
   // FILE MANAGER 
-  files     File[]
-  folders   Folder[]
+  files   File[]
+  folders Folder[]
 
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
