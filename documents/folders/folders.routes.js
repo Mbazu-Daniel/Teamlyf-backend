@@ -5,8 +5,7 @@ import {
   createFolder,
   getAllFolders,
   getSingleFolder,
-  updateFolder,
-  deleteFolder,
+  updateFolder
 } from "./folders.controllers.js";
 import { verifyToken } from "../../utils/middleware/authenticate.js";
 import {
@@ -40,9 +39,6 @@ folderRouter.get("/:workspaceId/folders", getAllFolders);
 folderRouter.get("/:workspaceId/folders/:folderId", getSingleFolder);
 
 // Update a folder by ID
-folderRouter.put("/:workspaceId/folders/:folderId", updateFolder);
-
-// Delete a folder by ID
-folderRouter.delete("/:workspaceId/folders/:folderId", deleteFolder);
+folderRouter.patch("/:workspaceId/folders/:folderId", updateFolder);
 
 export default folderRouter;

@@ -3,7 +3,10 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// TODO: create a select to show all
+// TODO: create a select to show all folders created, shared folders/files or shared folders/files
+// TODO: create a function that can handle creation of folder or different types of file
+// TODO: create a function that can handle moving of folder or file to trash
+// TODO: create a function that can handle restoring of folder or file from  trash
 
 // Create a new folder
 const createFolder = asyncHandler(async (req, res) => {
@@ -46,6 +49,7 @@ const getAllFolders = asyncHandler(async (req, res) => {
       where: {
         workspaceId,
         parentFolderId: null, // Exclude child folders
+        isTrashed: false,
       },
     });
 
@@ -60,7 +64,19 @@ const getAllFolders = asyncHandler(async (req, res) => {
 const getSingleFolder = asyncHandler(async (req, res) => {
   try {
     const { folderId } = req.params;
+    7;
 
+    // check if folder exists
+    const existingFolder = await prisma.folder.findFirst({
+      where: {
+        workspaceId,
+        OR: [{ id: folderId }, { parentFolderId: folderId }],
+      },
+    });
+
+    if (!existingFolder) {
+      return res.status(404).json({ error: "Folder not found" });
+    }
     const folders = await prisma.folder.findFirst({
       where: {
         OR: [
@@ -86,13 +102,22 @@ const updateFolder = asyncHandler(async (req, res) => {
     const { workspaceId, folderId } = req.params;
     const { name, description } = req.body;
 
+    // check if folder exists
+    const existingFolder = await prisma.folder.findFirst({
+      where: {
+        workspaceId,
+        OR: [{ id: folderId }, { parentFolderId: folderId }],
+      },
+    });
+
+    if (!existingFolder) {
+      return res.status(404).json({ error: "Folder not found" });
+    }
+
     const updatedFolder = await prisma.folder.update({
       where: {
         workspaceId,
-        OR: [
-          { id: folderId }, // Checks if folderId matches the id directly
-          { parentFolderId: folderId }, // Checks if folderId matches the parentFolderId
-        ],
+        OR: [{ id: folderId }, { parentFolderId: folderId }],
       },
       data: {
         name: name || null,
@@ -107,42 +132,4 @@ const updateFolder = asyncHandler(async (req, res) => {
   }
 });
 
-// Delete a folder by ID
-const deleteFolder = asyncHandler(async (req, res) => {
-  try {
-    const { folderId } = req.params;
-
-    let deletedFolder;
-
-    // Check if folderId matches the id directly
-    deletedFolder = await prisma.folder.delete({
-      where: { id: folderId },
-    });
-
-    // If no folder was deleted based on id, check if folderId matches the parentFolderId
-    if (!deletedFolder) {
-      deletedFolder = await prisma.folder.deleteMany({
-        where: { parentFolderId: folderId },
-      });
-    }
-
-    if (!deletedFolder) {
-      return res.status(404).json({ error: "Folder not found" });
-    }
-
-    res
-      .status(204)
-      .json({ msg: `Folder ${deletedFolder.name} deleted successfully` });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-export {
-  createFolder,
-  getAllFolders,
-  getSingleFolder,
-  updateFolder,
-  deleteFolder,
-};
+export { createFolder, getAllFolders, getSingleFolder, updateFolder };
