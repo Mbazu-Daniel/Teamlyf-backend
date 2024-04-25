@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Thu Apr 25 2024 07:20:33 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Thu Apr 25 2024 08:28:27 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
 provider = "prisma-client-js"
@@ -1166,6 +1166,7 @@ enum GroupRole {
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 // TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
 // TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
+// TODO: create a Drive model to hold home folder and file together
 
 enum FileSource {
     TASK
@@ -1257,19 +1258,19 @@ model FileVersion {
 
 // TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
 model TrashBin {
-    id          String   @id @default(cuid())
-    folderId    String
-    folder      Folder   @relation(fields: [folderId], references: [id])
-    fileId      String
-    file        File     @relation(fields: [fileId], references: [id])
-    deletedBy   Employee @relation(fields: [deletedById], references: [id], onDelete: Cascade)
-    deletedById String
-    reason      String?
-    deletedAt   DateTime @default(now())
+    id         String   @id @default(cuid())
+    folderId   String?
+    folder     Folder?  @relation(fields: [folderId], references: [id])
+    fileId     String?
+    file       File?    @relation(fields: [fileId], references: [id])
+    deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    employeeId String
+    reason     String?
+    deletedAt  DateTime @default(now())
 
     @@index([folderId])
     @@index([fileId])
-    @@index([deletedById])
+    @@index([employeeId])
 }
 
 // Activity Log model// Share model for file/folder sharing

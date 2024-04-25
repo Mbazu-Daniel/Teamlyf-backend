@@ -2,25 +2,27 @@
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 // TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
 // TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
+// TODO: create a Drive model to hold home folder and file together
 
 enum FileSource {
     TASK
     CHAT
     PROJECT
     LMS
+    DEFAULT
 }
 
 // File model
 model File {
-    id         String @id @default(cuid())
-    fileName   String
-    fileType   String
-    fileSize   Int
-    fileFormat String
-    fileUrl    String
+    id             String @id @default(cuid())
+    fileName       String
+    fileType       String
+    fileSize       Int
+    fileUrl        String @db.LongText()
+    fileIdentifier String
 
-    source      FileSource // Source of the file (e.g., Task, Project, Chat, LMS)
-    sourceId    String // ID of the entity the file belongs to (e.g., Task ID, Project ID)
+    source      FileSource @default(DEFAULT) // Source of the file (e.g., Task, Project, Chat, LMS)
+    sourceId    String? // ID of the entity the file belongs to (e.g., Task ID, Project ID)
     description String?
 
     workspaceId String
@@ -30,10 +32,15 @@ model File {
     folderId    String?
     folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: NoAction)
 
-    versions  FileVersion[]
-    trashbin  TrashBin[]
-    createdAt DateTime      @default(now())
-    updatedAt DateTime      @updatedAt
+    versions       FileVersion[]
+    trashbin       TrashBin[]
+    sharedFileLink SharedFileLink[]
+
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
     @@index([workspaceId])
     @@index([employeeId])
@@ -54,10 +61,12 @@ model Folder {
     parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
     childFolders   Folder[] @relation("ChildFolders")
 
-    files    File[]
-    trashbin TrashBin[]
+    files          File[]
+    trashbin       TrashBin[]
+    sharedFileLink SharedFileLink[]
 
-    isTrashed       Boolean   @default(false)
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
@@ -85,19 +94,19 @@ model FileVersion {
 
 // TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
 model TrashBin {
-    id          String   @id @default(cuid())
-    folderId    String
-    folder      Folder   @relation(fields: [folderId], references: [id])
-    fileId      String
-    file        File     @relation(fields: [fileId], references: [id])
-    deletedBy   Employee @relation(fields: [deletedById], references: [id], onDelete: Cascade)
-    deletedById String
-    reason      String?
-    deletedAt   DateTime @default(now())
+    id         String   @id @default(cuid())
+    folderId   String?
+    folder     Folder?  @relation(fields: [folderId], references: [id])
+    fileId     String?
+    file       File?    @relation(fields: [fileId], references: [id])
+    deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    employeeId String
+    reason     String?
+    deletedAt  DateTime @default(now())
 
     @@index([folderId])
     @@index([fileId])
-    @@index([deletedById])
+    @@index([employeeId])
 }
 
 // Activity Log model// Share model for file/folder sharing
