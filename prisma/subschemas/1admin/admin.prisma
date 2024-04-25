@@ -1,17 +1,19 @@
 // TODO: add Notification
 model User {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  password           String
-  role               UserRole     @default(BASIC)
-  source             SourceType   @default(OTHER)
-  authStrategy       AuthStrategy @default(EMAIL)
-  googleId           String?      @unique
-  githubId           String?      @unique
-  passwordResetToken String?
-  passwordResetAt    DateTime?
-  workspaces         Workspace[]
-  employees          Employee[]
+  id                    String                  @id @default(cuid())
+  email                 String                  @unique
+  password              String
+  role                  UserRole                @default(BASIC)
+  source                SourceType              @default(OTHER)
+  authStrategy          AuthStrategy            @default(EMAIL)
+  googleId              String?                 @unique
+  githubId              String?                 @unique
+  passwordResetToken    String?
+  passwordResetAt       DateTime?
+  workspaces            Workspace[]
+  employees             Employee[]
+  announcements         Announcement[]
+  announcementRecipient AnnouncementRecipient[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -27,9 +29,8 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees Employee[]
-  teams     Team[]
-  invite    Invite[]
+  // ADMIN
+  invite Invite[]
 
   // PM/TASKS
   projects        Project[]
@@ -39,13 +40,15 @@ model Workspace {
   tasks           Task[]
 
   // HR
+  employees     Employee[]
+  teams         Team[]
   leaves        Leave[]
   leaveTypes    LeaveType[]
   jobs          Job[]
   leaveComment  LeaveComment[]
   group         Group[]
   events        Event[]
-  announcements Announcement[]
+  notifications Notification[]
 
   // FILE MANAGER 
   files   File[]
@@ -76,7 +79,33 @@ model Invite {
 
   @@index([employeeId])
   @@index([workspaceId])
-  @@map("Invite")
+}
+
+model AnnouncementRecipient {
+  id             String @id @default(cuid())
+  announcementId String
+  recipientId    String
+  recipient      User   @relation(fields: [recipientId], references: [id])
+
+  announcements Announcement @relation(fields: [announcementId], references: [id])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
+
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipients AnnouncementRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum SourceType {
