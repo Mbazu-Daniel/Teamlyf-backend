@@ -22,7 +22,7 @@ import authRouter from "./admin/auth/auth.routes.js";
 import userRouter from "./admin/users/users.routes.js";
 import inviteRouter from "./admin/invites/invites.routes.js";
 import workspaceRouter from "./admin/workspaces/workspaces.routes.js";
-import notificationRouter from "./admin/notifications/notifications.routes.js";
+
 
 // pm
 import milestoneRouter from "./pm/milestones/milestones.routes.js";
@@ -46,11 +46,17 @@ import educationRouter from "./hr/education/education.routes.js";
 import eventsRouter from "./hr/events/events.routes.js";
 import jobsRouter from "./hr/jobs/jobs.routes.js";
 import jobResponsesRouter from "./hr/jobResponse/jobResponse.routes.js";
+import notificationRouter from "./hr/notifications/notifications.routes.js";
 
 // CHAT
 import groupRouter from "./chats/groups/groups.routes.js";
 import conversationRouter from "./chats/conversations/conversations.routes.js";
 import messageRouter from "./chats/messages/messages.routes.js";
+
+// Document
+import folderRouter from "./documents/folders/folders.routes.js";
+import fileRouter from "./documents/files/files.routes.js";
+import trashbinRouter from "./documents/trashbin/trashbin.routes.js";
 
 dotenv.config();
 
@@ -108,6 +114,7 @@ const basePath = "/api/v1";
 app.use(`${basePath}/auth`, authRouter);
 app.use(`${basePath}/users`, userRouter);
 app.use(`${basePath}/workspace`, workspaceRouter);
+// app.use(`${basePath}/workspace`, folderRouter);
 app.use(`${basePath}/invites`, inviteRouter);
 app.use(`${basePath}/workspace`, employeeRouter);
 app.use(`${basePath}/workspace`, notificationRouter);
@@ -133,6 +140,11 @@ app.use(`${basePath}/workspace`, educationRouter);
 app.use(`${basePath}/workspace`, eventsRouter);
 app.use(`${basePath}/workspace`, jobsRouter);
 app.use(`${basePath}/workspace`, jobResponsesRouter);
+
+// Document Management
+app.use(`${basePath}/workspace`, folderRouter);
+app.use(`${basePath}/workspace`, fileRouter);
+app.use(`${basePath}/workspace`, trashbinRouter);
 
 // Chat Management
 app.use(`${basePath}/workspace`, groupRouter);

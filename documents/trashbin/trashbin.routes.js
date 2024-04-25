@@ -9,6 +9,8 @@ import {
 } from "../../utils/middleware/index.js";
 import {
   moveFoldersAndFilesToTrash,
+  restoreFoldersAndFilesFromTrash,
+
 } from "./trashbin.controllers.js";
 
 const app = express();
@@ -30,6 +32,12 @@ trashbinRouter.use(
 
 // Route for moving folders and files to trash
 trashbinRouter.patch("/:workspaceId/trash/move", moveFoldersAndFilesToTrash);
+
+// Route for restoring folders and files from trash
+trashbinRouter.patch(
+  "/:workspaceId/trash/restore",
+  restoreFoldersAndFilesFromTrash
+);
 
 
 export default trashbinRouter;

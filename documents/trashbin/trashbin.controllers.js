@@ -95,8 +95,96 @@ const moveFoldersAndFilesToTrash = asyncHandler(async (req, res) => {
   }
 });
 
+const restoreFoldersAndFilesFromTrash = asyncHandler(async (req, res) => {
+  try {
+    const { trashBinIds } = req.body;
+
+    // Find trash bin entries with the provided IDs
+    const trashBinEntries = await prisma.trashBin.findMany({
+      where: {
+        id: {
+          in: trashBinIds,
+        },
+      },
+    });
+
+    // Separate folder IDs and file IDs from the trash bin entries
+    const folderIds = trashBinEntries
+      .filter((entry) => entry.folderId)
+      .map((entry) => entry.folderId);
+    const fileIds = trashBinEntries
+      .filter((entry) => entry.fileId)
+      .map((entry) => entry.fileId);
+
+    // Check if any of the specified trash bin entries are already restored
+    const alreadyRestoredFolders = await prisma.folder.findMany({
+      where: {
+        id: {
+          in: folderIds,
+        },
+        isTrashed: false,
+      },
+    });
+
+    const alreadyRestoredFiles = await prisma.file.findMany({
+      where: {
+        id: {
+          in: fileIds,
+        },
+        isTrashed: false,
+      },
+    });
+
+    if (alreadyRestoredFolders.length > 0 || alreadyRestoredFiles.length > 0) {
+      return res
+        .status(400)
+        .json({ error: "Some folders or files are already restored" });
+    }
+
+    // Update folders to mark them as not trashed
+    await prisma.folder.updateMany({
+      where: {
+        id: {
+          in: folderIds,
+        },
+      },
+      data: {
+        isTrashed: false,
+      },
+    });
+
+    // Update files to mark them as not trashed
+    await prisma.file.updateMany({
+      where: {
+        id: {
+          in: fileIds,
+        },
+      },
+      data: {
+        isTrashed: false,
+      },
+    });
+
+    // Delete trash bin entries
+    await prisma.trashBin.deleteMany({
+      where: {
+        id: {
+          in: trashBinIds,
+        },
+      },
+    });
+
+    res.status(200).json({
+      msg: "Folders and files restored from trash successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
 
 
-export { moveFoldersAndFilesToTrash};
+
+export { moveFoldersAndFilesToTrash, restoreFoldersAndFilesFromTrash , };
