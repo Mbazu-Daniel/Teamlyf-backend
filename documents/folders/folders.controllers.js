@@ -7,6 +7,8 @@ const prisma = new PrismaClient();
 // TODO: create a function that can handle creation of folder or different types of file
 // TODO: create a function that can handle moving of folder or file to trash
 // TODO: create a function that can handle restoring of folder or file from  trash
+// TODO: uploading folders to cloud storage
+// TODO: create folder with workspace id-name inside s3 bucket, if workspace already exists then no need to create new folder
 
 // Create a new folder
 const createFolder = asyncHandler(async (req, res) => {
@@ -24,7 +26,7 @@ const createFolder = asyncHandler(async (req, res) => {
       employee: { connect: { id: employeeId } },
     };
 
-    // If parentFolderId is provided, connect to the parent folder
+    // If parentFolderId is provided, connect to the parent folder to create a parent child hierarchy
     if (parentFolderId) {
       folderData.parentFolder = { connect: { id: parentFolderId } };
     }
@@ -35,7 +37,6 @@ const createFolder = asyncHandler(async (req, res) => {
 
     res.status(201).json(newFolder);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error });
   }
 });
@@ -55,7 +56,6 @@ const getAllFolders = asyncHandler(async (req, res) => {
 
     res.status(200).json(folders);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error });
   }
 });
@@ -63,14 +63,14 @@ const getAllFolders = asyncHandler(async (req, res) => {
 // Get all child folders of a parent folder
 const getSingleFolder = asyncHandler(async (req, res) => {
   try {
-    const { folderId } = req.params;
+    const { folderId, workspaceId } = req.params;
     7;
 
     // check if folder exists
     const existingFolder = await prisma.folder.findFirst({
       where: {
         workspaceId,
-        OR: [{ id: folderId }, { parentFolderId: folderId }],
+        isTrashed: false,
       },
     });
 
@@ -79,10 +79,7 @@ const getSingleFolder = asyncHandler(async (req, res) => {
     }
     const folders = await prisma.folder.findFirst({
       where: {
-        OR: [
-          { id: folderId }, // Checks if folderId matches the id directly
-          { parentFolderId: folderId }, // Checks if folderId matches the parentFolderId
-        ],
+        id: folderId,
       },
       include: {
         childFolders: true,
@@ -91,7 +88,6 @@ const getSingleFolder = asyncHandler(async (req, res) => {
 
     res.status(200).json(folders);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error });
   }
 });
@@ -106,7 +102,7 @@ const updateFolder = asyncHandler(async (req, res) => {
     const existingFolder = await prisma.folder.findFirst({
       where: {
         workspaceId,
-        OR: [{ id: folderId }, { parentFolderId: folderId }],
+        isTrashed: false,
       },
     });
 
@@ -116,8 +112,8 @@ const updateFolder = asyncHandler(async (req, res) => {
 
     const updatedFolder = await prisma.folder.update({
       where: {
+        id: folderId,
         workspaceId,
-        OR: [{ id: folderId }, { parentFolderId: folderId }],
       },
       data: {
         name: name || null,
@@ -127,7 +123,6 @@ const updateFolder = asyncHandler(async (req, res) => {
 
     res.status(200).json(updatedFolder);
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
