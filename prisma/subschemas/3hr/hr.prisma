@@ -43,15 +43,17 @@ model Employee {
   subtaskCollaborator SubtaskCollaborator[]
 
   // HR
-  leave        Leave[]
-  leaveComment LeaveComment[]
-  leaveType    LeaveType[]
-  educations   Education[]
-  attendances  Attendance[]
-  jobs         Job[]
-  events       Event[]
-  timesheets   Timesheet[]
-  payroll      Payroll[]
+  leave                 Leave[]
+  leaveComment          LeaveComment[]
+  leaveType             LeaveType[]
+  educations            Education[]
+  attendances           Attendance[]
+  jobs                  Job[]
+  events                Event[]
+  notifications         Notification[]
+  notificationRecipient NotificationRecipient[]
+  timesheets            Timesheet[]
+  payroll               Payroll[]
 
   // CHAT
   messages               Message[]
@@ -227,6 +229,37 @@ model Education {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([employeeId])
+}
+
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  recipientId    String
+  recipient      Employee @relation(fields: [recipientId], references: [id])
+
+  notification Notification @relation(fields: [notificationId], references: [id])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
+
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+
+  recipients NotificationRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
   @@index([employeeId])
 }
 
@@ -411,15 +444,15 @@ model Event {
   endDate     DateTime
   isPublished Boolean   @default(false)
   timezone    String    @default("GMT")
-  createdBy   Employee  @relation(fields: [createdById], references: [id])
-  createdById String
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([workspaceId])
-  @@index([createdById])
+  @@index([employeeId])
 }
 
 // TODO: handle holidays (public and weekly holiday)
@@ -464,6 +497,11 @@ enum TeamRole {
   LEAD
   MEMBER
   ADMIN
+}
+
+enum NotificationType {
+  GENERAL
+  WORKSPACE
 }
 
 // TODO: use this on the frontend 

@@ -1,30 +1,30 @@
-//🧩Don't Edit this file.✨Generated in Sun Mar 24 2024 22:02:07 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Thu Apr 25 2024 08:28:27 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+provider = "prisma-client-js"
+binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
-
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+provider = "mysql"
+url      = env("DATABASE_URL")
+relationMode = "prisma"
 }
-
 // TODO: add Notification
 model User {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  password           String
-  role               UserRole     @default(BASIC)
-  source             SourceType   @default(OTHER)
-  authStrategy       AuthStrategy @default(EMAIL)
-  googleId           String?      @unique
-  githubId           String?      @unique
-  passwordResetToken String?
-  passwordResetAt    DateTime?
-  workspaces         Workspace[]
-  employees          Employee[]
+  id                    String                  @id @default(cuid())
+  email                 String                  @unique
+  password              String
+  role                  UserRole                @default(BASIC)
+  source                SourceType              @default(OTHER)
+  authStrategy          AuthStrategy            @default(EMAIL)
+  googleId              String?                 @unique
+  githubId              String?                 @unique
+  passwordResetToken    String?
+  passwordResetAt       DateTime?
+  workspaces            Workspace[]
+  employees             Employee[]
+  announcements         Announcement[]
+  announcementRecipient AnnouncementRecipient[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -40,9 +40,8 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees Employee[]
-  teams     Team[]
-  invite    Invite[]
+  // ADMIN
+  invite Invite[]
 
   // PM/TASKS
   projects        Project[]
@@ -52,12 +51,15 @@ model Workspace {
   tasks           Task[]
 
   // HR
-  leaves       Leave[]
-  leaveTypes   LeaveType[]
-  jobs         Job[]
-  leaveComment LeaveComment[]
-  group        Group[]
-  events       Event[]
+  employees     Employee[]
+  teams         Team[]
+  leaves        Leave[]
+  leaveTypes    LeaveType[]
+  jobs          Job[]
+  leaveComment  LeaveComment[]
+  group         Group[]
+  events        Event[]
+  notifications Notification[]
 
   // FILE MANAGER 
   files   File[]
@@ -88,7 +90,33 @@ model Invite {
 
   @@index([employeeId])
   @@index([workspaceId])
-  @@map("Invite")
+}
+
+model AnnouncementRecipient {
+  id             String @id @default(cuid())
+  announcementId String
+  recipientId    String
+  recipient      User   @relation(fields: [recipientId], references: [id])
+
+  announcements Announcement @relation(fields: [announcementId], references: [id])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
+
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipients AnnouncementRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum SourceType {
@@ -114,7 +142,6 @@ enum AuthStrategy {
   GITHUB
   GOOGLE
 }
-
 // Project Management 
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
@@ -506,7 +533,6 @@ enum MilestoneStatus {
   IN_PROGRESS
   COMPLETED
 }
-
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
 // TODO: add employee contact list to store some contact details ?
 
@@ -552,15 +578,17 @@ model Employee {
   subtaskCollaborator SubtaskCollaborator[]
 
   // HR
-  leave        Leave[]
-  leaveComment LeaveComment[]
-  leaveType    LeaveType[]
-  educations   Education[]
-  attendances  Attendance[]
-  jobs         Job[]
-  events       Event[]
-  timesheets   Timesheet[]
-  payroll      Payroll[]
+  leave                 Leave[]
+  leaveComment          LeaveComment[]
+  leaveType             LeaveType[]
+  educations            Education[]
+  attendances           Attendance[]
+  jobs                  Job[]
+  events                Event[]
+  notifications         Notification[]
+  notificationRecipient NotificationRecipient[]
+  timesheets            Timesheet[]
+  payroll               Payroll[]
 
   // CHAT
   messages               Message[]
@@ -736,6 +764,37 @@ model Education {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([employeeId])
+}
+
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  recipientId    String
+  recipient      Employee @relation(fields: [recipientId], references: [id])
+
+  notification Notification @relation(fields: [notificationId], references: [id])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
+
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+
+  recipients NotificationRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
   @@index([employeeId])
 }
 
@@ -920,15 +979,15 @@ model Event {
   endDate     DateTime
   isPublished Boolean   @default(false)
   timezone    String    @default("GMT")
-  createdBy   Employee  @relation(fields: [createdById], references: [id])
-  createdById String
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([workspaceId])
-  @@index([createdById])
+  @@index([employeeId])
 }
 
 // TODO: handle holidays (public and weekly holiday)
@@ -973,6 +1032,11 @@ enum TeamRole {
   LEAD
   MEMBER
   ADMIN
+}
+
+enum NotificationType {
+  GENERAL
+  WORKSPACE
 }
 
 // TODO: use this on the frontend 
@@ -1098,125 +1162,133 @@ enum GroupRole {
   MEMBER
   GUEST
 }
-
 // TODO: files from tasks and any other attachments should be added to this file manager storage 
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 // TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
 // TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
+// TODO: create a Drive model to hold home folder and file together
 
 enum FileSource {
-  TASK
-  CHAT
-  PROJECT
-  LMS
+    TASK
+    CHAT
+    PROJECT
+    LMS
+    DEFAULT
 }
 
 // File model
 model File {
-  id         String @id @default(cuid())
-  fileName   String
-  fileType   String
-  fileSize   Int
-  fileFormat String
-  fileUrl    String
+    id             String @id @default(cuid())
+    fileName       String
+    fileType       String
+    fileSize       Int
+    fileUrl        String @db.LongText()
+    fileIdentifier String
 
-  source      FileSource // Source of the file (e.g., Task, Project, Chat, LMS)
-  sourceId    String // ID of the entity the file belongs to (e.g., Task ID, Project ID)
-  description String?
+    source      FileSource @default(DEFAULT) // Source of the file (e.g., Task, Project, Chat, LMS)
+    sourceId    String? // ID of the entity the file belongs to (e.g., Task ID, Project ID)
+    description String?
 
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  employeeId  String
-  uploadBy    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  folderId    String?
-  folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: NoAction)
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    employeeId  String
+    uploadBy    Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    folderId    String?
+    folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: NoAction)
 
-  versions       FileVersion[]
-  trashbin       TrashBin[]
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  SharedFileLink SharedFileLink[]
+    versions       FileVersion[]
+    trashbin       TrashBin[]
+    sharedFileLink SharedFileLink[]
 
-  @@index([workspaceId])
-  @@index([employeeId])
-  @@index([folderId])
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([workspaceId])
+    @@index([employeeId])
+    @@index([folderId])
 }
 
 // Folder model
 model Folder {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  employeeId  String
-  employee    Employee  @relation(fields: [employeeId], references: [id])
+    id          String    @id @default(cuid())
+    name        String
+    description String?
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id])
+    employeeId  String
+    employee    Employee  @relation(fields: [employeeId], references: [id])
 
-  parentFolderId String?
-  parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  childFolders   Folder[] @relation("ChildFolders")
+    parentFolderId String?
+    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    childFolders   Folder[] @relation("ChildFolders")
 
-  files    File[]
-  trashbin TrashBin[]
+    files          File[]
+    trashbin       TrashBin[]
+    sharedFileLink SharedFileLink[]
 
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  SharedFileLink SharedFileLink[]
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
 
-  @@index([workspaceId])
-  @@index([employeeId])
-  @@index([parentFolderId])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([workspaceId])
+    @@index([employeeId])
+    @@index([parentFolderId])
 }
 
 model FileVersion {
-  id      String @id @default(cuid())
-  file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  fileId  String
-  version Int
+    id      String @id @default(cuid())
+    file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+    fileId  String
+    version Int
 
-  timestamp DateTime //Timestamp of the version
-  notes     String? // Additional notes or comments
+    timestamp DateTime //Timestamp of the version
+    notes     String? // Additional notes or comments
 
-  createdAt DateTime @default(now())
+    createdAt DateTime @default(now())
 
-  @@index([fileId])
+    @@index([fileId])
 }
 
 // TrashBin model for deleted files
 
 // TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
 model TrashBin {
-  id          String   @id @default(cuid())
-  folderId    String
-  folder      Folder   @relation(fields: [folderId], references: [id])
-  fileId      String
-  file        File     @relation(fields: [fileId], references: [id])
-  deletedBy   Employee @relation(fields: [deletedById], references: [id], onDelete: Cascade)
-  deletedById String
-  reason      String?
-  deletedAt   DateTime @default(now())
+    id         String   @id @default(cuid())
+    folderId   String?
+    folder     Folder?  @relation(fields: [folderId], references: [id])
+    fileId     String?
+    file       File?    @relation(fields: [fileId], references: [id])
+    deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+    employeeId String
+    reason     String?
+    deletedAt  DateTime @default(now())
 
-  @@index([folderId])
-  @@index([fileId])
-  @@index([deletedById])
+    @@index([folderId])
+    @@index([fileId])
+    @@index([employeeId])
 }
 
 // Activity Log model// Share model for file/folder sharing
 model SharedFileLink {
-  id         String    @id @default(cuid())
-  employee   Employee  @relation(fields: [employeeId], references: [id])
-  employeeId String
-  file       File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  fileId     String?
-  folder     Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  folderId   String?
-  // Additional attributes
-  permission String // Permission level (e.g., read, write, admin)
-  expiration DateTime? // Expiration date for the share
+    id         String    @id @default(cuid())
+    employee   Employee  @relation(fields: [employeeId], references: [id])
+    employeeId String
+    file       File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+    fileId     String?
+    folder     Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+    folderId   String?
+    // Additional attributes
+    permission String // Permission level (e.g., read, write, admin)
+    expiration DateTime? // Expiration date for the share
 
-  @@index([folderId])
-  @@index([fileId])
-  @@index([employeeId])
+    @@index([folderId])
+    @@index([fileId])
+    @@index([employeeId])
 }
 
 // // ActivityLog model
