@@ -4,9 +4,13 @@ import {
   allEmployeeRoles,
   getCurrentWorkspace,
 } from "../../utils/middleware/index.js";
-import upload from "../../utils/services/multerConfig.js";
-
-import { createFile, getFileDetails,getUserFiles,deleteFile, updateFileDetails } from "./files.controllers.js";
+import { fileUpload } from "../../utils/services/awsS3bucket.js";
+import {
+  uploadFileToCloud,
+  getFileDetails,
+  getUserFiles,
+  updateFileDetails,
+} from "./files.controllers.js";
 
 const fileRouter = express.Router();
 
@@ -16,7 +20,7 @@ app.use(
   "/workspace",
   fileRouter
 
-  // #swagger.tags = ['Tasks Files']
+  // #swagger.tags = ['Files ']
 );
 
 fileRouter.use(
@@ -27,18 +31,20 @@ fileRouter.use(
 );
 
 // Upload a file (single and multiple)
-fileRouter.post("/:workspaceId/file", upload.array("file"), createFile);
+fileRouter.post(
+  "/:workspaceId/file",
+  fileUpload.array("file"),
+  uploadFileToCloud
+);
 
-// Get File details 
+// TODO: Move to employee endpoint
+// Get User's Files
+fileRouter.get("/:workspaceId/file/user", getUserFiles);
+
+// Get File details
 fileRouter.get("/:workspaceId/file/:fileId", getFileDetails);
 
-// TODO: move this to employee controllers
-// Get User's Files
-fileRouter.get("/:workspaceId/user-files", getUserFiles);
-
-// update File details 
+// update File details
 fileRouter.patch("/:workspaceId/file/:fileId", updateFileDetails);
 
-// delete File  
-fileRouter.delete("/:workspaceId/file/:fileId", deleteFile);
 export default fileRouter;
