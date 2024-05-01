@@ -7,6 +7,16 @@ const prisma = new PrismaClient();
 // TODO: empty trashbin: this will delete all folders and files in the trashbin
 // TODO: delete some files and folders in the trashbin
 
+// Get all trashbins in a workspace
+const getAllTrashbins = asyncHandler(async (req, res) => {
+  try {
+    const trashbins = await prisma.trashBin.findMany({});
+
+    res.status(200).json(trashbins);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+});
 
 //  move folders and files to trash bin
 const moveFoldersAndFilesToTrash = asyncHandler(async (req, res) => {
@@ -450,5 +460,5 @@ export {
   restoreFoldersAndFilesFromTrash,
   deleteSelectedFoldersAndFiles,
   emptyTrashBin,
-  
+  getAllTrashbins,
 };
