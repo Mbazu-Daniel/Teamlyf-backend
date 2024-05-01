@@ -12,6 +12,7 @@ import {
   restoreFoldersAndFilesFromTrash,
   deleteSelectedFoldersAndFiles,
   emptyTrashBin,
+
 } from "./trashbin.controllers.js";
 
 const app = express();
@@ -31,7 +32,8 @@ trashbinRouter.use(
   getCurrentWorkspace
 );
 
-// Route for moving folders and files to trash
+
+
 trashbinRouter.patch("/:workspaceId/trash/move", moveFoldersAndFilesToTrash);
 
 // Route for restoring folders and files from trash
