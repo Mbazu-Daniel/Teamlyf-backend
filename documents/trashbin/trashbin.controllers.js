@@ -332,6 +332,11 @@ const emptyTrashBin = asyncHandler(async (req, res) => {
       },
     });
 
+    // If the trash bin is already empty, return an error message
+    if (trashBinEntries.length === 0) {
+      return res.status(404).json({ error: "The trash bin is already empty" });
+    }
+
     // Separate folder IDs  from the trash bin entries
     const folderIds = trashBinEntries
       .filter((entry) => entry.folderId)

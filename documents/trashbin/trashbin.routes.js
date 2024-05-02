@@ -32,9 +32,10 @@ trashbinRouter.use(
   getCurrentWorkspace
 );
 
-// Route for moving folders and files to trash
+// route to return all items in trashbin
 trashbinRouter.get("/:workspaceId/trash", getAllTrashbins);
 
+// Route for moving folders and files to trash
 trashbinRouter.patch("/:workspaceId/trash/move", moveFoldersAndFilesToTrash);
 
 // Route for restoring folders and files from trash
