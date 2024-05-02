@@ -5,9 +5,10 @@ const prisma = new PrismaClient();
 
 // TODO: create a select to show all folders created, shared folders/files or shared folders/files
 // TODO: create a function that can handle creation of folder or different types of file
-// TODO: create a function that can handle moving of folder or file to trash
-// TODO: create a function that can handle restoring of folder or file from  trash
-// TODO: uploading folders to cloud storage
+// TODO: move folder or files to another folder
+// TODO: create a controller to duplicate folder or files
+// TODO: controller to mark folder or file as starred
+// TODO: controller to download folder or file
 // TODO: create folder with workspace id-name inside s3 bucket, if workspace already exists then no need to create new folder
 
 // Create a new folder
@@ -93,7 +94,7 @@ const getSingleFolder = asyncHandler(async (req, res) => {
 });
 
 // Update a folder by ID
-const updateFolder = asyncHandler(async (req, res) => {
+const updateFolderDetails = asyncHandler(async (req, res) => {
   try {
     const { workspaceId, folderId } = req.params;
     const { name, description } = req.body;
@@ -127,4 +128,74 @@ const updateFolder = asyncHandler(async (req, res) => {
   }
 });
 
-export { createFolder, getAllFolders, getSingleFolder, updateFolder };
+const moveFoldersAndFiles = asyncHandler(async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { destinationFolderId, folderIds, fileIds } = req.body;
+
+    // Check if destination folder exists
+    const destinationFolder = await prisma.folder.findFirst({
+      where: { workspaceId, id: destinationFolderId },
+    });
+
+    if (!destinationFolder) {
+      return res.status(404).json({
+        error: "Destination folder not found",
+      });
+    }
+
+    // Move selected folders
+    if (folderIds && folderIds.length > 0) {
+      await prisma.folder.updateMany({
+        where: {
+          workspaceId,
+          id: {
+            in: folderIds,
+          },
+        },
+        data: {
+          parentFolderId: destinationFolderId,
+        },
+      });
+    }
+
+    // Move selected files
+    if (fileIds && fileIds.length > 0) {
+      // Update folderId for selected files in the fileFolderMapping
+      await Promise.all(
+        fileIds.map(async (fileId) => {
+          await prisma.fileFolderMapping.upsert({
+            where: {
+              fileId_folderId: {
+                fileId,
+                folderId: destinationFolderId,
+              },
+            },
+            update: {
+              folderId: destinationFolderId,
+            },
+            create: {
+              fileId,
+              folderId: destinationFolderId,
+            },
+          });
+        })
+      );
+    }
+
+    res.status(200).json({
+      msg: "Folders and files moved successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export {
+  createFolder,
+  getAllFolders,
+  getSingleFolder,
+  updateFolderDetails,
+  moveFoldersAndFiles,
+};
