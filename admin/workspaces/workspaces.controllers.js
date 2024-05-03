@@ -169,10 +169,8 @@ const createWorkspace = asyncHandler(async (req, res) => {
 
 // Get all  workspaces
 const getAllWorkspaces = asyncHandler(async (req, res) => {
-
   try {
-    const workspaces = await prisma.workspace.findMany({
-    });
+    const workspaces = await prisma.workspace.findMany({});
 
     res.status(200).json(workspaces);
   } catch (error) {
@@ -182,6 +180,7 @@ const getAllWorkspaces = asyncHandler(async (req, res) => {
 // Get users  workspaces
 const getUserWorkspaces = asyncHandler(async (req, res) => {
   const { email, id } = req.user;
+  const { workspaceId } = req.params;
   try {
     const workspaces = await prisma.workspace.findMany({
       where: {
