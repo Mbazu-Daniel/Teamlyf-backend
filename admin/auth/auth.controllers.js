@@ -3,9 +3,12 @@ const { PrismaClient, UserRole } = pkg;
 const prisma = new PrismaClient();
 import bcrypt from "bcryptjs";
 import asyncHandler from "express-async-handler";
-import generateResetToken from "../../utils/services/generateResetToken.js";
+import {
+  generateResetToken,
+  generateHashedPassword,
+} from "../../utils/helpers/index.js";
 import sendMail from "../../utils/services/sendMail.js";
-import generateHashedPassword from "../../utils/services/generateHashPassword.js";
+
 import dotenv from "dotenv";
 dotenv.config();
 const BASE_URL = process.env.FRONTEND_URL;

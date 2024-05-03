@@ -3,6 +3,10 @@ spaces/
 localimport.js
 .vscode*
 
+# markdown
+FileManager.md
+others.md
+
 # Logs
 logs
 *.log

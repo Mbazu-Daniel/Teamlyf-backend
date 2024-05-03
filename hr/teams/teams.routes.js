@@ -35,7 +35,7 @@ teamsRouter.use(
 	getCurrentWorkspace
 );
 
-teamsRouter.use('/:workspaceId', getCurrentEmployee, getCurrentWorkspace);
+// teamsRouter.use('/:workspaceId', getCurrentEmployee, getCurrentWorkspace);
 teamsRouter.post('/:workspaceId/teams', createTeam);
 teamsRouter.get('/:workspaceId/teams', getAllTeams);
 teamsRouter.get('/:workspaceId/teams/:teamId', getTeamById);

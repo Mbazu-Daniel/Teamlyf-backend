@@ -1673,7 +1673,7 @@
     "/workspace/{workspaceId}/file": {
       "post": {
         "tags": [
-          "Tasks Files"
+          "Files "
         ],
         "description": "",
         "parameters": [
@@ -1703,9 +1703,6 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "sourceId": {
-                    "example": "any"
-                  },
                   "folderId": {
                     "example": "any"
                   }
@@ -1716,10 +1713,36 @@
         }
       }
     },
+    "/workspace/{workspaceId}/file/user": {
+      "get": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/workspace/{workspaceId}/file/{fileId}": {
       "get": {
         "tags": [
-          "Tasks Files"
+          "Files "
         ],
         "description": "",
         "parameters": [
@@ -1741,17 +1764,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "404": {
             "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
       "patch": {
         "tags": [
-          "Tasks Files"
+          "Files "
         ],
         "description": "",
         "parameters": [
@@ -1782,94 +1805,19 @@
           "500": {
             "description": "Internal Server Error"
           }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Tasks Files"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "workspaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
             }
-          },
-          {
-            "name": "fileId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/workspace/{workspaceId}/user": {
-      "get": {
-        "tags": [
-          "Tasks Files"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "workspaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/workspace/{workspaceId}/file/{fileId}/download": {
-      "get": {
-        "tags": [
-          "Tasks Files"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "workspaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "fileId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -1944,6 +1892,55 @@
         }
       }
     },
+    "/workspace/{workspaceId}/folders/move/": {
+      "post": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destinationFolderId": {
+                    "example": "any"
+                  },
+                  "folderIds": {
+                    "example": "any"
+                  },
+                  "fileIds": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/workspace/{workspaceId}/folders/{folderId}": {
       "get": {
         "tags": [
@@ -1971,6 +1968,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -2004,6 +2004,9 @@
           "200": {
             "description": "OK"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -2023,6 +2026,16 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/trash": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }
@@ -2047,6 +2060,9 @@
           "200": {
             "description": "OK"
           },
+          "400": {
+            "description": "Bad Request"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -2057,13 +2073,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "reason": {
-                    "example": "any"
-                  },
                   "folderIds": {
                     "example": "any"
                   },
                   "fileIds": {
+                    "example": "any"
+                  },
+                  "reason": {
                     "example": "any"
                   }
                 }
@@ -2073,8 +2089,28 @@
         }
       }
     },
-    "/workspace/{workspaceId}/*trash/restore": {
+    "/workspace/{workspaceId}/trash/restore": {
       "patch": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/trash/delete": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/trash/empty": {
+      "delete": {
         "description": "",
         "responses": {
           "default": {

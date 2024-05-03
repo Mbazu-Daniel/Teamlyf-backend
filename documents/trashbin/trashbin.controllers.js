@@ -4,9 +4,6 @@ import { deleteFile } from "../../utils/services/awsS3bucket.js";
 import deleteFolderRecursive from "../../utils/helpers/deleteChildFolders.js";
 const prisma = new PrismaClient();
 
-// TODO: empty trashbin: this will delete all folders and files in the trashbin
-// TODO: delete some files and folders in the trashbin
-
 // Get all trashbins in a workspace
 const getAllTrashbins = asyncHandler(async (req, res) => {
   try {

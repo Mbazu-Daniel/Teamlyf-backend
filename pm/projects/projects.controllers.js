@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 // TODO: include progress bar in the project
 // TODO: by default every project is created with the status as "New Project" but when it has at least one tasks it can update to "In Progress"
 // TODO: filter project by project priority, project status,
+// TODO: create a function to add a project to a milestone
 
 const projectSelectOptions = {
   createdAt: true,
@@ -52,6 +53,7 @@ const createProject = asyncHandler(async (req, res) => {
     collaboratorIds,
     customTaskStatusId,
     projectPriorityId,
+    
   } = req.body;
   try {
     // Check if ProjectStatus with the given name already exists
