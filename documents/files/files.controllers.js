@@ -20,7 +20,8 @@ const prisma = new PrismaClient();
 
 // optional
 // TODO: when a file is uploaded, a folder should be created for that worskpace in S3 if it doesn't exist already
-// TODO: when a folderId is passed a it should be stored in the workspace and a new folderId created
+// TODO: when a folderId is passed to it should be stored in the workspace and a new folderId created
+
 
 
 // Create a new task file
@@ -184,9 +185,27 @@ const updateFileDetails = asyncHandler(async (req, res) => {
 });
 
 
+
+
+const getStarredFiles = asyncHandler(async (req, res) => {
+  try {
+    // Retrieve all  files that are marked as starred
+    const starredFiles = await prisma.file.findMany({
+      where: { isStarred: true },
+      include: { mappings: true },
+    });
+
+    res.status(200).json({ starredFiles });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export {
   uploadFileToCloud,
   getFileDetails,
   getUserFiles,
   updateFileDetails,
+  getStarredFiles,
 };
