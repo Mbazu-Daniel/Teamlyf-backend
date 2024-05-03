@@ -64,12 +64,12 @@ model Employee {
   groupMembers           GroupMembers[]
 
   // FILE MANAGER 
-  files           File[]
-  folders         Folder[]
-  sharedFileLinks SharedFileLink[]
-  trashbins       TrashBin[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  files       File[]
+  folders     Folder[]
+  sharedFiles SharedFile[]
+  trashbins   TrashBin[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
