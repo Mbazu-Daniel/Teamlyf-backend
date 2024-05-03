@@ -7,6 +7,7 @@ import {
   getSingleFolder,
   updateFolderDetails,
   moveFoldersAndFiles,
+  getStarredFolders,
 } from "./folders.controllers.js";
 import { verifyToken } from "../../utils/middleware/authenticate.js";
 import {
@@ -32,17 +33,23 @@ folderRouter.use(
 );
 
 // Create a new folder
-folderRouter.post("/:workspaceId/folders", createFolder);
+folderRouter.post("/:workspaceId/drive/folders", createFolder);
 
 // Get all folders in a workspace
-folderRouter.get("/:workspaceId/folders", getAllFolders);
+folderRouter.get("/:workspaceId/drive/folders", getAllFolders);
 
 // move folder and files to a folder in the workspace
-folderRouter.post("/:workspaceId/folders/move/", moveFoldersAndFiles);
+folderRouter.post("/:workspaceId/drive/folders/move/", moveFoldersAndFiles);
 
-folderRouter.get("/:workspaceId/folders/:folderId", getSingleFolder);
+// Retrieve starred folder
+folderRouter.post("/:workspaceId/drive/folders/starred/", getStarredFolders);
+
+folderRouter.get("/:workspaceId/drive/folders/:folderId", getSingleFolder);
 
 // Update a folder by ID
-folderRouter.patch("/:workspaceId/folders/:folderId", updateFolderDetails);
+folderRouter.patch(
+  "/:workspaceId/drive/folders/:folderId",
+  updateFolderDetails
+);
 
 export default folderRouter;

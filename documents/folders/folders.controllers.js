@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// TODO: create a select to show all folders created, shared folders/files or shared folders/files
-// TODO: create a function that can handle creation of folder or different types of file
-// TODO: move folder or files to another folder
 // TODO: create a controller to duplicate folder or files
-// TODO: controller to mark folder or file as starred
 // TODO: controller to download folder or file
+// TODO: controller to upload folders 
 // TODO: create folder with workspace id-name inside s3 bucket, if workspace already exists then no need to create new folder
+// TODO: Users can share files and folders with multiple users, allowing collaboration.
+// TODO: Create publicly shareable links for files and folders with optional expiration date, password and permissions. if you receive a folder or file through a shared link it should update the sharedFolder model with the details of the user that shared the file or folder
+
 
 // Create a new folder
 const createFolder = asyncHandler(async (req, res) => {
@@ -50,7 +50,7 @@ const getAllFolders = asyncHandler(async (req, res) => {
     const folders = await prisma.folder.findMany({
       where: {
         workspaceId,
-        parentFolderId: null, // Exclude child folders
+        parentFolderId: null, 
         isTrashed: false,
       },
     });
@@ -192,10 +192,29 @@ const moveFoldersAndFiles = asyncHandler(async (req, res) => {
   }
 });
 
+const getStarredFolders = asyncHandler(async (req, res) => {
+  try {
+    // Retrieve all folders  that are marked as starred
+    const starredFolders = await prisma.folder.findMany({
+      where: { isStarred: true },
+      include: { mappings: true },
+    });
+
+    res.status(200).json({ starredFolders });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+
+
 export {
   createFolder,
   getAllFolders,
   getSingleFolder,
   updateFolderDetails,
   moveFoldersAndFiles,
+  getStarredFolders,
 };
