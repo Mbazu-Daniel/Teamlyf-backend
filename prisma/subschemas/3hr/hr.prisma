@@ -66,10 +66,10 @@ model Employee {
   // FILE MANAGER 
   files       File[]
   folders     Folder[]
-  sharedFiles SharedFile[]
+  sharedFiles SharedFileEmployee[]
   trashbins   TrashBin[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
