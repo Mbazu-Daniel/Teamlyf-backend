@@ -33,23 +33,74 @@ trashbinRouter.use(
 );
 
 // route to return all items in trashbin
-trashbinRouter.get("/:workspaceId/drive/trash", getAllTrashbins);
+trashbinRouter.get(
+  "/:workspaceId/drive/trash",
+  getAllTrashbins
+
+  /* 
+#swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+*/
+);
 
 // Route for moving folders and files to trash
-trashbinRouter.patch("/:workspaceId/drive/trash/move", moveFoldersAndFilesToTrash);
+trashbinRouter.patch(
+  "/:workspaceId/drive/trash/move",
+  moveFoldersAndFilesToTrash
+
+  /* 
+#swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+*/
+);
 
 // Route for restoring folders and files from trash
 trashbinRouter.patch(
   "/:workspaceId/drive/trash/restore",
   restoreFoldersAndFilesFromTrash
+  /* 
+#swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+*/
 );
 
 // Route for deleting specific folders and files from trash
 trashbinRouter.delete(
   "/:workspaceId/drive/trash/delete",
   deleteSelectedFoldersAndFiles
+  /* 
+#swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+*/
 );
 // Route for restoring folders and files from trash
-trashbinRouter.delete("/:workspaceId/drive/trash/empty", emptyTrashBin);
+trashbinRouter.delete(
+  "/:workspaceId/drive/trash/empty",
+  emptyTrashBin
+  /* 
+#swagger.parameters['workspaceId'] = {
+    in: 'path',
+    required: true,
+    type: 'string'
+} 
+
+*/
+);
 
 export default trashbinRouter;
