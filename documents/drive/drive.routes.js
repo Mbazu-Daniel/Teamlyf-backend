@@ -1,6 +1,8 @@
 import {
-  getStarredFoldersAndFiles,
   markAsStarred,
+  getAllUsersFoldersAndFiles,
+  getStarredFoldersAndFolders,
+  
 } from "./drive.controllers.js";
 
 import { verifyToken } from "../../utils/middleware/authenticate.js";
@@ -27,6 +29,17 @@ driveRouter.use(
 );
 
 // mark folders and files as starred
+driveRouter.patch("/:workspaceId/drive/starred", markAsStarred);
+// get starred folders and files
+driveRouter.get("/:workspaceId/drive/starred", getStarredFoldersAndFolders);
+
+// get all users folders and files
+driveRouter.get("/:workspaceId/drive/my-drive", getAllUsersFoldersAndFiles);
+
+// create shared link
+driveRouter.post("/:workspaceId/drive/shared-files", shareFoldersAndFile);
+
+
 driveRouter.patch("/:workspaceId/drive/starred", markAsStarred);
 
 export default driveRouter;
