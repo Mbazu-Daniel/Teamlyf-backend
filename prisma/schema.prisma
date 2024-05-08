@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Sat May 04 2024 08:06:24 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Wed May 08 2024 21:16:40 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -605,7 +605,7 @@ model Employee {
   // FILE MANAGER 
   files       File[]
   folders     Folder[]
-  sharedFiles SharedFileEmployee[]
+  sharedFiles SharedLinkEmployee[]
   trashbins   TrashBin[]
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
@@ -1193,7 +1193,7 @@ model File {
   versions FileVersion[]
 
   trashbin   TrashBin[]
-  sharedFile SharedFile[]
+  sharedLink SharedLink[]
 
   isTrashed Boolean @default(false)
   isStarred Boolean @default(false)
@@ -1224,7 +1224,7 @@ model Folder {
   mappings FileFolderMapping[]
 
   trashbin   TrashBin[]
-  sharedFile SharedFile[]
+  sharedLink SharedLink[]
 
   isTrashed Boolean @default(false)
   isStarred Boolean @default(false)
@@ -1246,7 +1246,6 @@ model FileFolderMapping {
 
   createdAt DateTime @default(now())
 
-  @@unique([fileId, folderId])
   @@index([fileId, folderId])
   @@index([fileId])
   @@index([folderId])
@@ -1286,21 +1285,21 @@ model TrashBin {
   @@index([employeeId])
 }
 
-enum SharedFileVisibility {
+enum SharedLinkVisibility {
   RESTRICTED
   EVERYONE
 }
 
 // Share model for file/folder sharing
-model SharedFile {
+model SharedLink {
   id         String               @id @default(cuid())
   file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
   fileId     String?
   folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
   folderId   String?
-  sharedWith SharedFileEmployee[]
-  password   String?
-  visibility SharedFileVisibility @default(RESTRICTED)
+  sharedWith SharedLinkEmployee[]
+  // password   String?
+  visibility SharedLinkVisibility @default(RESTRICTED)
   link       String?
 
   updatedAt DateTime @updatedAt
@@ -1310,14 +1309,14 @@ model SharedFile {
   @@index([fileId])
 }
 
-model SharedFileEmployee {
+model SharedLinkEmployee {
   id           String     @id @default(cuid())
-  sharedFile   SharedFile @relation(fields: [sharedFileId], references: [id])
-  sharedFileId String
+  sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
+  sharedLinkId String
   employee     Employee   @relation(fields: [employeeId], references: [id])
   employeeId   String
 
-  @@index([sharedFileId])
+  @@index([sharedLinkId])
   @@index([employeeId])
 }
 

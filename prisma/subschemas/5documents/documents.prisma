@@ -24,7 +24,7 @@ model File {
     versions FileVersion[]
 
     trashbin   TrashBin[]
-    sharedFile SharedFile[]
+    sharedLink SharedLink[]
 
     isTrashed Boolean @default(false)
     isStarred Boolean @default(false)
@@ -55,7 +55,7 @@ model Folder {
     mappings FileFolderMapping[]
 
     trashbin   TrashBin[]
-    sharedFile SharedFile[]
+    sharedLink SharedLink[]
 
     isTrashed Boolean @default(false)
     isStarred Boolean @default(false)
@@ -76,8 +76,7 @@ model FileFolderMapping {
     folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
-
-    @@unique([fileId, folderId])
+    
     @@index([fileId, folderId])
     @@index([fileId])
     @@index([folderId])
@@ -117,21 +116,21 @@ model TrashBin {
     @@index([employeeId])
 }
 
-enum SharedFileVisibility {
+enum SharedLinkVisibility {
     RESTRICTED
     EVERYONE
 }
 
 // Share model for file/folder sharing
-model SharedFile {
+model SharedLink {
     id         String               @id @default(cuid())
     file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
     fileId     String?
     folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
     folderId   String?
-    sharedWith SharedFileEmployee[]
-    password   String?
-    visibility SharedFileVisibility @default(RESTRICTED)
+    sharedWith SharedLinkEmployee[]
+    // password   String?
+    visibility SharedLinkVisibility @default(RESTRICTED)
     link       String?
 
     updatedAt DateTime @updatedAt
@@ -141,14 +140,14 @@ model SharedFile {
     @@index([fileId])
 }
 
-model SharedFileEmployee {
+model SharedLinkEmployee {
     id           String     @id @default(cuid())
-    sharedFile   SharedFile @relation(fields: [sharedFileId], references: [id])
-    sharedFileId String
+    sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
+    sharedLinkId String
     employee     Employee   @relation(fields: [employeeId], references: [id])
     employeeId   String
 
-    @@index([sharedFileId])
+    @@index([sharedLinkId])
     @@index([employeeId])
 }
 

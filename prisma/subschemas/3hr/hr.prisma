@@ -66,7 +66,7 @@ model Employee {
   // FILE MANAGER 
   files       File[]
   folders     Folder[]
-  sharedFiles SharedFileEmployee[]
+  sharedFiles SharedLinkEmployee[]
   trashbins   TrashBin[]
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
