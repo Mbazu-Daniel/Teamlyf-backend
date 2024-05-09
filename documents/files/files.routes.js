@@ -10,6 +10,7 @@ import {
   getFileDetails,
   getUserFiles,
   updateFileDetails,
+  getStarredFiles,
 } from "./files.controllers.js";
 
 const fileRouter = express.Router();
@@ -39,12 +40,15 @@ fileRouter.post(
 
 // TODO: Move to employee endpoint
 // Get User's Files
-fileRouter.get("/:workspaceId/file/user", getUserFiles);
+fileRouter.get("/:workspaceId/drive/file/user", getUserFiles);
+
+// Retrieve starred files
+fileRouter.post("/:workspaceId/drive/files/starred/", getStarredFiles);
 
 // Get File details
-fileRouter.get("/:workspaceId/file/:fileId", getFileDetails);
+fileRouter.get("/:workspaceId/drive/file/:fileId", getFileDetails);
 
 // update File details
-fileRouter.patch("/:workspaceId/file/:fileId", updateFileDetails);
+fileRouter.patch("/:workspaceId/drive/file/:fileId", updateFileDetails);
 
 export default fileRouter;

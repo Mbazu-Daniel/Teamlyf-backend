@@ -10,7 +10,7 @@ const createEducation = asyncHandler(async (req, res) => {
     const { institution, courseOfStudy, result, degree, startDate, endDate } =
       req.body;
 
-    const education = await prisma.education.create({
+    const newEducation = await prisma.education.create({
       data: {
         institution,
         courseOfStudy,
@@ -22,7 +22,7 @@ const createEducation = asyncHandler(async (req, res) => {
       },
     });
 
-    res.status(201).json(education);
+    res.status(201).json(newEducation);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });

@@ -7,8 +7,8 @@ const storage = diskStorage({
   },
   filename: (req, file, cb) => {
     // Rename the file to avoid conflicts, e.g., using a timestamp
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.mimetype.split('/')[1]);
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${file.fieldname}-${uniqueSuffix}.${file.mimetype.split('/')[1]}`);
   },
 });
 

@@ -12,8 +12,8 @@ async function doesFileNameFolderExist(fileName, folderId) {
     });
     return existingFile !== null;
   } catch (error) {
-    console.error("Error checking filename existence:", error);
-    throw new Error("Failed to check filename existence");
+    console.error("Error checking filename and folder existence", error);
+    throw new Error("Failed to check filename and folder existence");
   }
 }
 
@@ -26,15 +26,16 @@ async function doesFileNameExist(fileName) {
     });
 
     // Check if there is a mapping for the filename with a folder
-    const existingMapping = await prisma.fileFolderMapping.findFirst({
-      where: {
-        file: { fileName },
-        NOT: {
-          folderId: null,
-        },
-      },
-    });
-    return existingFile !== null && existingMapping === null;
+    // const existingMapping = await prisma.fileFolderMapping.findFirst({
+    //   where: {
+    //     file: { fileName },
+    //     NOT: {
+    //       folderId: null,
+    //     },
+    //   },
+    // });
+    return existingFile !== null;
+    // return existingFile !== null && existingMapping === null;
   } catch (error) {
     console.error("Error checking filename existence:", error);
     throw new Error("Failed to check filename existence");

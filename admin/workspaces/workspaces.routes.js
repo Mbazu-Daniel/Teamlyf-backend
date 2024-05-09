@@ -41,12 +41,21 @@ workspacesRouter.use("/workspace", verifyToken);
 
 workspacesRouter.post("/", validateCreateWorkspace, createWorkspace);
 workspacesRouter.get("/", getAllWorkspaces);
-workspacesRouter.get("/current-user", getCurrentEmployee, getUserWorkspaces);
-workspacesRouter.get("/count", getCurrentEmployee, getTotalWorkspacesCount);
+workspacesRouter.get(
+  "/current-user",
+  getUserWorkspaces
+);
+workspacesRouter.get(
+  "/count",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  getTotalWorkspacesCount
+);
 workspacesRouter.get(
   "/:workspaceId",
 
   getCurrentEmployee,
+  getCurrentWorkspace,
   getWorkspaceById
 );
 workspacesRouter.patch(

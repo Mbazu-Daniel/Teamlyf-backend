@@ -9,11 +9,11 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 // TODO: Update this code to send template
-// TODO: fix the bug on this code with the one on Ovasite
 // TODO: new users and employee to be added to the platform or workspace through the workspace invite code
-// TODO: function to regenerate workspace inviteCode
-
-// TODO: function to leave a workspace (this should not CASCADE delete, the user information should still be available)
+// TODO: controller to regenerate workspace inviteCode
+// TODO: controller to generate shared link
+// TODO: controller to add user to workspace through the generated link
+// TODO: controller to leave a workspace (this should not CASCADE delete, the user information should still be available)
 
 const url = process.env.FRONTEND_URL;
 

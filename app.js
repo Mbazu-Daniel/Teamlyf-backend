@@ -23,7 +23,6 @@ import userRouter from "./admin/users/users.routes.js";
 import inviteRouter from "./admin/invites/invites.routes.js";
 import workspaceRouter from "./admin/workspaces/workspaces.routes.js";
 
-
 // pm
 import milestoneRouter from "./pm/milestones/milestones.routes.js";
 import projectRouter from "./pm/projects/projects.routes.js";
@@ -57,6 +56,7 @@ import messageRouter from "./chats/messages/messages.routes.js";
 import folderRouter from "./documents/folders/folders.routes.js";
 import fileRouter from "./documents/files/files.routes.js";
 import trashbinRouter from "./documents/trashbin/trashbin.routes.js";
+import driveRouter from "./documents/drive/drive.routes.js";
 
 dotenv.config();
 
@@ -145,6 +145,7 @@ app.use(`${basePath}/workspace`, jobResponsesRouter);
 app.use(`${basePath}/workspace`, folderRouter);
 app.use(`${basePath}/workspace`, fileRouter);
 app.use(`${basePath}/workspace`, trashbinRouter);
+app.use(`${basePath}/workspace`, driveRouter);
 
 // Chat Management
 app.use(`${basePath}/workspace`, groupRouter);

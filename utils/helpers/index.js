@@ -5,6 +5,7 @@ import {
 import generateFileName from "./generateFileName.js";
 import generateHashedPassword from "./generateHashPassword.js";
 import generateResetToken from "./generateResetToken.js";
+import deleteFolderRecursive from "./deleteChildFolders.js";
 
 export {
   generateFileName,
@@ -12,4 +13,5 @@ export {
   resolveFileNameConflict,
   generateHashedPassword,
   generateResetToken,
+  deleteFolderRecursive,
 };
