@@ -1,30 +1,32 @@
 import pkg from '@prisma/client';
 const { PrismaClient } =  pkg
-import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
-import { v4 as uuidv4 } from 'uuid';
 import sendMail from '../../utils/services/sendMail.js';
+
+import { generateUniqueId,generateHashedPassword } from "../../utils/helpers/index.js";
+import {FRONTEND_URL, SALT  } from "../../utils/config/env.js";
 import dotenv from 'dotenv';
 dotenv.config();
 const prisma = new PrismaClient();
 
+
+
 // TODO: Update this code to send template
 // TODO: new users and employee to be added to the platform or workspace through the workspace invite code
 // TODO: controller to regenerate workspace inviteCode
-// TODO: controller to generate shared link
+// TODO: controller to generate shareable link
 // TODO: controller to add user to workspace through the generated link
 // TODO: controller to leave a workspace (this should not CASCADE delete, the user information should still be available)
 
-const url = process.env.FRONTEND_URL;
 
 const generateInviteLink = asyncHandler(async (req, res) => {
-	let { email, role } = req.body;
+	let { email, role } = req.body; 
 	const { workspaceId } = req.params;
 	email = email.toLowerCase();
 
 	try {
 		// Generate unique token
-		const inviteToken = uuidv4();
+		const inviteToken = generateUniqueId()
 
 		// Set expiration date
 		const expireDate = new Date();
@@ -51,7 +53,7 @@ const generateInviteLink = asyncHandler(async (req, res) => {
           <div class="container" style="max-width: 90%; margin: auto; padding-top: 20px">
             <h2>You have been invited to join an workspace.</h2>
             <p>Click the following link to accept the invitation:</p>
-            <a href="${url}/join/${inviteToken}">Accept Invitation</a>
+            <a href="${FRONTEND_URL}/join/${inviteToken}">Accept Invitation</a>
           </div>
         `,
 		};
@@ -74,7 +76,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 		const invite = await prisma.invite.findFirst({
 			where: { token: inviteToken },
 		});
-		console.log('🚀 ~ joinWorkspace ~ invite:', invite);
+		
 
 		if (!invite || invite.expirationDate < new Date()) {
 			return res
@@ -115,7 +117,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 				.json({ error: 'Full name, email and password are required' });
 		}
 
-		const hashedPassword = await generateHashedPassword(password, saltRounds);
+		const hashedPassword = await generateHashedPassword(password, SALT);
 
 		const newUser = await prisma.user.create({
 			data: {

@@ -1,4 +1,4 @@
-//🧩Don't Edit this file.✨Generated in Thu May 02 2024 21:19:00 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Wed May 08 2024 21:16:40 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
   provider      = "prisma-client-js"
@@ -605,10 +605,10 @@ model Employee {
   // FILE MANAGER 
   files       File[]
   folders     Folder[]
-  sharedFiles SharedFile[]
+  sharedFiles SharedLinkEmployee[]
   trashbins   TrashBin[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
@@ -1171,14 +1171,6 @@ enum GroupRole {
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 // TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
 // TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
-// TODO: create a Drive model to hold home folder and file together
-
-// // root drive 
-// model Drive {
-//     id      String   @id @default(cuid())
-//     folders Folder[]
-//     files   File[]
-// }
 
 // File model
 model File {
@@ -1201,7 +1193,7 @@ model File {
   versions FileVersion[]
 
   trashbin   TrashBin[]
-  sharedFile SharedFile[]
+  sharedLink SharedLink[]
 
   isTrashed Boolean @default(false)
   isStarred Boolean @default(false)
@@ -1232,7 +1224,7 @@ model Folder {
   mappings FileFolderMapping[]
 
   trashbin   TrashBin[]
-  sharedFile SharedFile[]
+  sharedLink SharedLink[]
 
   isTrashed Boolean @default(false)
   isStarred Boolean @default(false)
@@ -1254,7 +1246,6 @@ model FileFolderMapping {
 
   createdAt DateTime @default(now())
 
-  @@unique([fileId, folderId])
   @@index([fileId, folderId])
   @@index([fileId])
   @@index([folderId])
@@ -1294,32 +1285,49 @@ model TrashBin {
   @@index([employeeId])
 }
 
-// Activity Log model// Share model for file/folder sharing
-model SharedFile {
-  id         String    @id @default(cuid())
-  employee   Employee  @relation(fields: [employeeId], references: [id])
-  employeeId String
-  file       File?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+enum SharedLinkVisibility {
+  RESTRICTED
+  EVERYONE
+}
+
+// Share model for file/folder sharing
+model SharedLink {
+  id         String               @id @default(cuid())
+  file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
   fileId     String?
-  folder     Folder?   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
   folderId   String?
-  // Additional attributes
-  permission String // Permission level (e.g., read, write, admin)
-  expiration DateTime? // Expiration date for the share
+  sharedWith SharedLinkEmployee[]
+  // password   String?
+  visibility SharedLinkVisibility @default(RESTRICTED)
+  link       String?
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
   @@index([folderId])
   @@index([fileId])
+}
+
+model SharedLinkEmployee {
+  id           String     @id @default(cuid())
+  sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
+  sharedLinkId String
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+  employeeId   String
+
+  @@index([sharedLinkId])
   @@index([employeeId])
 }
 
-// // ActivityLog model
-// model ActivityLog {
-//     id        String      @id @default(cuid())
-//     employee      Employee     @relation(fields: [employeeId], references: [id])
-//     employeeId    String
-//     action    String
-//     timestamp DateTime @default(now())
+// ActivityLog model
+// model FileActivityLog {
+//     id         String   @id @default(cuid())
+//     employee   Employee @relation(fields: [employeeId], references: [id])
+//     employeeId String
+//     action     String
+//     timestamp  DateTime @default(now())
 //     // Additional attributes
-//     ipAddress String? // IP address of the user performing the action
-//     userAgent String? // User agent of the client application
+//     ipAddress  String? // IP address of the user performing the action
+//     userAgent  String? // User agent of the client application
 // }
