@@ -5,11 +5,10 @@ const prisma = new PrismaClient();
 
 // TODO: create a controller to duplicate folder or files
 // TODO: controller to download folder or file
-// TODO: controller to upload folders 
+// TODO: controller to upload folders
 // TODO: create folder with workspace id-name inside s3 bucket, if workspace already exists then no need to create new folder
 // TODO: Users can share files and folders with multiple users, allowing collaboration.
 // TODO: Create publicly shareable links for files and folders with optional expiration date, password and permissions. if you receive a folder or file through a shared link it should update the sharedFolder model with the details of the user that shared the file or folder
-
 
 // Create a new folder
 const createFolder = asyncHandler(async (req, res) => {
@@ -50,7 +49,7 @@ const getAllFolders = asyncHandler(async (req, res) => {
     const folders = await prisma.folder.findMany({
       where: {
         workspaceId,
-        parentFolderId: null, 
+        parentFolderId: null,
         isTrashed: false,
       },
     });
@@ -206,9 +205,6 @@ const getStarredFolders = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
 
 export {
   createFolder,

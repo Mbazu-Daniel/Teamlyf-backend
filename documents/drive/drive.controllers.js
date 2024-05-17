@@ -92,11 +92,110 @@ const markAsStarred = asyncHandler(async (req, res) => {
   }
 });
 
+const shareFoldersAndFile = asyncHandler(async (req, res) => {
+  try {
+    const { files, folders, password, visibility, sharedWith } = req.body;
+
+    // Generate a unique identifier for the shared link
+    const sharedLinkId = generateUniqueId();
+    console.log("🚀 ~ shareFoldersAndFile ~ sharedLinkId:", sharedLinkId);
+
+    // Create shared files entries
+    const sharedFiles = [];
+
+    // Create shared file entries for each file
+    for (const fileId of files) {
+      const sharedFile = await prisma.sharedFile.create({
+        data: {
+          file: { connect: { id: fileId } },
+          visibility: visibility,
+          link: sharedLinkId,
+        },
+      });
+
+      // Create entries in SharedLinkEmployee table for each shared file
+      await Promise.all(
+        sharedWith.map(async (employeeId) => {
+          await prisma.sharedLinkEmployee.create({
+            data: {
+              sharedFile: { connect: { id: sharedFile.id } },
+              employee: { connect: { id: employeeId } },
+            },
+          });
+        })
+      );
+
+      sharedFiles.push(sharedFile);
+    }
+
+    // Create shared file entries for each folder
+    for (const folderId of folders) {
+      const sharedFile = await prisma.sharedFile.create({
+        data: {
+          folder: { connect: { id: folderId } },
+          visibility: visibility,
+          link: sharedLinkId,
+          createdAt: new Date(),
+        },
+      });
+
+      // Create entries in SharedLinkEmployee table for each shared folder
+      await Promise.all(
+        sharedWith.map(async (employeeId) => {
+          await prisma.sharedLinkEmployee.create({
+            data: {
+              sharedFile: { connect: { id: sharedFile.id } },
+              employee: { connect: { id: employeeId } },
+            },
+          });
+        })
+      );
+
+      sharedFiles.push(sharedFile);
+    }
+
+    // Send email notification to each recipient
+    // await Promise.all(
+    //   sharedWith.map(async (employeeId) => {
+    //     const recipientEmail = // Get recipient's email from employeeId;
+    //       await sendEmailNotification(recipientEmail, sharedLinkId);
+    //   })
+    // );
+
+    res.status(201).json(sharedFiles);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to create shared files." });
+  }
+});
+
+export const generateSharedLink = asyncHandler(async (req, res) => {
+  try {
+    const { sharedFileId } = req.params;
+
+    // Generate shared link
+    const linkId = generateLink();
+
+    // Update shared file with the generated link
+    const updatedSharedFile = await prisma.sharedFile.update({
+      where: { id: sharedFileId },
+      data: {
+        link: linkId,
+      },
+    });
+
+    res.status(200).json(updatedSharedFile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to generate shared link." });
+  }
+});
+
 export {
   markAsStarred,
   getAllUsersFoldersAndFiles,
   getStarredFoldersAndFolders,
-
+  shareFoldersAndFile,
 };
 
 

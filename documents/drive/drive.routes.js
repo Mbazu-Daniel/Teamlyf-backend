@@ -2,7 +2,7 @@ import {
   markAsStarred,
   getAllUsersFoldersAndFiles,
   getStarredFoldersAndFolders,
-  
+  shareFoldersAndFile,
 } from "./drive.controllers.js";
 
 import { verifyToken } from "../../utils/middleware/authenticate.js";
@@ -40,6 +40,6 @@ driveRouter.get("/:workspaceId/drive/my-drive", getAllUsersFoldersAndFiles);
 driveRouter.post("/:workspaceId/drive/shared-files", shareFoldersAndFile);
 
 
-driveRouter.patch("/:workspaceId/drive/starred", markAsStarred);
+// driveRouter.patch("/:workspaceId/drive/starred", markAsStarred);
 
 export default driveRouter;
