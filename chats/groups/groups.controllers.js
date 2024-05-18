@@ -394,7 +394,7 @@ const updateEmployeeGroupRole = asyncHandler(async (req, res) => {
         .json({ message: `Employee ${employeeIdToUpdate} not found in group` });
     }
 
-        // Update the role of the group member
+    // Update the role of the group member
     const updatedGroupMember = await prisma.groupMembers.update({
       where: {
         id: groupMember.id,
@@ -425,6 +425,20 @@ const addMembersToGroup = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: `Group ${groupId} not found` });
     }
 
+    const existingMemberIds = new Set(
+      existingMembers.map((member) => member.memberId)
+    );
+
+    const newMemberIds = memberIds.filter(
+      (memberId) => !existingMemberIds.has(memberId)
+    );
+
+    if (newMemberIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "All provided members are already in the group" });
+    }
+
     const groupMemberPromises = memberIds.map((memberId) =>
       prisma.groupMembers.create({
         data: {
@@ -437,12 +451,19 @@ const addMembersToGroup = asyncHandler(async (req, res) => {
 
     await Promise.all(groupMemberPromises);
 
+    // Emit JOIN_CHAT_EVENT for each new member
+    const payload = { groupId, message: "Joined group chat" };
+
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    newMemberIds.forEach((memberId) => {
+      emitSocketEvent(req, memberId, ChatEventEnum.JOIN_CHAT_EVENT, payload);
+    });
     const updatedGroup = await prisma.group.findUnique({
       where: {
         id: groupId,
       },
       include: {
-        employee: true,
+        groupMembers: true,
       },
     });
 
@@ -483,7 +504,7 @@ const removeMembersFromGroup = asyncHandler(async (req, res) => {
         id: groupId,
       },
       include: {
-        employee: true,
+        groupMembers: true,
       },
     });
 
@@ -525,5 +546,5 @@ export {
   removeMembersFromGroup,
   searchGroupsByName,
   leaveGroupChat,
-  updateEmployeeGroupRole
+  updateEmployeeGroupRole,
 };
