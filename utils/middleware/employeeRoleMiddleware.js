@@ -19,12 +19,18 @@ function employeeRoleBasedMiddleware(allowedRoles) {
 				},
 			});
 
-			if (!employee || !allowedRoles.includes(employee.role)) {
+			if (!allowedRoles.includes(employee.role)) {
 				return res.status(403).json({
 					error:
 						'User does not have the required role or does not belong to this workspace',
 				});
 			}
+			// if (!employee || !allowedRoles.includes(employee.role)) {
+			// 	return res.status(403).json({
+			// 		error:
+			// 			'User does not have the required role or does not belong to this workspace',
+			// 	});
+			// }
 
 			// Attach the employee object to the request for further use if needed
 			req.employeeId = employee.id;

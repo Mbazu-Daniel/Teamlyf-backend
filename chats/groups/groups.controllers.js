@@ -28,7 +28,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
       },
     });
 
-    // TODO: Handle duplicate employee in group
 
     // Add the group creator as an admin
     const groupMembersData = [
@@ -313,7 +312,7 @@ const addMembersToGroup = asyncHandler(async (req, res) => {
       prisma.groupMembers.create({
         data: {
           group: { connect: { id: groupId } },
-          member: { connect: { id: memberId } },
+          groupMembers: { connect: { id: memberId } },
           role: GroupRole.MEMBER,
         },
       })

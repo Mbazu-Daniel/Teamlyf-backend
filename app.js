@@ -124,7 +124,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.set("trust proxy", 1);
 app.use(
   session({
-    secret: process.env.SESSION_SECRETS,
+    secret: process.env.EXPRESS_SESSION_SECRET,
     resave: true,
     saveUninitialized: true,
     // cookie: { maxAge: 86400000 },
