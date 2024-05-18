@@ -1,12 +1,12 @@
 import pkg from "@prisma/client";
 const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupRole } = pkg;
 import asyncHandler from "express-async-handler";
-import ShortUniqueId from "short-unique-id";
+import { generateUniqueId } from "../../utils/helpers/index.js";
+
 
 const prisma = new PrismaClient();
 // TODO: set permission for update and delete workspace to only employee with Admin and owner role
-// TODO: check existing workspace based on the current user and not general workspaces
-const { randomUUID } = new ShortUniqueId({ length: 10 });
+
 
 const workspaceSelectOptions = {
   id: true,
@@ -54,7 +54,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
         name: name,
         logo: logo || null,
         address: address || null,
-        inviteCode: randomUUID(),
+        inviteCode: generateUniqueId(),
         userId,
       },
 
@@ -432,7 +432,7 @@ const joinWorkspaceUsingInviteCode = asyncHandler(async (req, res) => {
 const changeWorkspaceInviteCode = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   const { employeeId } = req.employeeId;
-  const newInviteCode = randomUUID();
+  const newInviteCode = generateUniqueId();
 
   try {
     // Check if the user is an owner or admin

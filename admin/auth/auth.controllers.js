@@ -16,7 +16,7 @@ const saltRounds = parseInt(process.env.SALT);
 const registerUser = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
-  
+
     const lowercaseEmail = email.toLowerCase();
 
     // Check if the user already exists
@@ -26,13 +26,14 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if (!existingUser) {
       const hashedPassword = await generateHashedPassword(password, saltRounds);
-   
 
-      await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: { email: lowercaseEmail, password: hashedPassword },
       });
 
-      return res.status(201).json({ message: "User registered successfully" });
+      return res
+        .status(201)
+        .json({ newUser: newUser, message: "User registered successfully" });
     }
     res.status(400).json({ error: "User already exists" });
   } catch (error) {
@@ -162,7 +163,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 const changePassword = asyncHandler(async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    const userId = req.user.id; // Assuming you have the user's ID in the request
+    const userId = req.user.id;
 
     // Find the user by ID
     const user = await prisma.user.findUnique({

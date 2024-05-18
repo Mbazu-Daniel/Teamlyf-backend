@@ -56,7 +56,7 @@ model Employee {
   payroll               Payroll[]
 
   // CHAT
-  messages               Message[]
+  groupMessages          GroupMessage[]
   conversationsInitiated Conversation[]  @relation("EmployeeOne")
   conversationsReceived  Conversation[]  @relation("EmployeeTwo")
   directMessages         DirectMessage[]

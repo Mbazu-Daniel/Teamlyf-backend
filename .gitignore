@@ -6,6 +6,8 @@ localimport.js
 # markdown
 FileManager.md
 others.md
+CONTRIBUTING*.md 
+*/*/*.test.md 
 
 # Logs
 logs

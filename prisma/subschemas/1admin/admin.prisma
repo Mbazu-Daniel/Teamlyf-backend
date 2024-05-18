@@ -1,18 +1,21 @@
 // TODO: add Notification
 model User {
-  id                    String                  @id @default(cuid())
-  email                 String                  @unique
-  password              String
-  role                  UserRole                @default(BASIC)
-  source                SourceType              @default(OTHER)
-  authStrategy          AuthStrategy            @default(EMAIL)
-  googleId              String?                 @unique
-  githubId              String?                 @unique
-  passwordResetToken    String?
-  passwordResetAt       DateTime?
+  id           String       @id @default(cuid())
+  email        String       @unique
+  password     String
+  role         UserRole     @default(BASIC)
+  source       SourceType   @default(OTHER)
+  authStrategy AuthStrategy @default(EMAIL_PASSWORD)
+  googleId     String?      @unique
+  githubId     String?      @unique
+
+  passwordResetToken String?
+  passwordResetAt    DateTime?
+  refreshToken       String?
+
   workspaces            Workspace[]
   employees             Employee[]
-  announcements         Announcement[]
+  announcement          Announcement[]
   announcementRecipient AnnouncementRecipient[]
 
   createdAt DateTime @default(now())
@@ -88,6 +91,9 @@ model AnnouncementRecipient {
   recipient      User   @relation(fields: [recipientId], references: [id])
 
   announcements Announcement @relation(fields: [announcementId], references: [id])
+
+  @@index([recipientId])
+  @@index([announcementId])
 }
 
 model Announcement {
@@ -127,7 +133,7 @@ enum UserRole {
 }
 
 enum AuthStrategy {
-  EMAIL
   GITHUB
   GOOGLE
+  EMAIL_PASSWORD
 }

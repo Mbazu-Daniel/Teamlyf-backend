@@ -1,6 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
-import { deleteFile } from "../../utils/services/awsS3bucket.js";
+import { deleteFileFromS3Bucket } from "../../utils/services/awsS3bucket.js";
 import deleteFolderRecursive from "../../utils/helpers/deleteChildFolders.js";
 const prisma = new PrismaClient();
 
@@ -221,7 +221,7 @@ const deleteSelectedFoldersAndFiles = asyncHandler(async (req, res) => {
         });
 
         if (file) {
-          await deleteFile(file.fileIdentifier);
+          await deleteFileFromS3Bucket(file.fileIdentifier);
         }
       }
 
@@ -297,7 +297,7 @@ const deleteSelectedFoldersAndFiles = asyncHandler(async (req, res) => {
 
       if (file) {
         // Delete the file from AWS S3
-        await deleteFile(file.fileIdentifier);
+        await deleteFileFromS3Bucket(file.fileIdentifier);
       }
     }
     // Delete selected files using FileFolderMapping
@@ -370,7 +370,7 @@ const emptyTrashBin = asyncHandler(async (req, res) => {
         });
 
         if (file) {
-          await deleteFile(file.fileIdentifier);
+          await deleteFileFromS3Bucket(file.fileIdentifier);
         }
       }
 
@@ -428,7 +428,7 @@ const emptyTrashBin = asyncHandler(async (req, res) => {
 
       if (file) {
         // Delete the file from AWS S3
-        await deleteFile(file.fileIdentifier);
+        await deleteFileFromS3Bucket(file.fileIdentifier);
       }
     }
 

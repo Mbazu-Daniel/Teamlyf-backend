@@ -10,6 +10,11 @@ import session from "express-session";
 import passport from "passport";
 import treblle from "@treblle/express";
 import swaggerUi from "swagger-ui-express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import { rateLimit } from "express-rate-limit";
+import requestIp from "request-ip";
+
 import Memorystore from "memorystore";
 const MemoryStore = Memorystore(session);
 
@@ -62,34 +67,76 @@ dotenv.config();
 
 const app = express();
 
+// socket
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  },
+});
+
+// using set method to mount the `io` instance on the app to avoid usage of `global`
+
+app.set("io", io);
+
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+app.use(
+  cors({
+    origin:
+      process.env.CORS_ORIGIN === "*"
+        ? "*"
+        : process.env.CORS_ORIGIN?.split(", "),
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
+app.use(requestIp.mw());
+
+// Rate limiter
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5000, // Limit each IP to 500 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req, res) => {
+    return req.clientIp; // IP address from requestIp.mw(), as opposed to req.ip
+  },
+  handler: (_, __, ___, options) => {
+    throw new ApiError(
+      options.statusCode || 500,
+      `There are too many requests. You are only allowed ${
+        options.max
+      } requests per ${options.windowMs / 60000} minutes`
+    );
+  },
+});
+
+// Apply the rate limiting middleware to all requests
+app.use(limiter);
+
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.set("trust proxy", 1);
 app.use(
   session({
-    secret: process.env.SESSION_SECRETS,
-    resave: false,
+    secret: process.env.EXPRESS_SESSION_SECRET,
+    resave: true,
     saveUninitialized: true,
-    cookie: { maxAge: 86400000 },
-    store: new MemoryStore({
-      checkPeriod: 86400000,
-    }),
+    // cookie: { maxAge: 86400000 },
+    // store: new MemoryStore({
+    //   checkPeriod: 86400000,
+    // }),
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
-
-app.use(
-  cors({
-    origin: ["*"],
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
 
 // compress using gzip
 app.use(compression());
@@ -102,7 +149,15 @@ app.use(morgan("dev"));
 
 // Swagger UI
 app.use("/docs", swaggerUi.serve);
-app.get("/docs", swaggerUi.setup(swaggerDocument));
+app.get(
+  "/docs",
+  swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+      docExpansion: "none", // keep section collapsed by default
+    },
+    customSiteTitle: "Teamlyf",
+  })
+);
 
 // ENDPOINTS
 app.get("/", (req, res) => {
@@ -152,4 +207,4 @@ app.use(`${basePath}/workspace`, groupRouter);
 app.use(`${basePath}/workspace`, conversationRouter);
 app.use(`${basePath}/workspace`, messageRouter);
 
-export default app;
+export { httpServer };

@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { deleteFile } from "../services/awsS3bucket.js";
+import { deleteFileFromS3Bucket } from "../services/awsS3bucket.js";
 const prisma = new PrismaClient();
 
 const deleteFolderRecursive = async (folderId) => {
@@ -36,7 +36,7 @@ const deleteFolderRecursive = async (folderId) => {
     });
 
     if (file) {
-      await deleteFile(file.fileIdentifier);
+      await deleteFileFromS3Bucket(file.fileIdentifier);
     }
   }
 

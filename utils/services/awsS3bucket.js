@@ -43,7 +43,7 @@ async function uploadFile(fileBuffer, fileName, mimetype) {
   return s3.send(new PutObjectCommand(uploadParams));
 }
 
-async function deleteFile(fileName) {
+async function deleteFileFromS3Bucket(fileName) {
   const deleteParams = {
     Bucket: bucketName,
     Key: fileName,
@@ -55,6 +55,7 @@ async function getObjectSignedUrl(key) {
   const params = {
     Bucket: bucketName,
     Key: key,
+    ACL: acl,
   };
 
   // https://aws.amazon.com/blogs/developer/generate-presigned-url-modular-aws-sdk-javascript/
@@ -63,5 +64,44 @@ async function getObjectSignedUrl(key) {
   return getSignedUrl(s3, command);
 }
 
+async function downloadFileFromS3(fileName) {
+  try {
+    const params = {
+      Bucket: bucketName,
+      Key: fileName,
+    };
 
-export { fileUpload, uploadFile, deleteFile, getObjectSignedUrl };
+    const command = new GetObjectCommand(params);
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // Expiring in 1 hour
+
+    return signedUrl;
+  } catch (error) {
+    console.error("Error downloading file from S3:", error);
+    throw error;
+  }
+}
+
+// async function createFolderOnS3(folderPath) {
+// try {
+//   const params = {
+//     Bucket : bucketName,
+//     Key: folderPath,
+//     Body: '',
+//     ACL:acl,
+//   }
+//     await s3.send(new PutObjectCommand(params));
+//     console.log(`Folder created successfully: ${folderPath}`);
+
+//   } catch(error) {
+//     console.error(`Error creating folder on S3: ${error.message}`);
+//     throw error;
+//   }
+// }
+
+export {
+  fileUpload,
+  uploadFile,
+  deleteFileFromS3Bucket,
+  getObjectSignedUrl,
+  downloadFileFromS3,
+};
