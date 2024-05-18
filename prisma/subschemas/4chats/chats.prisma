@@ -1,10 +1,10 @@
 // Chat communication model 
 model Group {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  description String?     @db.Text
-  thumbnail   String?
-  groupType   MessageType @default(TEXT)
+  description String?   @db.Text
+  icon        String?
+  groupType   GroupType @default(TEXT)
 
   lastMessageAt DateTime?
 
@@ -14,9 +14,9 @@ model Group {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  messages Message[]
-
-  groupMembers GroupMembers[]
+  groupMessages GroupMessage[]
+  groupMembers  GroupMembers[]
+  attachments   GroupAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -43,7 +43,6 @@ model GroupMembers {
 model GroupMessage {
   id        String    @id @default(cuid())
   text      String    @db.Text
-  fileUrl   String?   @db.Text
   deleted   Boolean   @default(false)
   read      Boolean   @default(false)
   readAt    DateTime?
@@ -57,15 +56,33 @@ model GroupMessage {
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id])
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  replies GroupMessage[] @relation("ThreadParentGroupMessage")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  replies     GroupMessage[]           @relation("ThreadParentGroupMessage")
+  attachments GroupMessageAttachment[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
 
   @@index([groupId, employeeId])
   @@index([parentMessageId])
+}
+
+model GroupAttachment {
+  id             String   @id @default(cuid())
+  groupId        String
+  group          Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fileUrl        String   @db.Text
+  fileIdentifier String
+  createdAt      DateTime @default(now())
+}
+
+model GroupMessageAttachment {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  fileUrl        String       @db.Text
+  fileIdentifier String
+  createdAt      DateTime     @default(now())
 }
 
 model Conversation {
@@ -104,7 +121,7 @@ model DirectMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id])
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   replies         DirectMessage[] @relation("ThreadParentDirectMessage")
 
   createdAt DateTime @default(now())
@@ -113,7 +130,7 @@ model DirectMessage {
   @@index([employeeId, conversationId])
 }
 
-enum MessageType {
+enum GroupType {
   TEXT
   AUDIO
   VIDEO
