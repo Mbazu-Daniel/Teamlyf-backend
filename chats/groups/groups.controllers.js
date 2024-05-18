@@ -2,11 +2,12 @@ import asyncHandler from "express-async-handler";
 import pkg from "@prisma/client";
 import { ChatEventEnum } from "../../socket/constants.js";
 import { emitSocketEvent } from "../../socket/index.js";
-const { PrismaClient, GroupType, GroupRole } = pkg;
+const { PrismaClient, GroupType, GroupMemberRole } = pkg;
 
 const prisma = new PrismaClient();
 
-// TODO: create project endpoints should create a new group during creation
+// TODO: update the leave group endpoint to not allow admin to leave group in their role is still admin
+// TODO: update employee group role to be admin
 const createGroupChat = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   const employeeId = req.employeeId;
@@ -27,7 +28,6 @@ const createGroupChat = asyncHandler(async (req, res) => {
         workspace: { connect: { id: workspaceId } },
       },
     });
-
 
     // Add the group creator as an admin
     const groupMembersData = [
@@ -293,6 +293,71 @@ const getGroupMembers = asyncHandler(async (req, res) => {
   }
 });
 
+const leaveGroupChat = asyncHandler(async (req, res) => {
+  const { groupId } = req.params;
+  const employeeId = req.employeeId;
+  try {
+    const group = await prisma.group.findUnique({
+      where: {
+        id: groupId,
+      },
+    });
+    if (!group) {
+      return res.status(404).json({ message: `Group ${groupId} not found` });
+    }
+
+    const groupMember = await prisma.groupMembers.findFirst({
+      where: {
+        groupId,
+        memberId: employeeId,
+      },
+    });
+
+    if (!groupMember) {
+      return res
+        .status(404)
+        .json({ message: `Employee ${employeeId} not found in group` });
+    }
+
+    // Prevent admin from leaving the group if they are the only admin
+    if (groupMember.role === GroupMemberRole.ADMIN) {
+      const adminCount = await prisma.groupMembers.count({
+        where: {
+          groupId,
+          role: GroupMemberRole.ADMIN,
+        },
+      });
+
+      if (adminCount <= 1) {
+        return res.status(403).json({
+          message:
+            "There must be at least one admin in the group. Please assign a new admin role first.",
+        });
+      }
+    }
+
+    // delete group member from group
+    await prisma.groupMembers.delete({
+      where: {
+        id: groupMember.id,
+      },
+    });
+
+    const payload = { groupId, message: "Left group chat" };
+
+    emitSocketEvent(
+      req,
+      groupMember.memberId,
+      ChatEventEnum.LEAVE_CHAT_EVENT,
+      payload
+    );
+
+    res.status(200).json({ message: "Successfully left the group chat" });
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 const addMembersToGroup = asyncHandler(async (req, res) => {
   const { groupId } = req.params;
   const { memberIds } = req.body;
@@ -313,7 +378,7 @@ const addMembersToGroup = asyncHandler(async (req, res) => {
         data: {
           group: { connect: { id: groupId } },
           groupMembers: { connect: { id: memberId } },
-          role: GroupRole.MEMBER,
+          role: GroupMemberRole.MEMBER,
         },
       })
     );
@@ -407,4 +472,5 @@ export {
   addMembersToGroup,
   removeMembersFromGroup,
   searchGroupsByName,
+  leaveGroupChat,
 };

@@ -13,6 +13,7 @@ import {
   getGroupMembers,
   addMembersToGroup,
   removeMembersFromGroup,
+  leaveGroupChat,
   searchGroupsByName,
 } from './groups.controllers.js';
 
@@ -42,6 +43,7 @@ groupRouter.get('/:workspaceId/groups/:groupId', getGroupChatDetails);
 groupRouter.patch('/:workspaceId/groups/:groupId', updateGroupChatDetails);
 groupRouter.delete('/:workspaceId/groups/:groupId', deleteGroupChat);
 groupRouter.get('/:workspaceId/groups/:groupId/members', getGroupMembers);
+groupRouter.delete('/:workspaceId/groups/:groupId/leave-group', leaveGroupChat);
 groupRouter.post(
 	'/:workspaceId/groups/:groupId/add-members',
 	addMembersToGroup
