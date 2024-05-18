@@ -88,11 +88,11 @@ model GroupMessageAttachment {
 model Conversation {
   id String @id @default(cuid())
 
-  employeeOneId String
-  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   Employee @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
 
-  employeeTwoId String
-  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   Employee @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   lastMessageAt DateTime?
 
@@ -100,8 +100,8 @@ model Conversation {
 
   createdAt DateTime @default(now())
 
-  @@unique([employeeOneId, employeeTwoId])
-  @@index([employeeTwoId, employeeOneId])
+  @@unique([senderId, receiverId])
+  @@index([receiverId, senderId])
 }
 
 model DirectMessage {
