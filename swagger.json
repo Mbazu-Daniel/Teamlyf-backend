@@ -1670,6 +1670,154 @@
         }
       }
     },
+    "/workspace/{workspaceId}/drive/starred": {
+      "patch": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemId": {
+                    "example": "any"
+                  },
+                  "itemType": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/my-drive": {
+      "get": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/shared-files": {
+      "post": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "example": "any"
+                  },
+                  "folders": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  },
+                  "visibility": {
+                    "example": "any"
+                  },
+                  "sharedWith": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/workspace/{workspaceId}/file": {
       "post": {
         "tags": [
@@ -1713,7 +1861,7 @@
         }
       }
     },
-    "/workspace/{workspaceId}/file/user": {
+    "/workspace/{workspaceId}/drive/file/user": {
       "get": {
         "tags": [
           "Files "
@@ -1739,7 +1887,33 @@
         }
       }
     },
-    "/workspace/{workspaceId}/file/{fileId}": {
+    "/workspace/{workspaceId}/drive/files/starred/": {
+      "post": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/file/{fileId}": {
       "get": {
         "tags": [
           "Files "
@@ -1822,7 +1996,7 @@
         }
       }
     },
-    "/workspace/{workspaceId}/folders": {
+    "/workspace/{workspaceId}/drive/folders": {
       "post": {
         "tags": [
           "Folder"
@@ -1892,7 +2066,7 @@
         }
       }
     },
-    "/workspace/{workspaceId}/folders/move/": {
+    "/workspace/{workspaceId}/drive/folders/move/": {
       "post": {
         "tags": [
           "Folder"
@@ -1941,7 +2115,33 @@
         }
       }
     },
-    "/workspace/{workspaceId}/folders/{folderId}": {
+    "/workspace/{workspaceId}/drive/folders/starred/": {
+      "post": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/folders/{folderId}": {
       "get": {
         "tags": [
           "Folder"
@@ -2030,9 +2230,22 @@
         }
       }
     },
-    "/workspace/{workspaceId}/trash": {
+    "/workspace/{workspaceId}/drive/trash": {
       "get": {
+        "tags": [
+          "Trash Bin"
+        ],
         "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -2040,7 +2253,7 @@
         }
       }
     },
-    "/workspace/{workspaceId}/trash/move": {
+    "/workspace/{workspaceId}/drive/trash/move": {
       "patch": {
         "tags": [
           "Trash Bin"
@@ -2089,9 +2302,22 @@
         }
       }
     },
-    "/workspace/{workspaceId}/trash/restore": {
+    "/workspace/{workspaceId}/drive/trash/restore": {
       "patch": {
+        "tags": [
+          "Trash Bin"
+        ],
         "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -2099,9 +2325,22 @@
         }
       }
     },
-    "/workspace/{workspaceId}/trash/delete": {
+    "/workspace/{workspaceId}/drive/trash/delete": {
       "delete": {
+        "tags": [
+          "Trash Bin"
+        ],
         "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -2109,9 +2348,22 @@
         }
       }
     },
-    "/workspace/{workspaceId}/trash/empty": {
+    "/workspace/{workspaceId}/drive/trash/empty": {
       "delete": {
+        "tags": [
+          "Trash Bin"
+        ],
         "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
