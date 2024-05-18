@@ -1,4 +1,3 @@
-
 /**
  * @description set of events that we are using in chat app. more to be added as we develop the chat app
  */
@@ -15,8 +14,10 @@ export const ChatEventEnum = Object.freeze({
   UPDATE_GROUP_NAME_EVENT: "updateGroupName",
   // ? when new message is received
   MESSAGE_RECEIVED_EVENT: "messageReceived",
-  // ? when there is new one on one chat, new group chat or user gets added in the group
-  NEW_CHAT_EVENT: "newChat",
+  // ? when there is new one on one chat
+  NEW_DIRECT_CHAT_EVENT: "newDirectChat",
+  //  ? new group chat or user gets added in the group
+  NEW_GROUP_CHAT_EVENT: "newGroupChat",
   // ? when there is an error in socket
   SOCKET_ERROR_EVENT: "socketError",
   // ? when participant stops typing
@@ -26,7 +27,5 @@ export const ChatEventEnum = Object.freeze({
   // ? when message is deleted
   MESSAGE_DELETE_EVENT: "messageDeleted",
 });
-
-
 
 export const AvailableChatEvents = Object.values(ChatEventEnum);

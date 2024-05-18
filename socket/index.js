@@ -1,7 +1,8 @@
 import cookie from "cookie";
 import jwt from "jsonwebtoken";
 import { ChatEventEnum } from "./constants.js";
-import { pkg } from "@prisma/client";
+
+import pkg from "@prisma/client";
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
