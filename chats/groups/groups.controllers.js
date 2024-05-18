@@ -358,6 +358,58 @@ const leaveGroupChat = asyncHandler(async (req, res) => {
   }
 });
 
+const updateEmployeeGroupRole = asyncHandler(async (req, res) => {
+  const { groupId, employeeId } = req.params;
+  const { newRole, employeeIdToUpdate } = req.body;
+
+  try {
+    const requestingMember = await prisma.groupMembers.findFirst({
+      where: {
+        groupId,
+        memberId: employeeId,
+      },
+    });
+
+    if (
+      !requestingMember ||
+      (requestingMember.role !== GroupMemberRole.ADMIN &&
+        requestingMember.role !== GroupMemberRole.MODERATOR)
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Only admins or moderators can update roles" });
+    }
+
+    // Check if the target employee is a member of the group
+    const groupMember = await prisma.groupMembers.findFirst({
+      where: {
+        groupId,
+        memberId: employeeIdToUpdate,
+      },
+    });
+
+    if (!groupMember) {
+      return res
+        .status(404)
+        .json({ message: `Employee ${employeeIdToUpdate} not found in group` });
+    }
+
+        // Update the role of the group member
+    const updatedGroupMember = await prisma.groupMembers.update({
+      where: {
+        id: groupMember.id,
+      },
+      data: {
+        role: newRole,
+      },
+    });
+    res.status(200).json(updatedGroupMember);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const addMembersToGroup = asyncHandler(async (req, res) => {
   const { groupId } = req.params;
   const { memberIds } = req.body;
@@ -473,4 +525,5 @@ export {
   removeMembersFromGroup,
   searchGroupsByName,
   leaveGroupChat,
+  updateEmployeeGroupRole
 };
