@@ -425,6 +425,18 @@ const addMembersToGroup = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: `Group ${groupId} not found` });
     }
 
+    const existingMembers = await prisma.groupMembers.findMany({
+      where: {
+        groupId: groupId,
+        memberId: {
+          in: memberIds,
+        },
+      },
+      select: {
+        memberId: true,
+      },
+    });
+
     const existingMemberIds = new Set(
       existingMembers.map((member) => member.memberId)
     );
@@ -483,9 +495,6 @@ const removeMembersFromGroup = asyncHandler(async (req, res) => {
       where: {
         id: groupId,
       },
-      include: {
-        groupMembers: true,
-      },
     });
 
     if (!group) {
@@ -498,6 +507,11 @@ const removeMembersFromGroup = asyncHandler(async (req, res) => {
         memberId: { in: memberIds },
       },
     });
+
+    const payload = { groupId, message: "Left group chat" };
+    for (const memberId of memberIds) {
+      emitSocketEvent(req, memberId, ChatEventEnum.LEAVE_CHAT_EVENT, payload);
+    }
 
     const updatedGroup = await prisma.group.findUnique({
       where: {
