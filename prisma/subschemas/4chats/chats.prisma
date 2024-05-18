@@ -9,7 +9,7 @@ model Group {
   lastMessageAt DateTime?
 
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -40,12 +40,10 @@ model GroupMembers {
   @@index([memberId])
 }
 
-model Message {
-  id   String @id @default(cuid())
-  text String @db.Text
-
-  fileUrl String? @db.Text
-
+model GroupMessage {
+  id        String    @id @default(cuid())
+  text      String    @db.Text
+  fileUrl   String?   @db.Text
   deleted   Boolean   @default(false)
   read      Boolean   @default(false)
   readAt    DateTime?
@@ -58,10 +56,16 @@ model Message {
   groupId String
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
+  parentMessageId String?
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id])
+
+  replies GroupMessage[] @relation("ThreadParentGroupMessage")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([groupId, employeeId])
+  @@index([parentMessageId])
 }
 
 model Conversation {
@@ -99,7 +103,9 @@ model DirectMessage {
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-
+  parentMessageId String?
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id])
+  replies         DirectMessage[] @relation("ThreadParentDirectMessage")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
