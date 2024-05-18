@@ -5,14 +5,15 @@ import {
 	getCurrentWorkspace,
 } from '../../utils/middleware/index.js';
 import {
-	getAllGroups,
-	createGroup,
-	updateGroup,
-	deleteGroup,
-	getGroupDetails,
-	getGroupMembers,
-	addMembersToGroup,
-	removeMembersFromGroup,
+  getAllGroupChats,
+  createGroupChat,
+  updateGroupChatDetails,
+  deleteGroupChat,
+  getGroupChatDetails,
+  getGroupMembers,
+  addMembersToGroup,
+  removeMembersFromGroup,
+  searchGroupsByName,
 } from './groups.controllers.js';
 
 const app = express();
@@ -35,11 +36,11 @@ groupRouter.use(
 	getCurrentWorkspace
 );
 
-groupRouter.get('/:workspaceId/groups', getAllGroups);
-groupRouter.post('/:workspaceId/groups', createGroup);
-groupRouter.get('/:workspaceId/groups/:groupId', getGroupDetails);
-groupRouter.patch('/:workspaceId/groups/:groupId', updateGroup);
-groupRouter.delete('/:workspaceId/groups/:groupId', deleteGroup);
+groupRouter.get('/:workspaceId/groups', getAllGroupChats);
+groupRouter.post('/:workspaceId/groups', createGroupChat);
+groupRouter.get('/:workspaceId/groups/:groupId', getGroupChatDetails);
+groupRouter.patch('/:workspaceId/groups/:groupId', updateGroupChatDetails);
+groupRouter.delete('/:workspaceId/groups/:groupId', deleteGroupChat);
 groupRouter.get('/:workspaceId/groups/:groupId/members', getGroupMembers);
 groupRouter.post(
 	'/:workspaceId/groups/:groupId/add-members',
