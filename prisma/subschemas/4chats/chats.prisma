@@ -56,7 +56,7 @@ model GroupMessage {
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
   replies     GroupMessage[]           @relation("ThreadParentGroupMessage")
   attachments GroupMessageAttachment[]
@@ -121,7 +121,7 @@ model DirectMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   replies         DirectMessage[] @relation("ThreadParentDirectMessage")
 
   createdAt DateTime @default(now())

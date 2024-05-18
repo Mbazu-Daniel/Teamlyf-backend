@@ -9,7 +9,7 @@ model File {
     fileName       String
     fileType       String
     fileSize       Int
-    fileUrl        String @db.LongText()
+    fileUrl        String
     fileIdentifier String
 
     description String?
@@ -49,7 +49,7 @@ model Folder {
     employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
     parentFolderId String?
-    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
     childFolders   Folder[] @relation("ChildFolders")
 
     mappings FileFolderMapping[]
@@ -76,7 +76,7 @@ model FileFolderMapping {
     folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
-    
+
     @@index([fileId, folderId])
     @@index([fileId])
     @@index([folderId])

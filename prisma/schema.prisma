@@ -1,11 +1,11 @@
-//🧩Don't Edit this file.✨Generated in Sat May 18 2024 13:02:08 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Sat May 18 2024 19:35:54 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
 provider = "prisma-client-js"
 binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 datasource db {
-provider = "mysql"
+provider = "postgresql"
 url      = env("DATABASE_URL")
 relationMode = "prisma"
 }
@@ -1061,7 +1061,7 @@ model Group {
   id          String    @id @default(cuid())
   name        String
   description String?   @db.Text
-  icon   String?
+  icon        String?
   groupType   GroupType @default(TEXT)
 
   lastMessageAt DateTime?
@@ -1073,8 +1073,8 @@ model Group {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   groupMessages GroupMessage[]
-
-  groupMembers GroupMembers[]
+  groupMembers  GroupMembers[]
+  attachments   GroupAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1101,7 +1101,6 @@ model GroupMembers {
 model GroupMessage {
   id        String    @id @default(cuid())
   text      String    @db.Text
-  fileUrl   String?   @db.Text
   deleted   Boolean   @default(false)
   read      Boolean   @default(false)
   readAt    DateTime?
@@ -1115,15 +1114,33 @@ model GroupMessage {
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
-  replies GroupMessage[] @relation("ThreadParentGroupMessage")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  replies     GroupMessage[]           @relation("ThreadParentGroupMessage")
+  attachments GroupMessageAttachment[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
 
   @@index([groupId, employeeId])
   @@index([parentMessageId])
+}
+
+model GroupAttachment {
+  id             String   @id @default(cuid())
+  groupId        String
+  group          Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fileUrl        String   @db.Text
+  fileIdentifier String
+  createdAt      DateTime @default(now())
+}
+
+model GroupMessageAttachment {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  fileUrl        String       @db.Text
+  fileIdentifier String
+  createdAt      DateTime     @default(now())
 }
 
 model Conversation {
@@ -1162,7 +1179,7 @@ model DirectMessage {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   parentMessageId String?
-  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   replies         DirectMessage[] @relation("ThreadParentDirectMessage")
 
   createdAt DateTime @default(now())
@@ -1205,7 +1222,7 @@ model File {
     fileName       String
     fileType       String
     fileSize       Int
-    fileUrl        String @db.LongText()
+    fileUrl        String
     fileIdentifier String
 
     description String?
@@ -1245,7 +1262,7 @@ model Folder {
     employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
     parentFolderId String?
-    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
     childFolders   Folder[] @relation("ChildFolders")
 
     mappings FileFolderMapping[]
@@ -1272,7 +1289,7 @@ model FileFolderMapping {
     folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now())
-    
+
     @@index([fileId, folderId])
     @@index([fileId])
     @@index([folderId])
