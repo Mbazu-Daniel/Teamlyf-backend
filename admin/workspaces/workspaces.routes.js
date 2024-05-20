@@ -1,5 +1,8 @@
 import express from "express";
-import { verifyToken } from "../../utils/middleware/authenticate.js";
+import {
+  verifyToken,
+  verifyLogin,
+} from "../../utils/middleware/authenticate.js";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -30,21 +33,17 @@ const workspacesRouter = express.Router();
 app.use(
   "/workspace",
   workspacesRouter
-
   /* 
   
   #swagger.tags = ['Workspace']
   */
 );
 
-workspacesRouter.use("/workspace", verifyToken);
+workspacesRouter.use(verifyLogin);
 
 workspacesRouter.post("/", validateCreateWorkspace, createWorkspace);
 workspacesRouter.get("/", getAllWorkspaces);
-workspacesRouter.get(
-  "/current-user",
-  getUserWorkspaces
-);
+workspacesRouter.get("/current-user", getUserWorkspaces);
 workspacesRouter.get(
   "/count",
   getCurrentWorkspace,

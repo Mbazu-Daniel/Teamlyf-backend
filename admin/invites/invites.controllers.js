@@ -73,8 +73,9 @@ const generateInviteLink = asyncHandler(async (req, res) => {
 const joinWorkspace = asyncHandler(async (req, res) => {
   const { inviteToken } = req.params;
   const { fullName, email, password } = req.body;
+  console.log("🚀 ~ joinWorkspace ~ password:", password);
   try {
-    // Find the invite link in the database using Prisma
+    // get invite from the token
     const invite = await prisma.invite.findFirst({
       where: { token: inviteToken },
     });
@@ -87,6 +88,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 
     const invitedEmail = invite.email.toLowerCase();
 
+    // Check if the user already exists in the database
     const existingUser = await prisma.user.findUnique({
       where: { email: invitedEmail },
     });
@@ -103,21 +105,22 @@ const joinWorkspace = asyncHandler(async (req, res) => {
           user: { connect: { id: existingUser.id } },
         },
       });
-      const toDeleteInvite = await prisma.invite.findFirst({
-        where: { token: inviteToken },
-      });
+
       await prisma.invite.delete({
-        where: { id: toDeleteInvite.id, token: inviteToken },
+        where: { id: invite.id },
       });
       return res.status(200).json(newEmployee);
     }
 
-    if (!fullName || email || !password) {
+    // Validate input fields for new user creation
+    if (!fullName || !password) {
       return res
         .status(400)
-        .json({ error: "Full name, email and password are required" });
+        .json({ error: "Full name and password are required" });
     }
 
+    console.log("🚀 ~ joinWorkspace ~ password:", password);
+    // Create a new user and employee profile
     const hashedPassword = await generateHashedPassword(password, SALT);
 
     const newUser = await prisma.user.create({
@@ -137,14 +140,9 @@ const joinWorkspace = asyncHandler(async (req, res) => {
       },
     });
 
-    const toDeleteInvite = await prisma.invite.findFirst({
-      where: { token: inviteToken },
-    });
-
     await prisma.invite.delete({
       where: {
-        id: toDeleteInvite.id,
-        token: inviteToken,
+        id: invite.id,
       },
     });
 

@@ -6,8 +6,8 @@ import {
 } from '../../utils/middleware/index.js';
 
 import {
-	getOrCreateConversation,
-	getConversationById,
+	getOrCreateOneOnOneChat,
+	getAllConversations,
 } from './conversations.controllers.js';
 
 const conversationRouter = express.Router();
@@ -30,10 +30,10 @@ conversationRouter.use(
 	getCurrentWorkspace
 );
 
-conversationRouter.post('/:workspaceId/conversations', getOrCreateConversation);
+conversationRouter.post('/:workspaceId/chat', getOrCreateOneOnOneChat);
 conversationRouter.get(
-	'/:workspaceId/conversations/:conversationId',
-	getConversationById
+	'/:workspaceId/chat/:conversationId',
+	getAllConversations
 );
 
 export default conversationRouter;

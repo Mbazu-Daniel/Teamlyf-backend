@@ -1,12 +1,10 @@
 import pkg from "@prisma/client";
-const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupRole } = pkg;
+const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupMemberRole } = pkg;
 import asyncHandler from "express-async-handler";
 import { generateUniqueId } from "../../utils/helpers/index.js";
 
-
 const prisma = new PrismaClient();
 // TODO: set permission for update and delete workspace to only employee with Admin and owner role
-
 
 const workspaceSelectOptions = {
   id: true,
@@ -83,7 +81,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
     const newGroup = await prisma.group.create({
       data: {
         name: defaultName,
-        employee: { connect: { id: newEmployee.id } },
+        createdBy: { connect: { id: newEmployee.id } },
         workspace: { connect: { id: newWorkspace.id } },
       },
     });
@@ -93,7 +91,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
       data: {
         group: { connect: { id: newGroup.id } },
         member: { connect: { id: newEmployee.id } },
-        role: GroupRole.ADMIN,
+        role: GroupMemberRole.ADMIN,
       },
     });
 
