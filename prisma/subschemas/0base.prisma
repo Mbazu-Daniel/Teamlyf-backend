@@ -14,7 +14,7 @@
 // binaryTargets = ["native", "rhel-openssl-1.0.x"]
 //}
 //datasource db {
-//  provider = "mysql"
+//  provider = "postgresql"
 //  url      = env("DATABASE_URL")
 // relationMode = "prisma"
 //}

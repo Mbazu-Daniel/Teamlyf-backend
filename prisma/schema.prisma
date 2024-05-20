@@ -1,29 +1,33 @@
-//🧩Don't Edit this file.✨Generated in Fri Feb 09 2024 22:43:46 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Mon May 20 2024 07:19:29 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+provider = "prisma-client-js"
+binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
-
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+provider = "postgresql"
+url      = env("DATABASE_URL")
+relationMode = "prisma"
 }
-
+// TODO: add Notification
 model User {
-  id                 String       @id @default(cuid())
-  email              String       @unique
-  password           String
-  role               UserRole     @default(BASIC)
-  source             SourceType   @default(OTHER)
-  authStrategy       AuthStrategy @default(EMAIL)
-  googleId           String?      @unique
-  githubId           String?      @unique
+  id           String       @id @default(cuid())
+  email        String       @unique
+  password     String
+  role         UserRole     @default(BASIC)
+  source       SourceType   @default(OTHER)
+  authStrategy AuthStrategy @default(EMAIL_PASSWORD)
+  googleId     String?      @unique
+  githubId     String?      @unique
+
   passwordResetToken String?
   passwordResetAt    DateTime?
-  workspaces         Workspace[]
-  employees          Employee[]
+  refreshToken       String?
+
+  workspaces            Workspace[]
+  employees             Employee[]
+  announcement          Announcement[]
+  announcementRecipient AnnouncementRecipient[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -39,21 +43,33 @@ model Workspace {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  employees       Employee[]
-  teams           Team[]
-  invite          Invite[]
+  // ADMIN
+  invite Invite[]
+
+  // PM/TASKS
   projects        Project[]
   projectPriority CustomProjectPriority[]
   taskPriority    CustomTaskPriority[]
   taskStatus      CustomTaskStatus[]
   tasks           Task[]
-  leaves          Leave[]
-  leaveTypes      LeaveType[]
 
-  leaveComment LeaveComment[]
-  group        Group[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  // HR
+  employees     Employee[]
+  teams         Team[]
+  leaves        Leave[]
+  leaveTypes    LeaveType[]
+  jobs          Job[]
+  leaveComment  LeaveComment[]
+  group         Group[]
+  events        Event[]
+  notifications Notification[]
+
+  // FILE MANAGER 
+  files   File[]
+  folders Folder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([name])
@@ -77,7 +93,36 @@ model Invite {
 
   @@index([employeeId])
   @@index([workspaceId])
-  @@map("Invite")
+}
+
+model AnnouncementRecipient {
+  id             String @id @default(cuid())
+  announcementId String
+  recipientId    String
+  recipient      User   @relation(fields: [recipientId], references: [id])
+
+  announcements Announcement @relation(fields: [announcementId], references: [id])
+
+  @@index([recipientId])
+  @@index([announcementId])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
+
+  userId    String
+  createdBy User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recipients AnnouncementRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum SourceType {
@@ -99,15 +144,28 @@ enum UserRole {
 }
 
 enum AuthStrategy {
-  EMAIL
   GITHUB
   GOOGLE
+  EMAIL_PASSWORD
 }
-
 // Project Management 
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
 // TODO: thinking of adding task priority model as well to track  task priority for  project
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      MilestoneStatus @default(PLANNED)
+  projects    Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Project {
   id          String  @id @default(cuid())
   name        String  @unique
@@ -133,6 +191,9 @@ model Project {
   projectCreatorId String
   projectCreator   Employee @relation(fields: [projectCreatorId], references: [id], onDelete: Cascade)
 
+  milestoneId String?
+  milestone   Milestone? @relation(fields: [milestoneId], references: [id])
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
@@ -145,6 +206,7 @@ model Project {
 
   @@index([projectCreatorId])
   @@index([workspaceId])
+  @@index([milestoneId])
   @@index([customTaskStatusId])
   @@index([projectStatusId])
   @@index([projectPriorityId])
@@ -186,7 +248,6 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([spaceId])
   @@index([workspaceId])
   @@index([employeeId])
   @@index([projectId])
@@ -223,18 +284,6 @@ model Subtask {
   @@index([employeeId])
   @@index([taskId])
 }
-
-// model TaskTag {
-//   id      String @id @default(cuid())
-//   tagName String
-
-//   tasks Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([tagName])
-// }
 
 model TaskComment {
   id   String @id @default(cuid())
@@ -455,18 +504,6 @@ model ProjectStatus {
   @@unique([name])
 }
 
-// model Milestone {
-//   id          String   @id @default(cuid())
-//   name        String
-//   startDate   DateTime
-//   endDate     DateTime
-//   description String
-//   task        Task[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
 // ENUMS
 enum TaskAction {
   CREATED_TASKS
@@ -497,7 +534,13 @@ enum ProjectRole {
   ADMIN
 }
 
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+}
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+// TODO: add employee contact list to store some contact details ?
 
 model Employee {
   id            String    @id @default(cuid())
@@ -525,40 +568,51 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  // spaces          Space[]
-  subtasks     Subtask[]
-  taskComments TaskComment[]
-  taskHistory  TaskHistory[]
-  tasks        Task[]
-  taskFiles    TaskFile[]
-  projects     Project[]
+  invite Invite[]
 
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
-
+  // PM/TASKS
+  subtasks            Subtask[]
+  taskComments        TaskComment[]
+  taskHistory         TaskHistory[]
+  projectHistory      ProjectHistory[]
+  tasks               Task[]
+  taskFiles           TaskFile[]
+  projects            Project[]
+  employeeTeam        EmployeeTeam[]
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  attendance   Attendance[]
-  leave        Leave[]
-  education    Education[]
-  leaveComment LeaveComment[]
-  leaveType    LeaveType[]
-  job          Job[]
-  timesheet    Timesheet[]
-  payroll      Payroll[]
+  // HR
+  leave                 Leave[]
+  leaveComment          LeaveComment[]
+  leaveType             LeaveType[]
+  educations            Education[]
+  attendances           Attendance[]
+  jobs                  Job[]
+  events                Event[]
+  notifications         Notification[]
+  notificationRecipient NotificationRecipient[]
+  timesheets            Timesheet[]
+  payroll               Payroll[]
 
-  messages               Message[]
-  conversationsInitiated Conversation[]  @relation("EmployeeOne")
-  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  // CHAT
+  groupMessages          GroupMessage[]
+  conversationsInitiated Conversation[]            @relation("Sender")
+  conversationsReceived  Conversation[]            @relation("Receiver")
   directMessages         DirectMessage[]
-
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  ProjectHistory ProjectHistory[]
-  Group          Group[]
-  GroupMembers   GroupMembers[]
+  groups                 Group[]
+  groupMembers           GroupMembers[]
+  conversationVisibility ConversationVisibility[]
+  chatVisibility         DirectMessageVisibility[]
+  groupVisibility        GroupMessageVisibility[]
+  // FILE MANAGER 
+  files                  File[]
+  folders                Folder[]
+  sharedFiles            SharedLinkEmployee[]
+  trashbins              TrashBin[]
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
@@ -598,42 +652,6 @@ model EmployeeTeam {
 
   @@index([employeeId])
   @@index([teamId])
-}
-
-model Attendance {
-  id           String           @id @default(cuid())
-  clockIn      DateTime
-  clockOut     DateTime?
-  totalHour    Float?
-  late         Float?
-  earlyLeaving Float?
-  overtime     Float?
-  break        Float?
-  state        AttendanceStatus
-
-  employeeId String
-  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
-}
-
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
 }
 
 model Leave {
@@ -717,13 +735,33 @@ model LeaveHistory {
   updatedBy     String?
 }
 
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
 model Education {
   id String @id @default(cuid())
 
-  institution   String?
-  courseOfStudy String?
+  institution   String
+  courseOfStudy String
   result        String?
-  degree        String?
+  degree        String
   startDate     DateTime?
   endDate       DateTime?
   status        Boolean   @default(true)
@@ -737,30 +775,51 @@ model Education {
   @@index([employeeId])
 }
 
-model PerformanceAppraisal {
-  id String @id @default(cuid())
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  recipientId    String
+  recipient      Employee @relation(fields: [recipientId], references: [id])
 
-  appraisalDate      DateTime
-  rating             Float
-  comments           String
-  goals              String
-  achievements       String
-  managerComments    String
-  appraisalQuestions Json
-  appraisalResponse  AppraisalResponse[]
+  notification Notification @relation(fields: [notificationId], references: [id])
 }
 
-model AppraisalResponse {
-  id String @id @default(cuid())
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
 
-  appraisalId          String
-  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  question String
-  response String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
 
-  // @@index([employeeId])
-  @@index([appraisalId])
+  recipients NotificationRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 // PAYMENT
@@ -840,50 +899,114 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id                   String                 @id @default(cuid())
-  title                String
-  category             String?
-  requirement          String
-  branch               String?
-  email                String
-  address              String
-  salaryRange          Int
-  noOfPositions        Int
-  company              String
-  types                String
-  education            String
-  industry             String
-  experience           String
-  employee             Employee?              @relation(fields: [employeeId], references: [id])
-  employeeId           String?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  JobApplicantResponse JobApplicantResponse[]
+  id            String                 @id @default(cuid())
+  title         String
+  description   String
+  category      String?
+  branch        String?
+  email         String?
+  address       String?
+  salaryRange   Int?
+  noOfPositions Int?
+  // type          String
+  // education     String
+  // industry      String
+  // experience    String
+  isActive      Boolean                @default(true)
+  jobApplicant  JobApplicantResponse[]
+
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // TODO: Recieves external user applications
 // TODO: When application is received send an email to the applicant
-// TODO: When application is Rejected send a custom email 
+// TODO: When application is rejected send a custom email 
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
-  id String @id @default(cuid())
-
-  job   Job    @relation(fields: [jobId], references: [id])
-  jobId String
+  id       String @id @default(cuid())
+  fullName String
+  email    String
+  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId    String
 
   coverLetter String?
   resume      String
 
   other Json?
 
-  status ApplicationStatus @default(PENDING)
+  status JobApplicationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum ApplicationStatus {
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  appraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  flier       String?
+  description String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean   @default(false)
+  timezone    String    @default("GMT")
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
+}
+
+// TODO: handle holidays (public and weekly holiday)
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum JobApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
@@ -919,23 +1042,41 @@ enum TeamRole {
   ADMIN
 }
 
+enum NotificationType {
+  GENERAL
+  WORKSPACE
+}
+
+// TODO: use this on the frontend 
+// enum Degree {
+//   Bachelors
+//   Masters
+//   Phd
+//   Associates
+//   Professional
+//   Certificate
+//   Diploma
+//   Honorary
+// }
 // Chat communication model 
 model Group {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  description String?     @db.Text
-  thumbnail   String?
-  type        MessageType @default(TEXT)
+  description String?   @db.Text
+  icon        String?
+  groupType   GroupType @default(TEXT)
+
+  lastMessageAt DateTime?
 
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  messages Message[]
-
-  groupMembers GroupMembers[]
+  groupMessages GroupMessage[]
+  groupMembers  GroupMembers[]
+  attachments   GroupAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -945,12 +1086,13 @@ model Group {
 }
 
 model GroupMembers {
-  id       String    @id @default(cuid())
-  group    Group     @relation(fields: [groupId], references: [id])
+  id       String          @id @default(cuid())
+  group    Group           @relation(fields: [groupId], references: [id])
   groupId  String
-  member   Employee  @relation(fields: [memberId], references: [id])
+  member   Employee        @relation(fields: [memberId], references: [id])
   memberId String
-  role     GroupRole @default(ADMIN)
+  role     GroupMemberRole @default(MEMBER)
+  status   MemberStatus    @default(ACTIVE)
 
   createdAt DateTime @default(now())
 
@@ -958,14 +1100,14 @@ model GroupMembers {
   @@index([memberId])
 }
 
-model Message {
-  id   String @id @default(cuid())
-  text String @db.Text
-
-  fileUrl String? @db.Text
-
-  deleted Boolean @default(false)
-  read    Boolean @default(false)
+model GroupMessage {
+  id        String    @id @default(cuid())
+  text      String    @db.Text
+  deleted   Boolean   @default(false)
+  read      Boolean   @default(false)
+  readAt    DateTime?
+  deletedAt DateTime?
+  editedAt  DateTime?
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -973,25 +1115,73 @@ model Message {
   groupId String
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  parentMessageId String?
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  replies     GroupMessage[]           @relation("ThreadParentGroupMessage")
+  attachments GroupMessageAttachment[]
+  visibility  GroupMessageVisibility[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
 
   @@index([groupId, employeeId])
+  @@index([parentMessageId])
+}
+
+model GroupAttachment {
+  id             String @id @default(cuid())
+  groupId        String
+  group          Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String @db.Text
+  fileIdentifier String
+
+  createdAt DateTime @default(now())
+}
+
+model GroupMessageAttachment {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String       @db.Text
+  fileIdentifier String
+  createdAt      DateTime     @default(now())
+}
+
+model GroupMessageVisibility {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  chatUserId     String
+  chatUser       Employee     @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible      Boolean      @default(true)
+
+  @@unique([groupMessageId, chatUserId])
 }
 
 model Conversation {
   id String @id @default(cuid())
 
-  employeeOneId String
-  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   Employee @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
 
-  employeeTwoId String
-  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   Employee @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  lastMessageAt DateTime?
 
   directMessages DirectMessage[]
+  visibility     ConversationVisibility[]
 
-  @@unique([employeeOneId, employeeTwoId])
-  @@index([employeeTwoId, employeeOneId])
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, senderId])
 }
 
 model DirectMessage {
@@ -999,21 +1189,66 @@ model DirectMessage {
   content String  @db.Text
   fileUrl String? @db.Text
 
+  deleted   Boolean       @default(false)
+  status    MessageStatus @default(SENT)
+  readAt    DateTime?
+  deletedAt DateTime?
+
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  deleted Boolean @default(false)
+  parentMessageId String?
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies         DirectMessage[] @relation("ThreadParentDirectMessage")
+
+  attachments DirectMessageAttachment[]
+  visibility  DirectMessageVisibility[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId, conversationId])
+  @@index([parentMessageId])
 }
 
-enum MessageType {
+model DirectMessageAttachment {
+  id              String        @id @default(cuid())
+  directMessageId String
+  directMessage   DirectMessage @relation(fields: [directMessageId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileType        String
+  fileSize        Int
+  fileUrl         String        @db.Text
+  fileIdentifier  String
+  createdAt       DateTime      @default(now())
+}
+
+model DirectMessageVisibility {
+  id              String        @id @default(cuid())
+  directMessageId String
+  directMessage   DirectMessage @relation(fields: [directMessageId], references: [id], onDelete: Cascade)
+  chatUserId      String
+  chatUser        Employee      @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible       Boolean       @default(true)
+
+  @@unique([directMessageId, chatUserId])
+}
+
+model ConversationVisibility {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  chatUserId     String
+  chatUser       Employee     @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible      Boolean      @default(true)
+
+  @@unique([conversationId, chatUserId])
+}
+
+enum GroupType {
   TEXT
   AUDIO
   VIDEO
@@ -1025,120 +1260,178 @@ enum MessageStatus {
   SENT
 }
 
-enum GroupRole {
+enum GroupMemberRole {
   ADMIN
   MODERATOR
   MEMBER
   GUEST
 }
 
-// // File model
-// model File {
-//   fileId          Int      @id @default(autoincrement())
-//   employeeId          Int
-//   folderId        Int?
-//   filename         String
-//   filetype         String
-//   size             Int
-//   is_deleted       Boolean @default(false)
-//   version_number   Int
-//   file_content_type String
-//   file_content     String
-//   thumbnail_url    String
-//   download_count   Int
-//   tags             String[]
-//   access_control_type String
-//   created_at       DateTime @default(now())
-//   updated_at       DateTime
-//   metadata         Json
-//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-//   folder           Folder?  @relation(fields: [folderId], references: [folderId])
-//   permissions      Permission[]
-// }
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+}
+// TODO: files from tasks and any other attachments should be added to this file manager storage 
+// TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
+// TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
+// TODO: i want a situation when a file is created for a tasks, a folder can be created for the Project that houses that tasks, this goes the same for chats and LMS
 
-// // Folder model
-// model Folder {
-//   folderId        Int      @id @default(autoincrement())
-//   employeeId          Int
-//   parent_folderId Int?
-//   folder_name      String
-//   created_at       DateTime @default(now())
-//   updated_at       DateTime
-//   is_deleted       Boolean @default(false)
-//   access_control_type String
-//   metadata         Json
-//   owner            Employee     @relation(fields: [employeeId], references: [employeeId])
-//   parentFolder     Folder?  @relation("ParentFolder", fields: [parent_folderId], references: [folderId])
-//   subFolders       Folder[] @relation("SubFolders")
-//   files            File[]
-//   permissions      Permission[]
-// }
+// File model
+model File {
+    id             String @id @default(cuid())
+    fileName       String
+    fileType       String
+    fileSize       Int
+    fileUrl        String
+    fileIdentifier String
 
-// // Permission model
-// model Permission {
-//   permissionId    Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   role             String
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
+    description String?
 
-// // Activity Log model
-// model ActivityLog {
-//   logId           Int      @id @default(autoincrement())
-//   employeeId          Int
-//   action_type      String
-//   targetId        Int
-//   target_type      String
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-// // SharedLink model
-// model SharedLink {
-//   linkId          Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   link_url         String
-//   expiration_date  DateTime
-//   password_protected Boolean
-//   access_count     Int
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
+    employeeId String
+    uploadBy   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-// // Notification model
-// model Notification {
-//   notificationId  Int      @id @default(autoincrement())
-//   employeeId          Int
-//   senderId        Int
-//   notification_type String
-//   targetId        Int
-//   target_type      String
-//   is_read          Boolean
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   sender           Employee     @relation("Sender", fields: [senderId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
-// }
+    mappings FileFolderMapping[]
+    versions FileVersion[]
 
-// // Comment model
-// model Comment {
-//   commentId       Int      @id @default(autoincrement())
-//   employeeId          Int
-//   targetId        Int
-//   target_type      String
-//   comment_text     String
-//   timestamp        DateTime @default(now())
-//   employee             Employee     @relation(fields: [employeeId], references: [employeeId])
-//   file             File?    @relation(fields: [targetId], references: [fileId], when: [{target_type: "file"}])
-//   folder           Folder?  @relation(fields: [targetId], references: [folderId], when: [{target_type: "folder"}])
+    trashbin   TrashBin[]
+    sharedLink SharedLink[]
+
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([workspaceId])
+    @@index([employeeId])
+}
+
+// Folder model
+model Folder {
+    id          String  @id @default(cuid())
+    name        String
+    description String?
+
+    workspaceId String
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+    employeeId String
+    employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+    parentFolderId String?
+    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+    childFolders   Folder[] @relation("ChildFolders")
+
+    mappings FileFolderMapping[]
+
+    trashbin   TrashBin[]
+    sharedLink SharedLink[]
+
+    isTrashed Boolean @default(false)
+    isStarred Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([workspaceId])
+    @@index([employeeId])
+    @@index([parentFolderId])
+}
+
+model FileFolderMapping {
+    id       String @id @default(cuid())
+    fileId   String
+    file     File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+    folderId String
+    folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@index([fileId, folderId])
+    @@index([fileId])
+    @@index([folderId])
+}
+
+model FileVersion {
+    id      String @id @default(cuid())
+    file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+    fileId  String
+    version Int
+
+    timestamp DateTime //Timestamp of the version
+    notes     String? // Additional notes or comments
+
+    createdAt DateTime @default(now())
+
+    @@index([fileId])
+}
+
+// TrashBin model for deleted files
+
+// TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
+model TrashBin {
+    id         String   @id @default(cuid())
+    folderId   String?
+    folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+    fileId     String?
+    file       File?    @relation(fields: [fileId], references: [id], onDelete: SetNull)
+    employeeId String
+    deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+    reason    String?
+    deletedAt DateTime @default(now())
+
+    @@index([folderId])
+    @@index([fileId])
+    @@index([employeeId])
+}
+
+enum SharedLinkVisibility {
+    RESTRICTED
+    EVERYONE
+}
+
+// Share model for file/folder sharing
+model SharedLink {
+    id         String               @id @default(cuid())
+    file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
+    fileId     String?
+    folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
+    folderId   String?
+    sharedWith SharedLinkEmployee[]
+    // password   String?
+    visibility SharedLinkVisibility @default(RESTRICTED)
+    link       String?
+
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+
+    @@index([folderId])
+    @@index([fileId])
+}
+
+model SharedLinkEmployee {
+    id           String     @id @default(cuid())
+    sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
+    sharedLinkId String
+    employee     Employee   @relation(fields: [employeeId], references: [id])
+    employeeId   String
+
+    @@index([sharedLinkId])
+    @@index([employeeId])
+}
+
+// ActivityLog model
+// model FileActivityLog {
+//     id         String   @id @default(cuid())
+//     employee   Employee @relation(fields: [employeeId], references: [id])
+//     employeeId String
+//     action     String
+//     timestamp  DateTime @default(now())
+//     // Additional attributes
+//     ipAddress  String? // IP address of the user performing the action
+//     userAgent  String? // User agent of the client application
 // }

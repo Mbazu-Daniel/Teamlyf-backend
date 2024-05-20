@@ -3,15 +3,19 @@ const { PrismaClient, UserRole } = pkg;
 const prisma = new PrismaClient();
 import bcrypt from "bcryptjs";
 import asyncHandler from "express-async-handler";
-import generateResetToken from "../../utils/services/generateResetToken.js";
+import {
+  generateResetToken,
+  generateHashedPassword,
+} from "../../utils/helpers/index.js";
 import sendMail from "../../utils/services/sendMail.js";
-import generateHashedPassword from "../../utils/services/generateHashPassword.js";
 
+import dotenv from "dotenv";
+dotenv.config();
 const BASE_URL = process.env.FRONTEND_URL;
-const saltRounds = 10;
+const SALT = process.env.SALT;
 const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     const lowercaseEmail = email.toLowerCase();
 
@@ -21,13 +25,21 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (!existingUser) {
-      const hashedPassword = await generateHashedPassword(password, saltRounds);
+      const hashedPassword = await generateHashedPassword(password, SALT);
 
-      await prisma.user.create({
-        data: { email: lowercaseEmail, password: hashedPassword, role },
+      const newUser = await prisma.user.create({
+        data: { email: lowercaseEmail, password: hashedPassword },
+
+        select: {
+          id: true,
+          email: true,
+          role: true,
+        },
       });
 
-      return res.status(201).json({ message: "User registered successfully" });
+      return res
+        .status(201)
+        .json({ newUser: newUser, message: "User registered successfully" });
     }
     res.status(400).json({ error: "User already exists" });
   } catch (error) {
@@ -43,7 +55,7 @@ const registerAdminUser = asyncHandler(async (req, res) => {
     const lowercaseEmail = email.toLowerCase();
 
     // Check if the user making the request is a superAdmin
-    const currentUser = req.user; // Replace this with your actual user identification method
+    const currentUser = req.user;
 
     if (!currentUser.role === UserRole.SUPER_ADMIN) {
       return res.status(403).json({
@@ -57,7 +69,7 @@ const registerAdminUser = asyncHandler(async (req, res) => {
     });
 
     if (!existingUser) {
-      const hashedPassword = await generateHashedPassword(password, saltRounds);
+      const hashedPassword = await generateHashedPassword(password, SALT);
 
       await prisma.user.create({
         data: { email: lowercaseEmail, password: hashedPassword, role },
@@ -136,7 +148,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await generateHashedPassword(password, saltRounds);
+    const hashedPassword = await generateHashedPassword(password, SALT);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -157,7 +169,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 const changePassword = asyncHandler(async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    const userId = req.user.id; // Assuming you have the user's ID in the request
+    const userId = req.user.id;
 
     // Find the user by ID
     const user = await prisma.user.findUnique({
@@ -175,7 +187,7 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await generateHashedPassword(password, saltRounds);
+    const hashedPassword = await generateHashedPassword(password, SALT);
 
     await prisma.user.update({
       where: { id: userId },

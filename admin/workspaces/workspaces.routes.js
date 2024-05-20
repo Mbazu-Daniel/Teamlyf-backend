@@ -1,93 +1,103 @@
-import express from 'express';
-import { verifyToken } from '../../utils/middleware/authenticate.js';
+import express from "express";
 import {
-	createWorkspace,
-	deleteWorkspace,
-	getUserWorkspaces,
-	getWorkspaceById,
-	updateWorkspace,
-	getWorkspaceOwners,
-	transferWorkspaceOwnership,
-	leaveWorkspace,
-	changeWorkspaceInviteCode,
-	getTotalWorkspacesCount,
-	joinWorkspaceUsingInviteCode,
-} from './workspaces.controllers.js';
+  verifyToken,
+  verifyLogin,
+} from "../../utils/middleware/authenticate.js";
 import {
-	getCurrentEmployee,
-	getCurrentWorkspace,
-} from '../../utils/middleware/index.js';
+  createWorkspace,
+  deleteWorkspace,
+  getUserWorkspaces,
+  getWorkspaceById,
+  updateWorkspace,
+  getWorkspaceOwners,
+  transferWorkspaceOwnership,
+  leaveWorkspace,
+  changeWorkspaceInviteCode,
+  getTotalWorkspacesCount,
+  joinWorkspaceUsingInviteCode,
+  getAllWorkspaces,
+} from "./workspaces.controllers.js";
 import {
-	validateCreateWorkspace,
-	validateJoinWorkspace,
-	validateUpdateWorkspace,
-} from './workspaces.validate.js';
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../../utils/middleware/index.js";
+import {
+  validateCreateWorkspace,
+  validateJoinWorkspace,
+  validateUpdateWorkspace,
+} from "./workspaces.validate.js";
 
 const app = express();
 const workspacesRouter = express.Router();
 
 app.use(
-	'/workspace',
-	workspacesRouter
-
-	/* 
+  "/workspace",
+  workspacesRouter
+  /* 
   
   #swagger.tags = ['Workspace']
   */
 );
 
-workspacesRouter.use('/workspace', verifyToken);
+workspacesRouter.use(verifyLogin);
 
-workspacesRouter.post('/', validateCreateWorkspace, createWorkspace);
-workspacesRouter.get('/current-user', getCurrentEmployee, getUserWorkspaces);
-workspacesRouter.get('/count', getCurrentEmployee, getTotalWorkspacesCount);
+workspacesRouter.post("/", validateCreateWorkspace, createWorkspace);
+workspacesRouter.get("/", getAllWorkspaces);
+workspacesRouter.get("/current-user", getUserWorkspaces);
 workspacesRouter.get(
-	'/:workspaceId',
+  "/count",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  getTotalWorkspacesCount
+);
+workspacesRouter.get(
+  "/:workspaceId",
 
-	getCurrentEmployee,
-	getWorkspaceById
+  getCurrentEmployee,
+  getCurrentWorkspace,
+  getWorkspaceById
 );
 workspacesRouter.patch(
-	'/:workspaceId',
-	getCurrentWorkspace,
-	getCurrentEmployee,
-	validateUpdateWorkspace,
-	updateWorkspace
+  "/:workspaceId",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  validateUpdateWorkspace,
+  updateWorkspace
 );
 workspacesRouter.delete(
-	'/:workspaceId',
-	getCurrentWorkspace,
-	getCurrentEmployee,
-	deleteWorkspace
+  "/:workspaceId",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  deleteWorkspace
 );
 workspacesRouter.post(
-	'/:workspaceId/transfer-owner',
-	getCurrentWorkspace,
-	getCurrentEmployee,
-	transferWorkspaceOwnership
+  "/:workspaceId/transfer-owner",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  transferWorkspaceOwnership
 );
 workspacesRouter.post(
-	'/:workspaceId/leave-workspace',
-	getCurrentWorkspace,
-	getCurrentEmployee,
-	leaveWorkspace
+  "/:workspaceId/leave-workspace",
+  getCurrentWorkspace,
+  getCurrentEmployee,
+  leaveWorkspace
 );
 workspacesRouter.get(
-	'/workspace-owners',
-	getCurrentEmployee,
-	getWorkspaceOwners
+  "/workspace-owners",
+  getCurrentEmployee,
+  getWorkspaceOwners
 );
 
 workspacesRouter.patch(
-	'/:workspaceId/change-invite-code',
-	getCurrentEmployee,
-	changeWorkspaceInviteCode
+  "/:workspaceId/change-invite-code",
+  getCurrentEmployee,
+  changeWorkspaceInviteCode
 );
 workspacesRouter.post(
-	'/:workspaceId/join-with-invite-code',
-	getCurrentEmployee,
-	validateJoinWorkspace,
-	joinWorkspaceUsingInviteCode
+  "/:workspaceId/join-with-invite-code",
+  getCurrentEmployee,
+  validateJoinWorkspace,
+  joinWorkspaceUsingInviteCode
 );
 
 export default workspacesRouter;

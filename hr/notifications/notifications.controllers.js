@@ -3,6 +3,26 @@ import pkg from "@prisma/client";
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
+// Create a new notification
+const createNotification = asyncHandler(async (req, res) => {
+  const { message } = req.body;
+
+  try {
+    // Create the notification in the database
+    const newNotification = await prisma.notification.create({
+      data: {
+        employee: { connect: { id: req.employeeId } },
+        message,
+      },
+    });
+
+    res.status(201).json(newNotification);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Fetch all notifications for the user
 const getNotifications = asyncHandler(async (req, res) => {
   try {
@@ -58,4 +78,9 @@ const deleteNotification = asyncHandler(async (req, res) => {
   }
 });
 
-export { getNotifications, markNotificationAsRead, deleteNotification };
+export {
+  createNotification,
+  getNotifications,
+  markNotificationAsRead,
+  deleteNotification,
+};

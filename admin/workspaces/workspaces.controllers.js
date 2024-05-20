@@ -1,12 +1,10 @@
 import pkg from "@prisma/client";
-const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupRole } = pkg;
+const { EmployeeRole, PrismaClient, TeamRole, UserRole, GroupMemberRole } = pkg;
 import asyncHandler from "express-async-handler";
-import ShortUniqueId from "short-unique-id";
+import { generateUniqueId } from "../../utils/helpers/index.js";
 
 const prisma = new PrismaClient();
 // TODO: set permission for update and delete workspace to only employee with Admin and owner role
-// TODO: check existing workspace based on the current user and not general workspaces
-const { randomUUID } = new ShortUniqueId({ length: 10 });
 
 const workspaceSelectOptions = {
   id: true,
@@ -54,7 +52,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
         name: name,
         logo: logo || null,
         address: address || null,
-        inviteCode: randomUUID(),
+        inviteCode: generateUniqueId(),
         userId,
       },
 
@@ -83,7 +81,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
     const newGroup = await prisma.group.create({
       data: {
         name: defaultName,
-        employee: { connect: { id: newEmployee.id } },
+        createdBy: { connect: { id: newEmployee.id } },
         workspace: { connect: { id: newWorkspace.id } },
       },
     });
@@ -93,7 +91,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
       data: {
         group: { connect: { id: newGroup.id } },
         member: { connect: { id: newEmployee.id } },
-        role: GroupRole.ADMIN,
+        role: GroupMemberRole.ADMIN,
       },
     });
 
@@ -167,9 +165,20 @@ const createWorkspace = asyncHandler(async (req, res) => {
   }
 });
 
-// Get all workspaces
+// Get all  workspaces
+const getAllWorkspaces = asyncHandler(async (req, res) => {
+  try {
+    const workspaces = await prisma.workspace.findMany({});
+
+    res.status(200).json(workspaces);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+// Get users  workspaces
 const getUserWorkspaces = asyncHandler(async (req, res) => {
   const { email, id } = req.user;
+  const { workspaceId } = req.params;
   try {
     const workspaces = await prisma.workspace.findMany({
       where: {
@@ -421,7 +430,7 @@ const joinWorkspaceUsingInviteCode = asyncHandler(async (req, res) => {
 const changeWorkspaceInviteCode = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   const { employeeId } = req.employeeId;
-  const newInviteCode = randomUUID();
+  const newInviteCode = generateUniqueId();
 
   try {
     // Check if the user is an owner or admin
@@ -478,4 +487,5 @@ export {
   changeWorkspaceInviteCode,
   getTotalWorkspacesCount,
   joinWorkspaceUsingInviteCode,
+  getAllWorkspaces,
 };

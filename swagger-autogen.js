@@ -71,6 +71,9 @@ const config = {
       RemoveGroupCollaborators: {
         $memberIds: "string",
       },
+      TaskCount: {
+        $workspaceId: "string",
+      },
     },
   },
   schemes: ["http", "https"],

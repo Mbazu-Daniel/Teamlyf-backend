@@ -1,20 +1,22 @@
 // Chat communication model 
 model Group {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  description String?     @db.Text
-  thumbnail   String?
-  type        MessageType @default(TEXT)
+  description String?   @db.Text
+  icon        String?
+  groupType   GroupType @default(TEXT)
+
+  lastMessageAt DateTime?
 
   employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  messages Message[]
-
-  groupMembers GroupMembers[]
+  groupMessages GroupMessage[]
+  groupMembers  GroupMembers[]
+  attachments   GroupAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -24,12 +26,13 @@ model Group {
 }
 
 model GroupMembers {
-  id       String    @id @default(cuid())
-  group    Group     @relation(fields: [groupId], references: [id])
+  id       String          @id @default(cuid())
+  group    Group           @relation(fields: [groupId], references: [id])
   groupId  String
-  member   Employee  @relation(fields: [memberId], references: [id])
+  member   Employee        @relation(fields: [memberId], references: [id])
   memberId String
-  role     GroupRole @default(ADMIN)
+  role     GroupMemberRole @default(MEMBER)
+  status   MemberStatus    @default(ACTIVE)
 
   createdAt DateTime @default(now())
 
@@ -37,14 +40,14 @@ model GroupMembers {
   @@index([memberId])
 }
 
-model Message {
-  id   String @id @default(cuid())
-  text String @db.Text
-
-  fileUrl String? @db.Text
-
-  deleted Boolean @default(false)
-  read    Boolean @default(false)
+model GroupMessage {
+  id        String    @id @default(cuid())
+  text      String    @db.Text
+  deleted   Boolean   @default(false)
+  read      Boolean   @default(false)
+  readAt    DateTime?
+  deletedAt DateTime?
+  editedAt  DateTime?
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
@@ -52,25 +55,73 @@ model Message {
   groupId String
   group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  parentMessageId String?
+  parentMessage   GroupMessage? @relation("ThreadParentGroupMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  replies     GroupMessage[]           @relation("ThreadParentGroupMessage")
+  attachments GroupMessageAttachment[]
+  visibility  GroupMessageVisibility[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
 
   @@index([groupId, employeeId])
+  @@index([parentMessageId])
+}
+
+model GroupAttachment {
+  id             String @id @default(cuid())
+  groupId        String
+  group          Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String @db.Text
+  fileIdentifier String
+
+  createdAt DateTime @default(now())
+}
+
+model GroupMessageAttachment {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String       @db.Text
+  fileIdentifier String
+  createdAt      DateTime     @default(now())
+}
+
+model GroupMessageVisibility {
+  id             String       @id @default(cuid())
+  groupMessageId String
+  groupMessage   GroupMessage @relation(fields: [groupMessageId], references: [id], onDelete: Cascade)
+  chatUserId     String
+  chatUser       Employee     @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible      Boolean      @default(true)
+
+  @@unique([groupMessageId, chatUserId])
 }
 
 model Conversation {
   id String @id @default(cuid())
 
-  employeeOneId String
-  employeeOne   Employee @relation("EmployeeOne", fields: [employeeOneId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   Employee @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
 
-  employeeTwoId String
-  employeeTwo   Employee @relation("EmployeeTwo", fields: [employeeTwoId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   Employee @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  lastMessageAt DateTime?
 
   directMessages DirectMessage[]
+  visibility     ConversationVisibility[]
 
-  @@unique([employeeOneId, employeeTwoId])
-  @@index([employeeTwoId, employeeOneId])
+  createdAt DateTime @default(now())
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, senderId])
 }
 
 model DirectMessage {
@@ -78,21 +129,66 @@ model DirectMessage {
   content String  @db.Text
   fileUrl String? @db.Text
 
+  deleted   Boolean       @default(false)
+  status    MessageStatus @default(SENT)
+  readAt    DateTime?
+  deletedAt DateTime?
+
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
-  deleted Boolean @default(false)
+  parentMessageId String?
+  parentMessage   DirectMessage?  @relation("ThreadParentDirectMessage", fields: [parentMessageId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replies         DirectMessage[] @relation("ThreadParentDirectMessage")
+
+  attachments DirectMessageAttachment[]
+  visibility  DirectMessageVisibility[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId, conversationId])
+  @@index([parentMessageId])
 }
 
-enum MessageType {
+model DirectMessageAttachment {
+  id              String        @id @default(cuid())
+  directMessageId String
+  directMessage   DirectMessage @relation(fields: [directMessageId], references: [id], onDelete: Cascade)
+  fileName        String
+  fileType        String
+  fileSize        Int
+  fileUrl         String        @db.Text
+  fileIdentifier  String
+  createdAt       DateTime      @default(now())
+}
+
+model DirectMessageVisibility {
+  id              String        @id @default(cuid())
+  directMessageId String
+  directMessage   DirectMessage @relation(fields: [directMessageId], references: [id], onDelete: Cascade)
+  chatUserId      String
+  chatUser        Employee      @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible       Boolean       @default(true)
+
+  @@unique([directMessageId, chatUserId])
+}
+
+model ConversationVisibility {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  chatUserId     String
+  chatUser       Employee     @relation(fields: [chatUserId], references: [id], onDelete: Cascade)
+  isVisible      Boolean      @default(true)
+
+  @@unique([conversationId, chatUserId])
+}
+
+enum GroupType {
   TEXT
   AUDIO
   VIDEO
@@ -104,9 +200,14 @@ enum MessageStatus {
   SENT
 }
 
-enum GroupRole {
+enum GroupMemberRole {
   ADMIN
   MODERATOR
   MEMBER
   GUEST
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
 }

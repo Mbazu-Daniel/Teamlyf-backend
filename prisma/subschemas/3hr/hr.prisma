@@ -1,4 +1,5 @@
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
+// TODO: add employee contact list to store some contact details ?
 
 model Employee {
   id            String    @id @default(cuid())
@@ -26,37 +27,51 @@ model Employee {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  // spaces          Space[]
-  subtasks        Subtask[]
-  taskComments    TaskComment[]
-  taskHistory     TaskHistory[]
-  tasks     Task[]        
-  taskFiles       TaskFile[]
-  projects  Project[]    
+  invite Invite[]
 
-  employeeTeam EmployeeTeam[]
-  invite       Invite[]
-
+  // PM/TASKS
+  subtasks            Subtask[]
+  taskComments        TaskComment[]
+  taskHistory         TaskHistory[]
+  projectHistory      ProjectHistory[]
+  tasks               Task[]
+  taskFiles           TaskFile[]
+  projects            Project[]
+  employeeTeam        EmployeeTeam[]
   taskCollaborator    TaskCollaborator[]
   projectCollaborator ProjectCollaborator[]
   subtaskCollaborator SubtaskCollaborator[]
 
-  attendance   Attendance[]
-  leave        Leave[]
-  education    Education[]
-  leaveComment LeaveComment[]
-  leaveType    LeaveType[]
-  job          Job[]
-  timesheet    Timesheet[]
-  payroll      Payroll[]
+  // HR
+  leave                 Leave[]
+  leaveComment          LeaveComment[]
+  leaveType             LeaveType[]
+  educations            Education[]
+  attendances           Attendance[]
+  jobs                  Job[]
+  events                Event[]
+  notifications         Notification[]
+  notificationRecipient NotificationRecipient[]
+  timesheets            Timesheet[]
+  payroll               Payroll[]
 
-  messages               Message[]
-  conversationsInitiated Conversation[]  @relation("EmployeeOne")
-  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  // CHAT
+  groupMessages          GroupMessage[]
+  conversationsInitiated Conversation[]            @relation("Sender")
+  conversationsReceived  Conversation[]            @relation("Receiver")
   directMessages         DirectMessage[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  groups                 Group[]
+  groupMembers           GroupMembers[]
+  conversationVisibility ConversationVisibility[]
+  chatVisibility         DirectMessageVisibility[]
+  groupVisibility        GroupMessageVisibility[]
+  // FILE MANAGER 
+  files                  File[]
+  folders                Folder[]
+  sharedFiles            SharedLinkEmployee[]
+  trashbins              TrashBin[]
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
 
   @@index([userId])
   @@index([workspaceId])
@@ -66,7 +81,7 @@ model Employee {
 
 model Team {
   id    String  @id @default(cuid())
-  name  String  
+  name  String
   alias String?
 
   role TeamRole @default(MEMBER)
@@ -96,42 +111,6 @@ model EmployeeTeam {
 
   @@index([employeeId])
   @@index([teamId])
-}
-
-model Attendance {
-  id           String           @id @default(cuid())
-  clockIn      DateTime
-  clockOut     DateTime?
-  totalHour    Float?
-  late         Float?
-  earlyLeaving Float?
-  overtime     Float?
-  break        Float?
-  state        AttendanceStatus
-
-  employeeId String
-  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
-}
-
-model Timesheet {
-  id          String   @id @default(cuid())
-  date        DateTime
-  hoursWorked Float
-  remark      String?
-  overtime    Float
-
-  employeeId String
-  employee   Employee @relation(fields: [employeeId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([employeeId])
 }
 
 model Leave {
@@ -215,13 +194,33 @@ model LeaveHistory {
   updatedBy     String?
 }
 
+model Attendance {
+  id           String           @id @default(cuid())
+  clockIn      DateTime
+  clockOut     DateTime?
+  totalHour    Float?
+  late         Float?
+  earlyLeaving Float?
+  overtime     Float?
+  break        Float?
+  state        AttendanceStatus
+
+  employeeId String
+  punchedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+}
+
 model Education {
   id String @id @default(cuid())
 
-  institution   String?
-  courseOfStudy String?
+  institution   String
+  courseOfStudy String
   result        String?
-  degree        String?
+  degree        String
   startDate     DateTime?
   endDate       DateTime?
   status        Boolean   @default(true)
@@ -235,30 +234,51 @@ model Education {
   @@index([employeeId])
 }
 
-model PerformanceAppraisal {
-  id String @id @default(cuid())
+model NotificationRecipient {
+  id             String   @id @default(cuid())
+  notificationId String
+  recipientId    String
+  recipient      Employee @relation(fields: [recipientId], references: [id])
 
-  appraisalDate      DateTime
-  rating             Float
-  comments           String
-  goals              String
-  achievements       String
-  managerComments    String
-  appraisalQuestions Json
-  appraisalResponse  AppraisalResponse[]
+  notification Notification @relation(fields: [notificationId], references: [id])
 }
 
-model AppraisalResponse {
-  id String @id @default(cuid())
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  isPublished Boolean   @default(true)
+  sentAt      DateTime?
 
-  appraisalId          String
-  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+  employeeId String
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-  question String
-  response String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
 
-  // @@index([employeeId])
-  @@index([appraisalId])
+  recipients NotificationRecipient[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
+}
+
+model Timesheet {
+  id          String   @id @default(cuid())
+  date        DateTime
+  hoursWorked Float
+  remark      String?
+  overtime    Float
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
 }
 
 // PAYMENT
@@ -338,49 +358,114 @@ model Payslip {
 
 // Job Board 
 model Job {
-  id            String    @id @default(cuid())
+  id            String                 @id @default(cuid())
   title         String
+  description   String
   category      String?
-  requirement   String
   branch        String?
-  email         String
-  address       String
-  salaryRange   Int
-  noOfPositions Int
-  company       String
-  types         String
-  education     String
-  industry      String
-  experience    String
-  employee      Employee? @relation(fields: [employeeId], references: [id])
-  employeeId    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  email         String?
+  address       String?
+  salaryRange   Int?
+  noOfPositions Int?
+  // type          String
+  // education     String
+  // industry      String
+  // experience    String
+  isActive      Boolean                @default(true)
+  jobApplicant  JobApplicantResponse[]
+
+  createdBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // TODO: Recieves external user applications
 // TODO: When application is received send an email to the applicant
-// TODO: When application is Rejected send a custom email 
+// TODO: When application is rejected send a custom email 
 // TODO: When application is accepted send a custom email 
 
 model JobApplicantResponse {
-  id String @id @default(cuid())
-
-  job   Job    @relation(fields: [jobId], references: [id])
-  jobId String
+  id       String @id @default(cuid())
+  fullName String
+  email    String
+  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId    String
 
   coverLetter String?
   resume      String
 
   other Json?
 
-  status ApplicationStatus @default(PENDING)
+  status JobApplicationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-enum ApplicationStatus {
+model PerformanceAppraisal {
+  id String @id @default(cuid())
+
+  appraisalDate      DateTime
+  rating             Float
+  comments           String
+  goals              String
+  achievements       String
+  managerComments    String
+  appraisalQuestions Json
+  appraisalResponse  AppraisalResponse[]
+}
+
+model AppraisalResponse {
+  id String @id @default(cuid())
+
+  appraisalId          String
+  performanceAppraisal PerformanceAppraisal @relation(fields: [appraisalId], references: [id])
+
+  question String
+  response String
+
+  // @@index([employeeId])
+  @@index([appraisalId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  flier       String?
+  description String?
+  location    String?
+  startDate   DateTime
+  endDate     DateTime
+  isPublished Boolean   @default(false)
+  timezone    String    @default("GMT")
+  createdBy   Employee  @relation(fields: [employeeId], references: [id])
+  employeeId  String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
+  @@index([employeeId])
+}
+
+// TODO: handle holidays (public and weekly holiday)
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  REJECTED
+}
+
+enum JobApplicationStatus {
   PENDING
   ACCEPTED
   REJECTED
@@ -415,3 +500,20 @@ enum TeamRole {
   MEMBER
   ADMIN
 }
+
+enum NotificationType {
+  GENERAL
+  WORKSPACE
+}
+
+// TODO: use this on the frontend 
+// enum Degree {
+//   Bachelors
+//   Masters
+//   Phd
+//   Associates
+//   Professional
+//   Certificate
+//   Diploma
+//   Honorary
+// }

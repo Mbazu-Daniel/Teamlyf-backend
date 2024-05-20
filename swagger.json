@@ -32,6 +32,248 @@
     "Leave Type"
   ],
   "paths": {
+    "/workspace/{workspaceId}/events": {
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "example": "any"
+                  },
+                  "flier": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  },
+                  "location": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  },
+                  "timezone": {
+                    "example": "any"
+                  },
+                  "isPublished": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/events/{eventId}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Events"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "example": "any"
+                  },
+                  "flier": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  },
+                  "location": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  },
+                  "timezone": {
+                    "example": "any"
+                  },
+                  "isPublished": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Events"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          },
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": [
@@ -153,9 +395,6 @@
                     "example": "any"
                   },
                   "password": {
-                    "example": "any"
-                  },
-                  "role": {
                     "example": "any"
                   }
                 }
@@ -552,6 +791,20 @@
                 }
               }
             }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Workspace"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -1417,6 +1670,962 @@
         }
       }
     },
+    "/workspace/{workspaceId}/drive/starred": {
+      "patch": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemId": {
+                    "example": "any"
+                  },
+                  "itemType": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/my-drive": {
+      "get": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/shared-files": {
+      "post": {
+        "tags": [
+          "Other Drive"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "example": "any"
+                  },
+                  "folders": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  },
+                  "visibility": {
+                    "example": "any"
+                  },
+                  "sharedWith": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/file": {
+      "post": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "folderId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/file/user": {
+      "get": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/files/starred/": {
+      "post": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/file/{fileId}": {
+      "get": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Files "
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/folders": {
+      "post": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parentFolderId": {
+                    "example": "any"
+                  },
+                  "name": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/folders/move/": {
+      "post": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destinationFolderId": {
+                    "example": "any"
+                  },
+                  "folderIds": {
+                    "example": "any"
+                  },
+                  "fileIds": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/folders/starred/": {
+      "post": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/folders/{folderId}": {
+      "get": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Folder"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/trash": {
+      "get": {
+        "tags": [
+          "Trash Bin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/trash/move": {
+      "patch": {
+        "tags": [
+          "Trash Bin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "folderIds": {
+                    "example": "any"
+                  },
+                  "fileIds": {
+                    "example": "any"
+                  },
+                  "reason": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/trash/restore": {
+      "patch": {
+        "tags": [
+          "Trash Bin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/trash/delete": {
+      "delete": {
+        "tags": [
+          "Trash Bin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/drive/trash/empty": {
+      "delete": {
+        "tags": [
+          "Trash Bin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/employees/{employeeId}/educations": {
+      "post": {
+        "tags": [
+          "Education"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "institution": {
+                    "example": "any"
+                  },
+                  "courseOfStudy": {
+                    "example": "any"
+                  },
+                  "result": {
+                    "example": "any"
+                  },
+                  "degree": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Education"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/employees/{employeeId}/educations/{educationId}": {
+      "get": {
+        "tags": [
+          "Education"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "educationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Education"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "educationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "institution": {
+                    "example": "any"
+                  },
+                  "courseOfStudy": {
+                    "example": "any"
+                  },
+                  "result": {
+                    "example": "any"
+                  },
+                  "degree": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Education"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "employeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "educationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/workspace/{workspaceId}/employees": {
       "get": {
         "tags": [
@@ -1498,9 +2707,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1642,6 +2848,20 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -1673,16 +2893,13 @@
           "200": {
             "description": "OK"
           },
-          "404": {
-            "description": "Not Found"
-          },
           "500": {
             "description": "Internal Server Error"
           }
         }
       }
     },
-    "/workspace/{workspaceId}/employees/{employeeId}/change-role": {
+    "/workspace/{workspaceId}/employees/change-role": {
       "patch": {
         "tags": [
           "Employees"
@@ -1691,14 +2908,6 @@
         "parameters": [
           {
             "name": "workspaceId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "employeeId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1726,7 +2935,84 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "employeeId": {
+                    "example": "any"
+                  },
                   "role": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/employees/deactivate-employee": {
+      "patch": {
+        "tags": [
+          "Employees"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeId": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/employees/activate-employee": {
+      "patch": {
+        "tags": [
+          "Employees"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeId": {
                     "example": "any"
                   }
                 }
@@ -1758,6 +3044,457 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/{jobId}/responses": {
+      "post": {
+        "tags": [
+          "Job Response"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coverLetter": {
+                    "example": "any"
+                  },
+                  "resume": {
+                    "example": "any"
+                  },
+                  "other": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Job Response"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/{jobId}/responses/{responseId}": {
+      "get": {
+        "tags": [
+          "Job Response"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "responseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Job Response"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "responseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coverLetter": {
+                    "example": "any"
+                  },
+                  "resume": {
+                    "example": "any"
+                  },
+                  "other": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Job Response"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "responseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/jobs": {
+      "post": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "active",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/jobs/{jobId}": {
+      "get": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/jobs/{jobId}/status": {
+      "patch": {
+        "tags": [
+          "Jobs"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isActive": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -2456,6 +4193,138 @@
         }
       }
     },
+    "/workspace/{workspaceId}/notifications": {
+      "post": {
+        "tags": [
+          "Notification"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Notification"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/notifications/{notificationId}/mark-as-read": {
+      "get": {
+        "tags": [
+          "Notification"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/notifications/{notificationId}": {
+      "delete": {
+        "tags": [
+          "Notification"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/workspace/{workspaceId}/teams": {
       "post": {
         "tags": [
@@ -2775,6 +4644,295 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/milestones": {
+      "post": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/milestones/{milestoneId}": {
+      "get": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "example": "any"
+                  },
+                  "description": {
+                    "example": "any"
+                  },
+                  "startDate": {
+                    "example": "any"
+                  },
+                  "endDate": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/workspace/{workspaceId}/milestones/{milestoneId}/projects": {
+      "get": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Milestones"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "milestoneId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "projectIds": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4560,7 +6718,20 @@
     },
     "/workspace/{workspaceId}/tasks-count": {
       "get": {
+        "tags": [
+          "Tasks"
+        ],
         "description": "",
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -5039,6 +7210,18 @@
         },
         "required": [
           "memberIds"
+        ]
+      },
+      "TaskCount": {
+        "type": "object",
+        "properties": {
+          "workspaceId": {
+            "type": "string",
+            "example": "string"
+          }
+        },
+        "required": [
+          "workspaceId"
         ]
       }
     }
