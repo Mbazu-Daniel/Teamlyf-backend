@@ -1,39 +1,39 @@
-import express from 'express';
-import { verifyToken } from '../../utils/middleware/authenticate.js';
+import express from "express";
+import { verifyToken } from "../../utils/middleware/authenticate.js";
 import {
-	getCurrentEmployee,
-	getCurrentWorkspace,
-} from '../../utils/middleware/index.js';
+  getCurrentEmployee,
+  getCurrentWorkspace,
+} from "../../utils/middleware/index.js";
 
 import {
-	getOrCreateOneOnOneChat,
-	getAllConversations,
-} from './conversations.controllers.js';
+  getOrCreateConversation,
+  getAllConversations,
+} from "./conversations.controllers.js";
 
 const conversationRouter = express.Router();
 const app = express();
 
 app.use(
-	'/workspace',
-	conversationRouter
+  "/workspace",
+  conversationRouter
 
-	/* 
+  /* 
   
   #swagger.tags = ['Conversations']
   */
 );
 
 conversationRouter.use(
-	'/:workspaceId',
-	verifyToken,
-	getCurrentEmployee,
-	getCurrentWorkspace
+  "/:workspaceId",
+  verifyToken,
+  getCurrentEmployee,
+  getCurrentWorkspace
 );
 
-conversationRouter.post('/:workspaceId/chat', getOrCreateOneOnOneChat);
+conversationRouter.post("/:workspaceId/chat", getOrCreateConversation);
 conversationRouter.get(
-	'/:workspaceId/chat/:conversationId',
-	getAllConversations
+  "/:workspaceId/chat/:conversationId",
+  getAllConversations
 );
 
 export default conversationRouter;
