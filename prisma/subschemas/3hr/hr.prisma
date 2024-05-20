@@ -57,19 +57,21 @@ model Employee {
 
   // CHAT
   groupMessages          GroupMessage[]
-  conversationsInitiated Conversation[]  @relation("EmployeeOne")
-  conversationsReceived  Conversation[]  @relation("EmployeeTwo")
+  conversationsInitiated Conversation[]            @relation("Sender")
+  conversationsReceived  Conversation[]            @relation("Receiver")
   directMessages         DirectMessage[]
   groups                 Group[]
   groupMembers           GroupMembers[]
-
+  conversationVisibility ConversationVisibility[]
+  chatVisibility         DirectMessageVisibility[]
+  groupVisibility        GroupMessageVisibility[]
   // FILE MANAGER 
-  files       File[]
-  folders     Folder[]
-  sharedFiles SharedLinkEmployee[]
-  trashbins   TrashBin[]
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  files                  File[]
+  folders                Folder[]
+  sharedFiles            SharedLinkEmployee[]
+  trashbins              TrashBin[]
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
 
   @@index([userId])
   @@index([workspaceId])

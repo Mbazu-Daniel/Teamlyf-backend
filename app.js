@@ -109,7 +109,7 @@ const limiter = rateLimit({
     throw new ApiError(
       options.statusCode || 500,
       `There are too many requests. You are only allowed ${
-        options.max
+        options.limit
       } requests per ${options.windowMs / 60000} minutes`
     );
   },
@@ -125,7 +125,7 @@ app.set("trust proxy", 1);
 app.use(
   session({
     secret: process.env.EXPRESS_SESSION_SECRET,
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 86400000 },
     store: new MemoryStore({
@@ -164,47 +164,47 @@ app.get("/", (req, res) => {
   res.send("Healthy API");
 });
 
-const basePath = "/api/v1";
+const V1_BASE_PATH = "/api/v1";
 // Administration
-app.use(`${basePath}/auth`, authRouter);
-app.use(`${basePath}/users`, userRouter);
-app.use(`${basePath}/workspace`, workspaceRouter);
-// app.use(`${basePath}/workspace`, folderRouter);
-app.use(`${basePath}/invites`, inviteRouter);
-app.use(`${basePath}/workspace`, employeeRouter);
-app.use(`${basePath}/workspace`, notificationRouter);
+app.use(`${V1_BASE_PATH}/auth`, authRouter);
+app.use(`${V1_BASE_PATH}/users`, userRouter);
+app.use(`${V1_BASE_PATH}/workspace`, workspaceRouter);
+// app.use(`${V1_BASE_PATH}/workspace`, folderRouter);
+app.use(`${V1_BASE_PATH}/invites`, inviteRouter);
+app.use(`${V1_BASE_PATH}/workspace`, employeeRouter);
+app.use(`${V1_BASE_PATH}/workspace`, notificationRouter);
 
 // Task Management
-app.use(`${basePath}/workspace`, milestoneRouter);
-app.use(`${basePath}/workspace`, projectRouter);
-app.use(`${basePath}/workspace`, projectPriorityRouter);
-app.use(`${basePath}/workspace`, projectStatusRouter);
-app.use(`${basePath}/workspace`, tasksStatusRouter);
-app.use(`${basePath}/workspace`, tasksPriorityRouter);
-app.use(`${basePath}/workspace`, taskRouter);
-app.use(`${basePath}/workspace`, taskCommentRouter);
-app.use(`${basePath}/workspace`, subtaskRouter);
-app.use(`${basePath}/workspace`, taskFileRouter);
+app.use(`${V1_BASE_PATH}/workspace`, milestoneRouter);
+app.use(`${V1_BASE_PATH}/workspace`, projectRouter);
+app.use(`${V1_BASE_PATH}/workspace`, projectPriorityRouter);
+app.use(`${V1_BASE_PATH}/workspace`, projectStatusRouter);
+app.use(`${V1_BASE_PATH}/workspace`, tasksStatusRouter);
+app.use(`${V1_BASE_PATH}/workspace`, tasksPriorityRouter);
+app.use(`${V1_BASE_PATH}/workspace`, taskRouter);
+app.use(`${V1_BASE_PATH}/workspace`, taskCommentRouter);
+app.use(`${V1_BASE_PATH}/workspace`, subtaskRouter);
+app.use(`${V1_BASE_PATH}/workspace`, taskFileRouter);
 
 // HR Management
-app.use(`${basePath}/workspace`, teamsRouter);
-app.use(`${basePath}/workspace`, leavesRouter);
-app.use(`${basePath}/workspace`, leaveTypeRouter);
-app.use(`${basePath}/workspace`, leaveCommentRouter);
-app.use(`${basePath}/workspace`, educationRouter);
-app.use(`${basePath}/workspace`, eventsRouter);
-app.use(`${basePath}/workspace`, jobsRouter);
-app.use(`${basePath}/workspace`, jobResponsesRouter);
+app.use(`${V1_BASE_PATH}/workspace`, teamsRouter);
+app.use(`${V1_BASE_PATH}/workspace`, leavesRouter);
+app.use(`${V1_BASE_PATH}/workspace`, leaveTypeRouter);
+app.use(`${V1_BASE_PATH}/workspace`, leaveCommentRouter);
+app.use(`${V1_BASE_PATH}/workspace`, educationRouter);
+app.use(`${V1_BASE_PATH}/workspace`, eventsRouter);
+app.use(`${V1_BASE_PATH}/workspace`, jobsRouter);
+app.use(`${V1_BASE_PATH}/workspace`, jobResponsesRouter);
 
 // Document Management
-app.use(`${basePath}/workspace`, folderRouter);
-app.use(`${basePath}/workspace`, fileRouter);
-app.use(`${basePath}/workspace`, trashbinRouter);
-app.use(`${basePath}/workspace`, driveRouter);
+app.use(`${V1_BASE_PATH}/workspace`, folderRouter);
+app.use(`${V1_BASE_PATH}/workspace`, fileRouter);
+app.use(`${V1_BASE_PATH}/workspace`, trashbinRouter);
+app.use(`${V1_BASE_PATH}/workspace`, driveRouter);
 
 // Chat Management
-app.use(`${basePath}/workspace`, groupRouter);
-app.use(`${basePath}/workspace`, conversationRouter);
-app.use(`${basePath}/workspace`, messageRouter);
+app.use(`${V1_BASE_PATH}/workspace`, groupRouter);
+app.use(`${V1_BASE_PATH}/workspace`, conversationRouter);
+app.use(`${V1_BASE_PATH}/workspace`, messageRouter);
 
 export { httpServer };
