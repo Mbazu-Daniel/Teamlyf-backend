@@ -149,7 +149,7 @@ app.use(
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-eval'"],
-      imgSrc: ["'self'", `${{ API_URL }}`],
+      imgSrc: ["'self'", `${process.env.API_URL}`],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
     },
