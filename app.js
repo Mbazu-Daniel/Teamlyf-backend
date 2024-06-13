@@ -83,16 +83,18 @@ app.set("io", io);
 
 // Middleware
 
-app.use(
-  cors({
-    origin:
-      process.env.CORS_ORIGIN === "*"
-        ? "*"
-        : process.env.CORS_ORIGIN?.split(", "),
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+// app.use(
+//   cors({
+//     origin:
+//       process.env.CORS_ORIGIN === "*"
+//         ? "*"
+//         : process.env.CORS_ORIGIN?.split(", "),
+//     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+//     credentials: true,
+//   })
+// );
+
+app.use(cors());
 
 app.use(requestIp.mw());
 
