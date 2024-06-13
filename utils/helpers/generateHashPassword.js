@@ -1,8 +1,11 @@
 import bcrypt from "bcryptjs";
-
-async function generateHashedPassword(password, saltRounds) {
+import dotenv from "dotenv";
+dotenv.config();
+const SALT = process.env.SALT;
+async function generateHashedPassword(password) {
   try {
     // Generate a salt dynamically
+    const saltRounds = parseInt(SALT);
     const salt = await bcrypt.genSalt(saltRounds);
     // Hash the password using the generated salt
     const hashedPassword = await bcrypt.hash(password, salt);

@@ -19,8 +19,7 @@ const prisma = new PrismaClient();
 // TODO: controller to add user to workspace through the generated link
 // TODO: controller to leave a workspace (this should not CASCADE delete, the user information should still be available)
 
-const FRONTEND_URL = process.env.FRONTEND_URL;
-const SALT = process.env.SALT;
+const FRONTEND_URL = process.env.FRONTEND_URL; 
 const generateInviteLink = asyncHandler(async (req, res) => {
   let { email, role } = req.body;
   const { workspaceId } = req.params;
@@ -121,7 +120,7 @@ const joinWorkspace = asyncHandler(async (req, res) => {
 
     console.log("🚀 ~ joinWorkspace ~ password:", password);
     // Create a new user and employee profile
-    const hashedPassword = await generateHashedPassword(password, SALT);
+    const hashedPassword = await generateHashedPassword(password);
 
     const newUser = await prisma.user.create({
       data: {

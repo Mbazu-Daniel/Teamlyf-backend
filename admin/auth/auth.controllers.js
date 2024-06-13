@@ -12,7 +12,7 @@ import sendMail from "../../utils/services/sendMail.js";
 import dotenv from "dotenv";
 dotenv.config();
 const BASE_URL = process.env.FRONTEND_URL;
-const SALT = process.env.SALT;
+
 const registerUser = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (!existingUser) {
-      const hashedPassword = await generateHashedPassword(password, SALT);
+      const hashedPassword = await generateHashedPassword(password);
 
       const newUser = await prisma.user.create({
         data: { email: lowercaseEmail, password: hashedPassword },
@@ -69,7 +69,7 @@ const registerAdminUser = asyncHandler(async (req, res) => {
     });
 
     if (!existingUser) {
-      const hashedPassword = await generateHashedPassword(password, SALT);
+      const hashedPassword = await generateHashedPassword(password);
 
       await prisma.user.create({
         data: { email: lowercaseEmail, password: hashedPassword, role },
@@ -148,7 +148,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await generateHashedPassword(password, SALT);
+    const hashedPassword = await generateHashedPassword(password);
 
     await prisma.user.update({
       where: { id: user.id },
@@ -187,7 +187,7 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 
     // Hash the new password and update the user's password
-    const hashedPassword = await generateHashedPassword(password, SALT);
+    const hashedPassword = await generateHashedPassword(password);
 
     await prisma.user.update({
       where: { id: userId },
