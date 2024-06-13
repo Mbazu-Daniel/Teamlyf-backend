@@ -1,15 +1,28 @@
-import asyncHandler from 'express-async-handler';
-import pkg from '@prisma/client';
+import asyncHandler from "express-async-handler";
+import pkg from "@prisma/client";
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
-// Fetch all private conversations for the user and start a new private conversation with another user
-const getOrCreateOneOnOneChat = asyncHandler(async (req, res) => {
-	const { receiverId } = req.body;
+// TODO: attach file on private messaging
+// TODO: can delete their entire message for everyone
+// TODO: delete message just for themselves
+// TODO: edit their messages
+// TODO: conversation will be invisible for only the chat user that calls the function
 
-	try {
+// Fetch all private conversations for the user and start a new private conversation with another user
+const getOrCreateConversation = asyncHandler(async (req, res) => {
+  const { receiverId } = req.body;
+  const senderId = req.employeeId;
+  try {
     if (!receiverId) {
       return res.status(400).json({ error: "Receiver ID is required" });
+    }
+
+    // TODO: for now we allow user not to send to themselves
+    if (receiverId === senderId) {
+      return res
+        .status(400)
+        .json({ error: "Cannot create a conversation with yourself" });
     }
 
     // Check if the sender and receiver exist
@@ -17,22 +30,21 @@ const getOrCreateOneOnOneChat = asyncHandler(async (req, res) => {
       where: { id: senderId },
     });
 
+    const receiverExists = await prisma.employee.findUnique({
+      where: { id: receiverId },
+    });
 
-	const receiverExists = await prisma.employee.findUnique({
-    where: { id: receiverId },
-  });
-
-  if (!senderExists || !receiverExists) {
-    return res
-      .status(404)
-      .json({ error: "One or both employees do not exist" });
-  }
+    if (!senderExists || !receiverExists) {
+      return res
+        .status(404)
+        .json({ error: "One or both employees do not exist" });
+    }
     // Check if a conversation already exists
     let conversation = await prisma.conversation.findFirst({
       where: {
         OR: [
-          { senderId: req.employeeId, receiverId },
-          { senderId: receiverId, receiverId: req.employeeId },
+          { senderId: senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
         ],
       },
     });
@@ -41,45 +53,50 @@ const getOrCreateOneOnOneChat = asyncHandler(async (req, res) => {
     if (!conversation) {
       conversation = await prisma.conversation.create({
         data: {
-          senderId: req.employeeId,
+          senderId: senderId,
           receiverId,
         },
       });
 
-	  const payload = { conversationId: conversation.id, message: 'New conversation created' };
-      emitSocketEvent(req, senderId, ChatEventEnum.NEW_CHAT_EVENT, payload);
+      await prisma.conversationVisibility.createMany({
+        data: [
+          { conversationId: conversation.id, chatUserId: senderId },
+          { conversationId: conversation.id, chatUserId: receiverId },
+        ],
+      });
+
+      const payload = {
+        conversationId: conversation.id,
+        message: "New conversation created",
+      };
       emitSocketEvent(req, receiverId, ChatEventEnum.NEW_CHAT_EVENT, payload);
-    
     }
 
     res.status(200).json(conversation);
   } catch (error) {
-		console.error(error);
-		res.status(500).json({ error: error.message });
-	}
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Get details of a specific private conversation
+// Get all  users conversation
 const getAllConversations = asyncHandler(async (req, res) => {
-const employeeId = req.employeeId
+  const employeeId = req.employeeId;
 
-	try {
-		const conversation = await prisma.conversation.findMany({
-			where: {
-			OR: [
-          { senderId: employeeId },
-          { receiverId: employeeId },
-        ],
-			},
-		});
+  try {
+    const conversation = await prisma.conversation.findMany({
+      where: {
+        OR: [{ senderId: employeeId }, { receiverId: employeeId }],
+      },
+    });
 
-		
-
-		res.status(200).json(conversation);
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ error: error.message });
-	}
+    res.status(200).json(conversation);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
-export { getOrCreateOneOnOneChat, getAllConversations };
+
+
+export { getOrCreateConversation, getAllConversations };

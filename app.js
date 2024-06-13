@@ -142,7 +142,17 @@ app.use(cookieParser());
 app.use(compression());
 
 // Helmet for setting secure HTTP headers
-app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'wasm-eval'"],
+      imgSrc: ["'self'", `${{ API_URL }}`],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  })
+);
 
 // Morgan for HTTP request logging
 app.use(morgan("dev"));

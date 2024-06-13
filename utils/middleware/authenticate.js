@@ -21,21 +21,10 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyLogin = (req, res, next) => {
-  const token = req.cookies.access_token;
-
-  if (token) {
-    // Verify the token and extract the user information
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decodedToken) => {
-      if (err) {
-        res.status(403).json({ message: "Unauthorized" });
-      } else {
-        req.user = decodedToken;
-        next();
-      }
-    });
-  } else {
-    res.status(403).json({ message: "You're not logged in" });
+  if (!req.user) {
+    return res.status(403).json({ msg: "You're not logged in" });
   }
+  next();
 };
 
 const verifyUser = (req, res, next) => {
