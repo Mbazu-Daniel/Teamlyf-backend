@@ -1,14 +1,16 @@
-//🧩Don't Edit this file.✨Generated in Mon May 20 2024 07:19:29 GMT+0100 (West Africa Standard Time)✨
+//🧩Don't Edit this file.✨Generated in Thu Jun 13 2024 07:54:44 GMT+0100 (West Africa Standard Time)✨
 
 generator client {
-provider = "prisma-client-js"
-binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
+
 datasource db {
-provider = "postgresql"
-url      = env("DATABASE_URL")
-relationMode = "prisma"
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
+
 // TODO: add Notification
 model User {
   id           String       @id @default(cuid())
@@ -148,6 +150,7 @@ enum AuthStrategy {
   GOOGLE
   EMAIL_PASSWORD
 }
+
 // Project Management 
 // TODO: Add Team to this model ?
 // TODO: have priority and status model with thier colors but now in a json format where organanization can several status type and colors and assign them to a particular project 
@@ -539,6 +542,7 @@ enum MilestoneStatus {
   IN_PROGRESS
   COMPLETED
 }
+
 // TODO: APPRAISAL, JOB, AWARDS, CONTRACT, EMPLOYEE DOCUMENT, COMPLAINT, TRAINING
 // TODO: add employee contact list to store some contact details ?
 
@@ -1271,6 +1275,7 @@ enum MemberStatus {
   ACTIVE
   INACTIVE
 }
+
 // TODO: files from tasks and any other attachments should be added to this file manager storage 
 // TODO: try to understand how onDelete and onUpdate works on prisma so i don't delete folders when files are deleted
 // TODO: update file manager model to handle task/project, chat, LMS etc files for better data integrity
@@ -1278,150 +1283,150 @@ enum MemberStatus {
 
 // File model
 model File {
-    id             String @id @default(cuid())
-    fileName       String
-    fileType       String
-    fileSize       Int
-    fileUrl        String
-    fileIdentifier String
+  id             String @id @default(cuid())
+  fileName       String
+  fileType       String
+  fileSize       Int
+  fileUrl        String
+  fileIdentifier String
 
-    description String?
+  description String?
 
-    workspaceId String
-    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    uploadBy   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  uploadBy   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-    mappings FileFolderMapping[]
-    versions FileVersion[]
+  mappings FileFolderMapping[]
+  versions FileVersion[]
 
-    trashbin   TrashBin[]
-    sharedLink SharedLink[]
+  trashbin   TrashBin[]
+  sharedLink SharedLink[]
 
-    isTrashed Boolean @default(false)
-    isStarred Boolean @default(false)
+  isTrashed Boolean @default(false)
+  isStarred Boolean @default(false)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([workspaceId])
-    @@index([employeeId])
+  @@index([workspaceId])
+  @@index([employeeId])
 }
 
 // Folder model
 model Folder {
-    id          String  @id @default(cuid())
-    name        String
-    description String?
+  id          String  @id @default(cuid())
+  name        String
+  description String?
 
-    workspaceId String
-    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-    employeeId String
-    employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-    parentFolderId String?
-    parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
-    childFolders   Folder[] @relation("ChildFolders")
+  parentFolderId String?
+  parentFolder   Folder?  @relation("ChildFolders", fields: [parentFolderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  childFolders   Folder[] @relation("ChildFolders")
 
-    mappings FileFolderMapping[]
+  mappings FileFolderMapping[]
 
-    trashbin   TrashBin[]
-    sharedLink SharedLink[]
+  trashbin   TrashBin[]
+  sharedLink SharedLink[]
 
-    isTrashed Boolean @default(false)
-    isStarred Boolean @default(false)
+  isTrashed Boolean @default(false)
+  isStarred Boolean @default(false)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    @@index([workspaceId])
-    @@index([employeeId])
-    @@index([parentFolderId])
+  @@index([workspaceId])
+  @@index([employeeId])
+  @@index([parentFolderId])
 }
 
 model FileFolderMapping {
-    id       String @id @default(cuid())
-    fileId   String
-    file     File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
-    folderId String
-    folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  fileId   String
+  file     File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  folderId String
+  folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
-    createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
 
-    @@index([fileId, folderId])
-    @@index([fileId])
-    @@index([folderId])
+  @@index([fileId, folderId])
+  @@index([fileId])
+  @@index([folderId])
 }
 
 model FileVersion {
-    id      String @id @default(cuid())
-    file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
-    fileId  String
-    version Int
+  id      String @id @default(cuid())
+  file    File   @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId  String
+  version Int
 
-    timestamp DateTime //Timestamp of the version
-    notes     String? // Additional notes or comments
+  timestamp DateTime //Timestamp of the version
+  notes     String? // Additional notes or comments
 
-    createdAt DateTime @default(now())
+  createdAt DateTime @default(now())
 
-    @@index([fileId])
+  @@index([fileId])
 }
 
 // TrashBin model for deleted files
 
 // TODO: Additional attributes like reason for deletion, user who deleted it, etc., can be added.
 model TrashBin {
-    id         String   @id @default(cuid())
-    folderId   String?
-    folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
-    fileId     String?
-    file       File?    @relation(fields: [fileId], references: [id], onDelete: SetNull)
-    employeeId String
-    deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  folderId   String?
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  fileId     String?
+  file       File?    @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  employeeId String
+  deletedBy  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
-    reason    String?
-    deletedAt DateTime @default(now())
+  reason    String?
+  deletedAt DateTime @default(now())
 
-    @@index([folderId])
-    @@index([fileId])
-    @@index([employeeId])
+  @@index([folderId])
+  @@index([fileId])
+  @@index([employeeId])
 }
 
 enum SharedLinkVisibility {
-    RESTRICTED
-    EVERYONE
+  RESTRICTED
+  EVERYONE
 }
 
 // Share model for file/folder sharing
 model SharedLink {
-    id         String               @id @default(cuid())
-    file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
-    fileId     String?
-    folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
-    folderId   String?
-    sharedWith SharedLinkEmployee[]
-    // password   String?
-    visibility SharedLinkVisibility @default(RESTRICTED)
-    link       String?
+  id         String               @id @default(cuid())
+  file       File?                @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  fileId     String?
+  folder     Folder?              @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  folderId   String?
+  sharedWith SharedLinkEmployee[]
+  // password   String?
+  visibility SharedLinkVisibility @default(RESTRICTED)
+  link       String?
 
-    updatedAt DateTime @updatedAt
-    createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
-    @@index([folderId])
-    @@index([fileId])
+  @@index([folderId])
+  @@index([fileId])
 }
 
 model SharedLinkEmployee {
-    id           String     @id @default(cuid())
-    sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
-    sharedLinkId String
-    employee     Employee   @relation(fields: [employeeId], references: [id])
-    employeeId   String
+  id           String     @id @default(cuid())
+  sharedLink   SharedLink @relation(fields: [sharedLinkId], references: [id])
+  sharedLinkId String
+  employee     Employee   @relation(fields: [employeeId], references: [id])
+  employeeId   String
 
-    @@index([sharedLinkId])
-    @@index([employeeId])
+  @@index([sharedLinkId])
+  @@index([employeeId])
 }
 
 // ActivityLog model

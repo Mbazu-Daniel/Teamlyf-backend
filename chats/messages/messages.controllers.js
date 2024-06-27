@@ -94,6 +94,73 @@ const sendDirectMessage = asyncHandler(async (req, res) => {
   }
 });
 
+// Delete message for everyone
+const deleteMessageForEveryone = asyncHandler(async (req, res) => {
+  const { messageId } = req.params;
+
+  try {
+    const message = await prisma.directMessage.findUnique({
+      where: {
+        id: messageId,
+      },
+    });
+
+    if (!message) {
+      return res
+        .status(404)
+        .json({ message: `Message ${messageId} not found` });
+    }
+
+    await prisma.directMessage.delete({
+      where: {
+        id: messageId,
+      },
+    });
+
+    res
+      .status(204)
+      .json({ message: "Message deleted  for everyone successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+const deleteMessageForMyself = asyncHandler(async (req, res) => {
+  const { messageId } = req.params;
+  const employeeId = req.employeeId;
+
+  try {
+    const visibility = await prisma.directMessageVisibility.findFirst({
+      where: {
+        directMessageId: messageId,
+        chatUserId: employeeId,
+      },
+    });
+
+    if (!visibility) {
+      return res.status(404).json({
+        message: `Message ${messageId} not found for user ${employeeId}`,
+      });
+    }
+
+    await prisma.directMessageVisibility.update({
+      where: {
+        id: visibility.id,
+      },
+      data: {
+        isVisible: false,
+      },
+    });
+
+    res
+      .status(204)
+      .json({ message: "Message deleted for yourself successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Get the status of a message (read, delivered, sent)
 const getMessageStatus = asyncHandler(async (req, res) => {
@@ -167,12 +234,11 @@ const searchMessages = asyncHandler(async (req, res) => {
   }
 });
 
-
-
 export {
   getMessageStatus,
   getUnreadMessages,
   searchMessages,
   sendDirectMessage,
-
+  deleteMessageForEveryone,
+  deleteMessageForMyself,
 };

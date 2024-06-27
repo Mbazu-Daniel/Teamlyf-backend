@@ -32,7 +32,7 @@ const s3 = new S3Client({
 const storage = multer.memoryStorage();
 const fileUpload = multer({ storage: storage });
 
-async function uploadFile(fileBuffer, fileName, mimetype) {
+async function uploadFileToS3(fileBuffer, fileName, mimetype) {
   const uploadParams = {
     Bucket: bucketName,
     Body: fileBuffer,
@@ -100,7 +100,7 @@ async function downloadFileFromS3(fileName) {
 
 export {
   fileUpload,
-  uploadFile,
+  uploadFileToS3,
   deleteFileFromS3Bucket,
   getObjectSignedUrl,
   downloadFileFromS3,

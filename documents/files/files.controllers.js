@@ -2,7 +2,7 @@ import pkg from "@prisma/client";
 const { PrismaClient } = pkg;
 import {
   getObjectSignedUrl,
-  uploadFile,
+  uploadFileToS3,
 } from "../../utils/services/awsS3bucket.js";
 
 import asyncHandler from "express-async-handler";
@@ -22,8 +22,6 @@ const prisma = new PrismaClient();
 // TODO: when a file is uploaded, a folder should be created for that worskpace in S3 if it doesn't exist already
 // TODO: when a folderId is passed to it should be stored in the workspace and a new folderId created
 
-
-
 // Create a new task file
 const uploadFileToCloud = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
@@ -33,7 +31,6 @@ const uploadFileToCloud = asyncHandler(async (req, res) => {
   try {
     //  Handle single or multiple file uploads
     const files = req.files || [req.file];
- 
 
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No file(s) uploaded" });
@@ -49,18 +46,10 @@ const uploadFileToCloud = asyncHandler(async (req, res) => {
         return res.status(400).json({ error: "File size is not correct" });
       }
 
-      // const fileNameExists = await doesFileNameFolderExist(
-      //   originalname,
-      //   folderId
-      // );
-
-      // If the filename exists in the same folder, handle conflict resolution
       let fileName = originalname;
-      // if (fileNameExists) {
+      // Resolve name conflict
       fileName = await resolveFileNameConflict(originalname, folderId);
-      // }
 
-      // fileIdentifier - random file name to be generated for more security
       const fileIdentifier = generateFileName();
 
       const path = await getObjectSignedUrl(fileIdentifier);
@@ -71,7 +60,7 @@ const uploadFileToCloud = asyncHandler(async (req, res) => {
       //     .toBuffer();
 
       // Store the file in S3
-      await uploadFile(buffer, fileIdentifier, mimetype);
+      await uploadFileToS3(buffer, fileIdentifier, mimetype);
 
       const fileData = {
         fileName,
@@ -129,7 +118,7 @@ const getUserFiles = asyncHandler(async (req, res) => {
 
 // Get File Details Controller
 const getFileDetails = asyncHandler(async (req, res) => {
-  const {  fileId } = req.params;
+  const { fileId } = req.params;
   try {
     const file = await prisma.file.findUnique({
       where: {
@@ -183,9 +172,6 @@ const updateFileDetails = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
 
 const getStarredFiles = asyncHandler(async (req, res) => {
   try {

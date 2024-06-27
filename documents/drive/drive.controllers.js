@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 
 // TODO: controller to return both  starred folders and files
 // TODO: controller to return both folders and files
-const SALT = process.env.SALT;
+
 // Get all folders and files in a workspace
 const getAllUsersFoldersAndFiles = asyncHandler(async (req, res) => {
   try {

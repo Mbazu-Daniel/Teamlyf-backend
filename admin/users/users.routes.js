@@ -15,7 +15,7 @@ app.use(
   //  #swagger.tags = ['Users']
 );
 
-userRouter.get("/all", getAllUsers);
+userRouter.get("/", getAllUsers);
 userRouter.get("/email", getUserByEmail);
 userRouter.get("/:id", getSingleUser);
 userRouter.delete("/:id", deleteUser);

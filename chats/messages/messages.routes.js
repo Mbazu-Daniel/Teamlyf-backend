@@ -8,7 +8,8 @@ import {
 import {
   // getConversationMessages,
   sendDirectMessage,
-
+  deleteMessageForEveryone,
+  deleteMessageForMyself,
 } from "./messages.controllers.js";
 
 const messageRouter = express.Router();
@@ -28,6 +29,7 @@ messageRouter.post(
   "/:workspaceId/conversations/:conversationId/messages/send",
   sendDirectMessage
 );
-
+messageRouter.delete("/messages/:messageId/everyone", deleteMessageForEveryone);
+messageRouter.delete("/messages/:messageId/myself", deleteMessageForMyself);
 
 export default messageRouter;

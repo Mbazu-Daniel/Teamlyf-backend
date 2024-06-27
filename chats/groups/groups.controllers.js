@@ -6,8 +6,7 @@ const { PrismaClient, GroupType, GroupMemberRole } = pkg;
 
 const prisma = new PrismaClient();
 
-// TODO: update the leave group endpoint to not allow admin to leave group in their role is still admin
-// TODO: update employee group role to be admin
+// TODO: attach file on group messaging 
 const createGroupChat = asyncHandler(async (req, res) => {
   const { workspaceId } = req.params;
   const employeeId = req.employeeId;

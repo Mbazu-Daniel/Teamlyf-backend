@@ -97,6 +97,121 @@ const getAllConversations = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteConversationForUser = asyncHandler(async (req, res) => {
+  const { conversationId } = req.params;
+  const employeeId = req.employeeId;
 
+  try {
+    const conversationVisibility =
+      await prisma.conversationVisibility.findFirst({
+        where: {
+          conversationId: conversationId,
+          chatUserId: employeeId,
+        },
+      });
+
+    if (!conversationVisibility) {
+      return res.status(404).json({
+        message: `Conversation ${conversationId} not found for user ${employeeId}`,
+      });
+    }
+
+    await prisma.conversationVisibility.update({
+      where: {
+        id: conversationVisibility.id,
+      },
+      data: {
+        isVisible: false,
+      },
+    });
+
+    res.status(204).json({ message: "Conversation deleted for user" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// const deleteConversation = asyncHandler(async (req, res) => {
+//   const { conversationId } = req.params;
+
+//   try {
+//     const conversation = await prisma.conversation.findUnique({
+//       where: {
+//         id: conversationId,
+//       },
+//       include: {
+//         directMessages: {
+//           include: {
+//             attachments: true, // Include attachments in messages
+//           },
+//         },
+//       },
+//     });
+
+//     if (!conversation) {
+//       return res
+//         .status(404)
+//         .json({ message: `Conversation ${conversationId} not found` });
+//     }
+
+//     // Collect all file identifiers from direct message attachments
+//     const messageFileIdentifiers = [];
+//     for (const message of conversation.directMessages) {
+//       for (const attachment of message.attachments) {
+//         messageFileIdentifiers.push(attachment.fileIdentifier);
+//       }
+//     }
+
+//     // Delete files from S3
+//     for (const fileIdentifier of messageFileIdentifiers) {
+//       await deleteFileFromS3Bucket(fileIdentifier);
+//     }
+
+//     // Emit LEAVE_CHAT_EVENT for both participants
+//     const payload = {
+//       conversationId,
+//       message: "Conversation has been deleted",
+//     };
+//     emitSocketEvent(
+//       req,
+//       conversation.employeeOneId,
+//       ChatEventEnum.LEAVE_CHAT_EVENT,
+//       payload
+//     );
+//     emitSocketEvent(
+//       req,
+//       conversation.employeeTwoId,
+//       ChatEventEnum.LEAVE_CHAT_EVENT,
+//       payload
+//     );
+
+//     // Cascade delete direct messages and their attachments
+//     await prisma.directMessageAttachment.deleteMany({
+//       where: {
+//         directMessage: {
+//           conversationId,
+//         },
+//       },
+//     });
+
+//     await prisma.directMessage.deleteMany({
+//       where: {
+//         conversationId,
+//       },
+//     });
+
+//     await prisma.conversation.delete({
+//       where: {
+//         id: conversationId,
+//       },
+//     });
+
+//     res.status(204).json({ message: "Conversation deleted successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 export { getOrCreateConversation, getAllConversations };
