@@ -1,35 +1,4 @@
-
-  ## Installation
-
-```bash
-$ pnpm install
-```
-
-## Running the app
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
+This project was moved to [Teamlyf Nestjs](https://github.com/Mbazu-Daniel/teamlyf-backend-nestjs) 
 
 
 # TeamLyf - Your All-in-One Organization Collaboration Platform
@@ -181,7 +150,4 @@ Welcome to **TeamLyf**, the ultimate solution for seamless collaboration and enh
 -  Elasticsearch: To offer powerful search capabilities, particularly beneficial in the Document Management System.
 
 ## Support
-
-  
-
 For support, contact me  on email [Daniel Mbazu](mailto:mbazudaniel97@gmail.com) or [Whatsapp](https://wa.me/2349096809900)  . Our team is available 24/7 to assist you with any issues or queries.
